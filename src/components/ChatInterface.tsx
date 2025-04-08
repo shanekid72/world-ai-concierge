@@ -41,13 +41,13 @@ const ChatInterface: React.FC = () => {
           <div className="flex items-center mb-3">
             <img 
               src="/lovable-uploads/d6e7930f-08be-4f3b-b43b-8a9b176bb2d1.png" 
-              alt="World API Logo" 
+              alt="worldAPI Logo" 
               className="h-8 w-auto mr-2"
             />
-            <h3 className="text-sm font-medium text-worldapi-blue-800">About World API</h3>
+            <h3 className="text-sm font-medium text-worldapi-blue-800">About worldAPI</h3>
           </div>
           <p className="text-xs text-worldapi-blue-700 mb-3">
-            World API provides a unified platform for financial institutions to access global payment networks through a single integration.
+            worldAPI provides a unified platform for financial institutions to access global payment networks through a single integration.
           </p>
           <Alert className="bg-worldapi-teal-50 border-worldapi-teal-100 text-worldapi-teal-800">
             <AlertDescription className="text-xs">
@@ -61,7 +61,7 @@ const ChatInterface: React.FC = () => {
         <div className="p-4 border-b flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-worldapi-blue-800">Dolly</h2>
-            <p className="text-sm text-gray-500">I'll guide you through connecting to World API</p>
+            <p className="text-sm text-gray-500">I'll guide you through connecting to worldAPI</p>
           </div>
           <div className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs flex items-center">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>

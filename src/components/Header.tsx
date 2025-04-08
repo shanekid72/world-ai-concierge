@@ -18,10 +18,10 @@ const Header: React.FC = () => {
         <div className="flex items-center">
           <img 
             src="/lovable-uploads/d6e7930f-08be-4f3b-b43b-8a9b176bb2d1.png" 
-            alt="World API Logo" 
+            alt="worldAPI Logo" 
             className="h-10 w-auto"
           />
-          <span className="ml-2 text-xl font-semibold text-worldapi-blue-500">World API</span>
+          <span className="ml-2 text-xl font-semibold text-worldapi-blue-500">worldAPI</span>
         </div>
         <span className="text-xs px-2 py-0.5 bg-worldapi-blue-50 text-worldapi-blue-500 rounded-full">
           by Digit9
