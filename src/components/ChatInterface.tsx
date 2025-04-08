@@ -53,7 +53,7 @@ const ChatInterface: React.FC = () => {
       <div className="md:w-3/4 w-full bg-white rounded-lg border border-gray-100 shadow-sm flex flex-col h-full">
         <div className="p-4 border-b flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-medium text-worldapi-blue-800">Integration Assistant</h2>
+            <h2 className="text-lg font-medium text-worldapi-blue-800">Dolly</h2>
             <p className="text-sm text-gray-500">I'll guide you through connecting to World API</p>
           </div>
           <div className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs flex items-center">
