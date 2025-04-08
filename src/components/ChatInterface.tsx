@@ -37,12 +37,12 @@ const ChatInterface: React.FC = () => {
       <div className="md:w-1/4 w-full md:h-full overflow-y-auto">
         <ProgressTracker steps={steps} currentStepId={currentStepId} />
         
-        <div className="bg-gradient-to-br from-worldapi-blue-50 to-white border border-worldapi-blue-100 p-4 rounded-lg shadow-sm">
+        <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg">
           <div className="flex items-center mb-3">
             <img 
               src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
               alt="worldAPI Logo" 
-              className="h-16 w-auto mr-2" // Further increased size for better visibility
+              className="h-16 w-auto mr-2" // Keeping the increased size
             />
             <h3 className="text-sm font-medium text-worldapi-blue-800">About worldAPI</h3>
           </div>
@@ -57,8 +57,8 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
       
-      <div className="md:w-3/4 w-full bg-white rounded-lg border border-gray-100 shadow-md flex flex-col h-full">
-        <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-worldapi-blue-50 to-white">
+      <div className="md:w-3/4 w-full bg-white rounded-lg border border-gray-100 shadow-sm flex flex-col h-full">
+        <div className="p-4 border-b flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-worldapi-blue-800">Dolly</h2>
             <p className="text-sm text-gray-500">I'll guide you through connecting to worldAPI</p>
