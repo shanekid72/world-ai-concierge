@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, RefreshCw } from "lucide-react";
+import { ArrowUp, RefreshCw, Paperclip, Mic } from "lucide-react";
 import { 
   Message, 
   generateId, 
@@ -115,21 +115,45 @@ const AIAgent: React.FC<{
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="border-t p-4">
+      <div className="border-t p-4 bg-white rounded-b-lg">
         <div className="flex items-center space-x-2">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="flex-1"
-            disabled={isAgentTyping}
-          />
+          <div className="flex-1 relative rounded-full border border-gray-200 bg-white overflow-hidden shadow-sm">
+            <div className="flex">
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your message..."
+                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 py-5 px-4"
+                disabled={isAgentTyping}
+              />
+              <div className="flex items-center pr-2 space-x-1">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-gray-400 hover:text-worldapi-teal-500"
+                  title="Attach file (coming soon)"
+                  disabled
+                >
+                  <Paperclip size={18} />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-gray-400 hover:text-worldapi-teal-500"
+                  title="Voice input (coming soon)"
+                  disabled
+                >
+                  <Mic size={18} />
+                </Button>
+              </div>
+            </div>
+          </div>
           <Button 
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isAgentTyping}
             size="icon"
-            className="bg-worldapi-blue-500 hover:bg-worldapi-blue-600"
+            className="bg-worldapi-teal-500 hover:bg-worldapi-teal-600 h-12 w-12 rounded-full shadow-sm"
           >
             <ArrowUp size={18} />
           </Button>
@@ -138,6 +162,7 @@ const AIAgent: React.FC<{
             variant="outline"
             size="icon"
             title="Reset conversation"
+            className="h-12 w-12 rounded-full"
           >
             <RefreshCw size={16} />
           </Button>
