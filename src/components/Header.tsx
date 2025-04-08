@@ -19,7 +19,7 @@ const Header: React.FC = () => {
           <img 
             src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
             alt="worldAPI Logo" 
-            className="h-12 w-auto" // Increased size for better visibility
+            className="h-16 w-auto" // Increased size for better visibility
           />
           <span className="ml-2 text-xs px-2 py-0.5 bg-worldapi-blue-50 text-worldapi-blue-500 rounded-full">
             by Digit9

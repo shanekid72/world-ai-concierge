@@ -42,7 +42,7 @@ const ChatInterface: React.FC = () => {
             <img 
               src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
               alt="worldAPI Logo" 
-              className="h-8 w-auto mr-2"
+              className="h-10 w-auto mr-2" // Increased size for better visibility
             />
             <h3 className="text-sm font-medium text-worldapi-blue-800">About worldAPI</h3>
           </div>
