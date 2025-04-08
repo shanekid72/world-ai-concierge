@@ -17,7 +17,7 @@ const Header: React.FC = () => {
       <div className="flex items-center space-x-2">
         <div className="flex items-center">
           <img 
-            src="/lovable-uploads/d6e7930f-08be-4f3b-b43b-8a9b176bb2d1.png" 
+            src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
             alt="worldAPI Logo" 
             className="h-10 w-auto"
           />

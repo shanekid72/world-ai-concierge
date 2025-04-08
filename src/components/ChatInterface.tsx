@@ -40,7 +40,7 @@ const ChatInterface: React.FC = () => {
         <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg">
           <div className="flex items-center mb-3">
             <img 
-              src="/lovable-uploads/d6e7930f-08be-4f3b-b43b-8a9b176bb2d1.png" 
+              src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
               alt="worldAPI Logo" 
               className="h-8 w-auto mr-2"
             />
