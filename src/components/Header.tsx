@@ -16,9 +16,11 @@ const Header: React.FC = () => {
     <header className="w-full py-4 px-6 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between">
       <div className="flex items-center space-x-2">
         <div className="flex items-center">
-          <div className="h-8 w-8 rounded-md bg-gradient-to-br from-worldapi-blue-500 to-worldapi-teal-500 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">D9</span>
-          </div>
+          <img 
+            src="/lovable-uploads/d6e7930f-08be-4f3b-b43b-8a9b176bb2d1.png" 
+            alt="World API Logo" 
+            className="h-10 w-auto"
+          />
           <span className="ml-2 text-xl font-semibold text-worldapi-blue-500">World API</span>
         </div>
         <span className="text-xs px-2 py-0.5 bg-worldapi-blue-50 text-worldapi-blue-500 rounded-full">

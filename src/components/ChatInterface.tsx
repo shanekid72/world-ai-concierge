@@ -38,7 +38,14 @@ const ChatInterface: React.FC = () => {
         <ProgressTracker steps={steps} currentStepId={currentStepId} />
         
         <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-worldapi-blue-800 mb-2">About World API</h3>
+          <div className="flex items-center mb-3">
+            <img 
+              src="/lovable-uploads/d6e7930f-08be-4f3b-b43b-8a9b176bb2d1.png" 
+              alt="World API Logo" 
+              className="h-8 w-auto mr-2"
+            />
+            <h3 className="text-sm font-medium text-worldapi-blue-800">About World API</h3>
+          </div>
           <p className="text-xs text-worldapi-blue-700 mb-3">
             World API provides a unified platform for financial institutions to access global payment networks through a single integration.
           </p>
