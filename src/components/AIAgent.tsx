@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import { Input } from "@/components/ui/input";
@@ -21,12 +20,10 @@ const AIAgent: React.FC<{
   const [isAgentTyping, setIsAgentTyping] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation.messages]);
   
-  // Monitor stage changes and notify parent
   useEffect(() => {
     onStageChange(conversation.currentStageId);
   }, [conversation.currentStageId, onStageChange]);
@@ -34,7 +31,6 @@ const AIAgent: React.FC<{
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     
-    // Add user message
     const userMessage: Message = {
       id: generateId(),
       content: inputValue,
@@ -49,7 +45,6 @@ const AIAgent: React.FC<{
     setInputValue('');
     setIsAgentTyping(true);
     
-    // Add typing indicator
     const typingMessage: Message = {
       id: generateId(),
       content: '',
@@ -63,14 +58,11 @@ const AIAgent: React.FC<{
     }));
     
     try {
-      // Process the message and generate response asynchronously
       const { newState, aiResponse } = await processUserMessage(userMessage.content, conversation);
       
-      // Simulate agent typing delay (proportional to response length)
       const typingDelay = Math.min(1000 + aiResponse.length * 10, 3000);
       
       setTimeout(() => {
-        // Remove typing indicator and add real response
         const aiMessage: Message = {
           id: generateId(),
           content: aiResponse,
@@ -85,7 +77,6 @@ const AIAgent: React.FC<{
         setIsAgentTyping(false);
       }, typingDelay);
     } catch (error) {
-      // Handle errors
       console.error("Error processing message:", error);
       toast({
         title: "Error",
