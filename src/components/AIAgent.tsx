@@ -11,6 +11,7 @@ import {
   ConversationState,
   processUserMessage
 } from '../utils/chatLogic';
+import { toast } from "@/hooks/use-toast";
 
 const AIAgent: React.FC<{
   onStageChange: (stageId: string) => void;
@@ -30,7 +31,7 @@ const AIAgent: React.FC<{
     onStageChange(conversation.currentStageId);
   }, [conversation.currentStageId, onStageChange]);
   
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     
     // Add user message
@@ -48,22 +49,22 @@ const AIAgent: React.FC<{
     setInputValue('');
     setIsAgentTyping(true);
     
-    // Process the message and generate response
-    setTimeout(() => {
-      const { newState, aiResponse } = processUserMessage(userMessage.content, conversation);
-      
-      // Add typing indicator
-      const typingMessage: Message = {
-        id: generateId(),
-        content: '',
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      setConversation(prev => ({
-        ...prev,
-        messages: [...prev.messages, typingMessage]
-      }));
+    // Add typing indicator
+    const typingMessage: Message = {
+      id: generateId(),
+      content: '',
+      isUser: false,
+      timestamp: new Date()
+    };
+    
+    setConversation(prev => ({
+      ...prev,
+      messages: [...prev.messages, typingMessage]
+    }));
+    
+    try {
+      // Process the message and generate response asynchronously
+      const { newState, aiResponse } = await processUserMessage(userMessage.content, conversation);
       
       // Simulate agent typing delay (proportional to response length)
       const typingDelay = Math.min(1000 + aiResponse.length * 10, 3000);
@@ -83,8 +84,26 @@ const AIAgent: React.FC<{
         }));
         setIsAgentTyping(false);
       }, typingDelay);
+    } catch (error) {
+      // Handle errors
+      console.error("Error processing message:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem processing your request. Please try again.",
+        variant: "destructive",
+      });
       
-    }, 500);
+      setConversation(prev => ({
+        ...prev,
+        messages: [...prev.messages.filter(m => m.id !== typingMessage.id), {
+          id: generateId(),
+          content: "I'm sorry, there was an error processing your request. Please try again later.",
+          isUser: false,
+          timestamp: new Date()
+        }]
+      }));
+      setIsAgentTyping(false);
+    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {

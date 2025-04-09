@@ -1,3 +1,4 @@
+
 import { OnboardingStage, Question, onboardingStages } from "../components/OnboardingStages";
 
 export interface Message {
@@ -42,13 +43,82 @@ export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
+// Fetch currency rates from the API
+export const fetchCurrencyRate = async (currencyCode: string): Promise<number | null> => {
+  try {
+    const response = await fetch(
+      "https://lieservices.luluone.com:9443/liveccyrates?payload=%7B%22activityType%22%3A%22rates.get%22%2C%22aglcid%22%3A784278%2C%22instype%22%3A%22LR%22%7D"
+    );
+    const data = await response.json();
+    
+    if (data && data.rate) {
+      return parseFloat(data.rate);
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching currency rate:", error);
+    return null;
+  }
+};
+
+// Check if message is asking about currency rates
+export const isCurrencyRateQuery = (message: string): string | null => {
+  const rateKeywords = ['rate', 'exchange', 'fx', 'currency', 'conversion'];
+  const currencyCodes = ['USD', 'EUR', 'GBP', 'AED', 'INR', 'AUD', 'CAD', 'SGD', 'JPY', 'CHF'];
+  
+  const msgLower = message.toUpperCase();
+  
+  // Check if the message contains rate-related keywords
+  const hasRateKeyword = rateKeywords.some(keyword => 
+    msgLower.toLowerCase().includes(keyword.toLowerCase())
+  );
+  
+  if (hasRateKeyword) {
+    // Check if any currency code is mentioned
+    for (const code of currencyCodes) {
+      if (msgLower.includes(code)) {
+        return code;
+      }
+    }
+  }
+  
+  return null;
+};
+
 // Process user message and determine AI response
-export const processUserMessage = (
+export const processUserMessage = async (
   message: string, 
   state: ConversationState
-): { newState: ConversationState, aiResponse: string, isTyping: boolean } => {
+): Promise<{ newState: ConversationState, aiResponse: string, isTyping: boolean }> => {
   // Clone state to avoid mutations
   const newState = JSON.parse(JSON.stringify(state)) as ConversationState;
+  
+  // Check if this is a currency rate query
+  const currencyCode = isCurrencyRateQuery(message);
+  if (currencyCode) {
+    try {
+      const rate = await fetchCurrencyRate(currencyCode);
+      if (rate !== null) {
+        return { 
+          newState, 
+          aiResponse: `The current exchange rate for ${currencyCode} is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services?`,
+          isTyping: true
+        };
+      } else {
+        return { 
+          newState, 
+          aiResponse: `I'm sorry, I couldn't retrieve the current rate for ${currencyCode} at the moment. Please try again later or contact our support team for assistance.`,
+          isTyping: true
+        };
+      }
+    } catch (error) {
+      return { 
+        newState, 
+        aiResponse: `I apologize, but there was an error fetching the rate information. Please try again later.`,
+        isTyping: true
+      };
+    }
+  }
   
   // Store user's answer
   const currentStage = onboardingStages.find(s => s.id === state.currentStageId);
