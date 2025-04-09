@@ -17,9 +17,24 @@ export const processUserMessage = async (
     try {
       const rate = await fetchCurrencyRate(currencyCode);
       if (rate !== null) {
+        const currencyNames: Record<string, string> = {
+          'USD': 'US Dollar',
+          'EUR': 'Euro', 
+          'GBP': 'British Pound',
+          'AED': 'UAE Dirham',
+          'INR': 'Indian Rupee',
+          'AUD': 'Australian Dollar',
+          'CAD': 'Canadian Dollar',
+          'SGD': 'Singapore Dollar',
+          'JPY': 'Japanese Yen',
+          'CHF': 'Swiss Franc'
+        };
+        
+        const currencyName = currencyNames[currencyCode] || currencyCode;
+        
         return { 
           newState, 
-          aiResponse: `The current exchange rate for ${currencyCode} is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services?`,
+          aiResponse: `The current exchange rate for ${currencyName} (${currencyCode}) is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services?`,
           isTyping: true
         };
       } else {
@@ -30,6 +45,7 @@ export const processUserMessage = async (
         };
       }
     } catch (error) {
+      console.error("Error in currency rate processing:", error);
       return { 
         newState, 
         aiResponse: `I apologize, but there was an error fetching the rate information. Please try again later.`,
@@ -46,11 +62,6 @@ export const processUserMessage = async (
       aiResponse: "I'm sorry, something went wrong with tracking your progress. Let's start over.",
       isTyping: true
     };
-  }
-  
-  const currentQuestion = currentStage.questions[state.currentQuestionIndex];
-  if (currentQuestion) {
-    newState.answers[currentQuestion.id] = message;
   }
   
   // Determine if we should move to next question or next stage
