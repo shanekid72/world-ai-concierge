@@ -1,4 +1,3 @@
-
 import { OnboardingStage, Question, onboardingStages } from "../components/OnboardingStages";
 
 export interface Message {
@@ -192,17 +191,17 @@ export const getFollowUpResponse = (message: string): string | null => {
 };
 
 // Generate a smart AI response based on conversation context
-export const generateSmartResponse = (
+export const generateSmartResponse = async (
   userMessage: string,
   state: ConversationState
-): string => {
+): Promise<string> => {
   // Check for follow-up response based on keywords
   const followUp = getFollowUpResponse(userMessage);
   if (followUp) return followUp;
   
   // Otherwise process based on conversation state
-  const { aiResponse } = processUserMessage(userMessage, state);
-  return aiResponse;
+  const result = await processUserMessage(userMessage, state);
+  return result.aiResponse;
 };
 
 // Simulate API configuration response based on user details
