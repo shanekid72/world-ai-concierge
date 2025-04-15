@@ -56,7 +56,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             CANCELLED: "🚫 Update: Your transaction was *CANCELLED*.",
           };
 
-          originalHandleSendMessage(statusMsg[status] || `ℹ️ Status: ${status}`);
+          // Use setInputValue + originalHandleSendMessage to send the message
+          setInputValue(statusMsg[status] || `ℹ️ Status: ${status}`);
+          originalHandleSendMessage();
 
           if (['DELIVERED', 'FAILED', 'CANCELLED'].includes(status)) {
             clearInterval(interval);
@@ -87,7 +89,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
           CANCELLED: "🚫 This transaction was *CANCELLED*.",
         }[status] || `ℹ️ Status: ${status}`;
         
-        originalHandleSendMessage(statusMsg);
+        // Set the value and then call the original handler
+        setInputValue(statusMsg);
+        originalHandleSendMessage();
       } catch (error) {
         toast({
           title: "Error",
@@ -100,7 +104,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
     // Start new money transfer
     if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
-      originalHandleSendMessage("💬 Great! How much would you like to send?");
+      setInputValue("💬 Great! How much would you like to send?");
+      originalHandleSendMessage();
       setQuoteContext({});
       setStage('amount');
       return;
@@ -110,7 +115,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     if (stage === 'amount' && lower.match(/\d+/)) {
       const amount = parseFloat(lower.match(/\d+/)![0]);
       setQuoteContext(prev => ({ ...prev, amount }));
-      originalHandleSendMessage("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
+      setInputValue("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
+      originalHandleSendMessage();
       setStage('country');
       return;
     }
@@ -134,12 +140,13 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         const quoteId = quoteResult?.data?.quote_id;
         setQuoteContext(prev => ({ ...prev, to, quoteId }));
         
-        originalHandleSendMessage(
+        setInputValue(
           `📄 Here's your quote: Send ${quoteContext.amount} AED to ${to} → ` +
           `receive ${quoteResult?.data?.receiving_amount} ${quoteResult?.data?.receiving_currency_code}. ` +
           `💱 Rate: ${quoteResult?.data?.fx_rates?.[0]?.rate}\n\n` +
           "✅ Would you like to proceed with this transaction? (yes/no)"
         );
+        originalHandleSendMessage();
         setStage('confirm');
       } catch (error) {
         toast({
@@ -199,7 +206,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         if (txnRef) {
           await confirmTransaction(txnRef);
           setQuoteContext(prev => ({ ...prev, lastTxnRef: txnRef }));
-          originalHandleSendMessage(`📦 Transaction created and confirmed! Reference Number: ${txnRef}`);
+          setInputValue(`📦 Transaction created and confirmed! Reference Number: ${txnRef}`);
+          originalHandleSendMessage();
           setAutoPoll(true);
         } else {
           throw new Error('No transaction reference received');
@@ -217,13 +225,15 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
     // Handle rejection
     if (stage === 'confirm' && lower === 'no') {
-      originalHandleSendMessage("🚫 Transaction cancelled. Let me know if you'd like to try again.");
+      setInputValue("🚫 Transaction cancelled. Let me know if you'd like to try again.");
+      originalHandleSendMessage();
       setStage('init');
       return;
     }
 
     // Default response for unrecognized input
-    originalHandleSendMessage("🤖 Sorry, I didn't understand. Try saying 'I want to send money'.");
+    setInputValue("🤖 Sorry, I didn't understand. Try saying 'I want to send money'.");
+    originalHandleSendMessage();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
