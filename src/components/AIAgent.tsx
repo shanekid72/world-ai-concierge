@@ -1,253 +1,49 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import MessageBubble from './MessageBubble';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ArrowUp, RefreshCw, Paperclip, Mic } from "lucide-react";
-import { 
-  Message, 
-  generateId, 
-  initializeConversation, 
-  ConversationState,
-  processUserMessage
-} from '../utils/chatLogic';
-import { toast } from "@/hooks/use-toast";
-import { onboardingStages } from './OnboardingStages';
+import React from 'react';
+import MessageList from './chat/MessageList';
+import MessageInput from './chat/MessageInput';
+import ChatControls from './chat/ChatControls';
+import { useChatState } from '../hooks/useChatState';
 
-const AIAgent: React.FC<{
+interface AIAgentProps {
   onStageChange: (stageId: string) => void;
   currentStepId: string;
-}> = ({ onStageChange, currentStepId }) => {
-  const [inputValue, setInputValue] = useState<string>('');
-  const [conversation, setConversation] = useState<ConversationState>(initializeConversation());
-  const [isAgentTyping, setIsAgentTyping] = useState<boolean>(false);
-  const [previousStepId, setPreviousStepId] = useState<string>(conversation.currentStageId);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [stageConversations, setStageConversations] = useState<Record<string, Message[]>>({});
-  
-  // Initialize stage conversations with welcome messages
-  useEffect(() => {
-    if (Object.keys(stageConversations).length === 0) {
-      const initialStageConversations: Record<string, Message[]> = {};
-      
-      onboardingStages.forEach(stage => {
-        initialStageConversations[stage.id] = [{
-          id: generateId(),
-          content: `${stage.description}. ${stage.questions[0].text}`,
-          isUser: false,
-          timestamp: new Date()
-        }];
-      });
-      
-      setStageConversations(initialStageConversations);
-    }
-  }, [stageConversations]);
-  
-  // When currentStepId changes from parent, update the conversation
-  useEffect(() => {
-    if (currentStepId === conversation.currentStageId) return;
-    
-    const stage = onboardingStages.find(s => s.id === currentStepId);
-    if (!stage) return;
-    
-    // Save current stage messages
-    setStageConversations(prev => ({
-      ...prev,
-      [conversation.currentStageId]: conversation.messages
-    }));
-    
-    // Get messages for the new stage or create initial message if not exists
-    let newStageMessages = stageConversations[currentStepId];
-    if (!newStageMessages || newStageMessages.length === 0) {
-      newStageMessages = [{
-        id: generateId(),
-        content: `${stage.description}. ${stage.questions[0].text}`,
-        isUser: false,
-        timestamp: new Date()
-      }];
-    }
-    
-    // Update conversation with the new stage
-    setConversation(prev => ({
-      ...prev,
-      currentStageId: currentStepId,
-      currentQuestionIndex: 0,
-      messages: newStageMessages
-    }));
-    
-    // Update previous step ID to prevent toggling
-    setPreviousStepId(conversation.currentStageId);
-    
-  }, [currentStepId, conversation.currentStageId, stageConversations, conversation.messages]);
-  
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversation.messages]);
-  
-  // This useEffect only handles natural progression through stages by AI agent
-  useEffect(() => {
-    // Only inform parent component if the stage changed through natural conversation
-    if (conversation.currentStageId !== currentStepId) {
-      onStageChange(conversation.currentStageId);
-    }
-  }, [conversation.currentStageId, onStageChange, currentStepId]);
-  
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    
-    const userMessage: Message = {
-      id: generateId(),
-      content: inputValue,
-      isUser: true,
-      timestamp: new Date()
-    };
-    
-    setConversation(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage]
-    }));
-    setInputValue('');
-    setIsAgentTyping(true);
-    
-    const typingMessage: Message = {
-      id: generateId(),
-      content: '',
-      isUser: false,
-      timestamp: new Date()
-    };
-    
-    setConversation(prev => ({
-      ...prev,
-      messages: [...prev.messages, typingMessage]
-    }));
-    
-    try {
-      const { newState, aiResponse } = await processUserMessage(userMessage.content, conversation);
-      
-      const typingDelay = Math.min(1000 + aiResponse.length * 10, 3000);
-      
-      setTimeout(() => {
-        const aiMessage: Message = {
-          id: generateId(),
-          content: aiResponse,
-          isUser: false,
-          timestamp: new Date()
-        };
-        
-        setConversation(prev => ({
-          ...newState,
-          messages: [...prev.messages.filter(m => m.id !== typingMessage.id), aiMessage]
-        }));
-        
-        // Save updated conversation for this stage
-        setStageConversations(prev => ({
-          ...prev,
-          [newState.currentStageId]: [...prev[newState.currentStageId] || [], userMessage, aiMessage]
-        }));
-        
-        setIsAgentTyping(false);
-      }, typingDelay);
-    } catch (error) {
-      console.error("Error processing message:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem processing your request. Please try again.",
-        variant: "destructive",
-      });
-      
-      setConversation(prev => ({
-        ...prev,
-        messages: [...prev.messages.filter(m => m.id !== typingMessage.id), {
-          id: generateId(),
-          content: "I'm sorry, there was an error processing your request. Please try again later.",
-          isUser: false,
-          timestamp: new Date()
-        }]
-      }));
-      setIsAgentTyping(false);
-    }
-  };
-  
+}
+
+const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
+  const {
+    inputValue,
+    setInputValue,
+    conversation,
+    isAgentTyping,
+    handleSendMessage,
+    handleReset
+  } = useChatState({ currentStepId, onStageChange });
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
-  
-  const handleReset = () => {
-    if (window.confirm('This will reset your conversation. Are you sure?')) {
-      setConversation(initializeConversation());
-      setStageConversations({});
-    }
-  };
-  
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto py-4 px-4 chat-container">
-        {conversation.messages.map((message, index) => (
-          <MessageBubble
-            key={message.id}
-            content={message.content}
-            isUser={message.isUser}
-            timestamp={message.timestamp}
-            isTyping={index === conversation.messages.length - 1 && isAgentTyping}
-          />
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+      <MessageList 
+        messages={conversation.messages} 
+        isAgentTyping={isAgentTyping} 
+      />
       
       <div className="border-t p-4 bg-white rounded-b-lg">
         <div className="flex items-center space-x-2">
-          <div className="flex-1 relative rounded-full border border-gray-200 bg-white overflow-hidden shadow-sm">
-            <div className="flex">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type your message..."
-                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 py-5 px-4"
-                disabled={isAgentTyping}
-              />
-              <div className="flex items-center pr-2 space-x-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-gray-400 hover:text-worldapi-teal-500"
-                  title="Attach file (coming soon)"
-                  disabled
-                >
-                  <Paperclip size={18} />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-gray-400 hover:text-worldapi-teal-500"
-                  title="Voice input (coming soon)"
-                  disabled
-                >
-                  <Mic size={18} />
-                </Button>
-              </div>
-            </div>
-          </div>
-          <Button 
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isAgentTyping}
-            size="icon"
-            className="bg-worldapi-teal-500 hover:bg-worldapi-teal-600 h-12 w-12 rounded-full shadow-sm"
-          >
-            <ArrowUp size={18} />
-          </Button>
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            size="icon"
-            title="Reset conversation"
-            className="h-12 w-12 rounded-full"
-          >
-            <RefreshCw size={16} />
-          </Button>
+          <MessageInput
+            inputValue={inputValue}
+            isAgentTyping={isAgentTyping}
+            onInputChange={setInputValue}
+            onSendMessage={handleSendMessage}
+            onKeyDown={handleKeyDown}
+          />
+          <ChatControls onReset={handleReset} />
         </div>
       </div>
     </div>
