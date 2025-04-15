@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { type Stage } from '../hooks/useWorldApiChat';
+import { type Stage } from '../../hooks/useWorldApiChat';
 
 interface ChatStageHandlerProps {
   stage: Stage;
