@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
@@ -100,7 +101,10 @@ const ChatInterface: React.FC = () => {
         </div>
         
         <div className="flex-1 overflow-hidden">
-          <AIAgent onStageChange={handleStageChange} />
+          <AIAgent 
+            onStageChange={handleStageChange}
+            currentStepId={currentStepId}
+          />
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import { Input } from "@/components/ui/input";
@@ -11,22 +12,57 @@ import {
   processUserMessage
 } from '../utils/chatLogic';
 import { toast } from "@/hooks/use-toast";
+import { onboardingStages } from './OnboardingStages';
 
 const AIAgent: React.FC<{
   onStageChange: (stageId: string) => void;
-}> = ({ onStageChange }) => {
+  currentStepId: string;
+}> = ({ onStageChange, currentStepId }) => {
   const [inputValue, setInputValue] = useState<string>('');
   const [conversation, setConversation] = useState<ConversationState>(initializeConversation());
   const [isAgentTyping, setIsAgentTyping] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
+  // When currentStepId changes from parent, update the conversation
+  useEffect(() => {
+    if (currentStepId !== conversation.currentStageId) {
+      const stage = onboardingStages.find(s => s.id === currentStepId);
+      if (stage) {
+        const newMessage: Message = {
+          id: generateId(),
+          content: `${stage.description}. ${stage.questions[0].text}`,
+          isUser: false,
+          timestamp: new Date()
+        };
+        
+        // Initialize a new conversation state focused on the selected stage
+        const newState: ConversationState = {
+          currentStageId: currentStepId,
+          currentQuestionIndex: 0,
+          completedStages: [...conversation.completedStages],
+          answers: {...conversation.answers},
+          messages: [...conversation.messages, newMessage]
+        };
+        
+        setConversation(newState);
+        
+        // Inform the parent component about the stage change
+        onStageChange(currentStepId);
+      }
+    }
+  }, [currentStepId, conversation.currentStageId, onStageChange, conversation.completedStages, conversation.answers, conversation.messages]);
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation.messages]);
   
+  // We're now tracking the stage change in the useEffect above
+  // This will be called when the agent naturally progresses through stages
   useEffect(() => {
-    onStageChange(conversation.currentStageId);
-  }, [conversation.currentStageId, onStageChange]);
+    if (conversation.currentStageId !== currentStepId) {
+      onStageChange(conversation.currentStageId);
+    }
+  }, [conversation.currentStageId, onStageChange, currentStepId]);
   
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
