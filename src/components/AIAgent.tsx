@@ -4,7 +4,7 @@ import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import ChatControls from './chat/ChatControls';
 import { useChatState } from '../hooks/useChatState';
-import { useWorldApiChat } from '../hooks/useWorldApiChat';
+import { useWorldApiChat, type Stage } from '../hooks/useWorldApiChat';
 import { TransactionFlow } from './chat/TransactionFlow';
 import { ChatStageHandler } from './chat/ChatStageHandler';
 import { useTransactionPolling } from '../hooks/useTransactionPolling';
@@ -203,7 +203,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       
       <ChatStageHandler
         stage={stage}
-        onStageChange={(newStage) => setStage(newStage as any)}
+        onStageChange={(newStage: Stage) => setStage(newStage)}
         onMessage={(message) => {
           setInputValue(message);
           handleSendMessage();

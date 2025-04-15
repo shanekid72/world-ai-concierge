@@ -1,7 +1,6 @@
 
 import React from 'react';
-
-type Stage = 'intro' | 'choosePath' | 'collectMinimalInfo' | 'standardOnboarding' | 'init' | 'amount' | 'country' | 'confirm';
+import { type Stage } from '../hooks/useWorldApiChat';
 
 interface ChatStageHandlerProps {
   stage: Stage;

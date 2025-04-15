@@ -7,7 +7,10 @@ import { toast } from "@/hooks/use-toast";
 // Mock the custom hooks
 vi.mock('@/lib/useWorldApiHooks', () => ({
   useCreateQuote: vi.fn().mockReturnValue({
-    createQuote: vi.fn().mockResolvedValue({ data: { quote_id: 'test-quote-id' } })
+    createQuote: vi.fn().mockResolvedValue({ data: { quote_id: 'test-quote-id' } }),
+    data: null,
+    loading: false,
+    error: null
   }),
   useCreateTransaction: vi.fn().mockReturnValue({
     createTransaction: vi.fn().mockResolvedValue({ data: { transaction_ref_number: 'test-txn-ref' } })
@@ -43,7 +46,10 @@ describe('TransactionFlow', () => {
     const mockCreateQuote = vi.fn().mockRejectedValue(new Error('Quote creation failed'));
     
     vi.mocked(useCreateQuote).mockImplementationOnce(() => ({
-      createQuote: mockCreateQuote
+      createQuote: mockCreateQuote,
+      data: null,
+      loading: false,
+      error: null
     }));
 
     render(<TransactionFlow {...mockProps} />);

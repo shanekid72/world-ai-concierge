@@ -2,10 +2,11 @@
 import { render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ChatStageHandler } from '../ChatStageHandler';
+import { type Stage } from '@/hooks/useWorldApiChat';
 
 describe('ChatStageHandler', () => {
   const mockProps = {
-    stage: 'choosePath',
+    stage: 'choosePath' as Stage,
     onStageChange: vi.fn(),
     onMessage: vi.fn()
   };
@@ -35,7 +36,7 @@ describe('ChatStageHandler', () => {
   });
 
   it('should handle standard onboarding completion', () => {
-    render(<ChatStageHandler {...mockProps} stage="standardOnboarding" />);
+    render(<ChatStageHandler {...mockProps} stage="standardOnboarding" as Stage />);
     
     expect(mockProps.onMessage).toHaveBeenCalledWith(
       "🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?"
@@ -44,7 +45,7 @@ describe('ChatStageHandler', () => {
   });
 
   it('should handle minimal info collection completion', () => {
-    render(<ChatStageHandler {...mockProps} stage="collectMinimalInfo" />);
+    render(<ChatStageHandler {...mockProps} stage="collectMinimalInfo" as Stage />);
     
     expect(mockProps.onMessage).toHaveBeenCalledWith("🙌 Got what I need! Let's jump into worldAPI testing mode.");
     expect(mockProps.onStageChange).toHaveBeenCalledWith('init');
