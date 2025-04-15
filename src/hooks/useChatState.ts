@@ -109,14 +109,24 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
           timestamp: new Date()
         };
         
-        setConversation(prev => ({
-          ...newState,
-          messages: [...prev.messages.filter(m => m.id !== typingMessage.id), aiMessage]
-        }));
+        setConversation(prev => {
+          // Make sure to preserve the messages history
+          const updatedMessages = [...prev.messages.filter(m => m.id !== typingMessage.id), aiMessage];
+          
+          return {
+            ...newState,
+            messages: updatedMessages
+          };
+        });
+        
+        // Update stage conversations
+        if (newState.currentStageId !== conversation.currentStageId) {
+          onStageChange(newState.currentStageId);
+        }
         
         setStageConversations(prev => ({
           ...prev,
-          [newState.currentStageId]: [...prev[newState.currentStageId] || [], userMessage, aiMessage]
+          [newState.currentStageId]: [...(prev[newState.currentStageId] || []), userMessage, aiMessage]
         }));
         
         setIsAgentTyping(false);

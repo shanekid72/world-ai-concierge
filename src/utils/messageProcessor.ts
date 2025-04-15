@@ -114,7 +114,33 @@ Would you like to start filling in these details, or would you prefer to export 
     };
   }
   
-  // Store user's answer
+  // Check D9 Network capabilities
+  if (message.toLowerCase().includes('payout') || 
+      message.toLowerCase().includes('payin') || 
+      message.toLowerCase().includes('countries') || 
+      message.toLowerCase().includes('services')) {
+    return {
+      newState,
+      aiResponse: `I can provide information about our D9 Network capabilities. We offer various payment services across different regions:\n
+1. Payout Services - Available in multiple countries across:
+   - Africa (e.g., Kenya, Nigeria, Ghana)
+   - Americas (e.g., USA, Canada, Brazil)
+   - Asia (e.g., India, Philippines, China)
+   - Europe (including SEPA countries)
+   - Middle East and GCC regions
+
+2. Payin Services - Available in:
+   - GCC Region (UAE, Oman, Bahrain, Kuwait, Qatar)
+   - APAC (Malaysia, Hong Kong, Philippines, Singapore)
+   - Americas (Canada)
+   - Europe (UK)
+
+Would you like specific information about services in a particular country or region?`,
+      isTyping: true
+    };
+  }
+  
+  // Generic message processing based on conversation stage
   const currentStage = onboardingStages.find(s => s.id === state.currentStageId);
   if (!currentStage) {
     return { 
@@ -122,6 +148,12 @@ Would you like to start filling in these details, or would you prefer to export 
       aiResponse: "I'm sorry, something went wrong with tracking your progress. Let's start over.",
       isTyping: true
     };
+  }
+  
+  // Store user's answer for the current question
+  if (currentStage.questions[state.currentQuestionIndex]) {
+    const questionId = currentStage.questions[state.currentQuestionIndex].id;
+    newState.answers[questionId] = message;
   }
   
   // Determine if we should move to next question or next stage
