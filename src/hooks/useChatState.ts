@@ -73,7 +73,7 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
     const userMessage: Message = {
       id: generateId(),
       content: inputValue,
-      isUser: true,
+      isUser: false, // This isn't a user message but an agent message
       timestamp: new Date()
     };
 
@@ -82,74 +82,9 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
       messages: [...prev.messages, userMessage]
     }));
     setInputValue('');
-    setIsAgentTyping(true);
 
-    const typingMessage: Message = {
-      id: generateId(),
-      content: '',
-      isUser: false,
-      timestamp: new Date()
-    };
-
-    setConversation(prev => ({
-      ...prev,
-      messages: [...prev.messages, typingMessage]
-    }));
-
-    try {
-      const { newState, aiResponse } = await processUserMessage(userMessage.content, conversation);
-      
-      const typingDelay = Math.min(1000 + aiResponse.length * 10, 3000);
-      
-      setTimeout(() => {
-        const aiMessage: Message = {
-          id: generateId(),
-          content: aiResponse,
-          isUser: false,
-          timestamp: new Date()
-        };
-        
-        setConversation(prev => {
-          // Make sure to preserve the messages history
-          const updatedMessages = [...prev.messages.filter(m => m.id !== typingMessage.id), aiMessage];
-          
-          return {
-            ...newState,
-            messages: updatedMessages
-          };
-        });
-        
-        // Update stage conversations
-        if (newState.currentStageId !== conversation.currentStageId) {
-          onStageChange(newState.currentStageId);
-        }
-        
-        setStageConversations(prev => ({
-          ...prev,
-          [newState.currentStageId]: [...(prev[newState.currentStageId] || []), userMessage, aiMessage]
-        }));
-        
-        setIsAgentTyping(false);
-      }, typingDelay);
-    } catch (error) {
-      console.error("Error processing message:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem processing your request. Please try again.",
-        variant: "destructive",
-      });
-      
-      setConversation(prev => ({
-        ...prev,
-        messages: [...prev.messages.filter(m => m.id !== typingMessage.id), {
-          id: generateId(),
-          content: "I'm sorry, there was an error processing your request. Please try again later.",
-          isUser: false,
-          timestamp: new Date()
-        }]
-      }));
-      setIsAgentTyping(false);
-    }
+    // For agent-generated messages, we don't need the AI processing part
+    // so we simplify this function compared to the original handleSendMessage
   };
 
   const handleReset = () => {

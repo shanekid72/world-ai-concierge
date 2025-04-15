@@ -6,13 +6,13 @@ import { toast } from "@/hooks/use-toast";
 
 // Mock the custom hooks
 vi.mock('@/lib/useWorldApiHooks', () => ({
-  useCreateQuote: () => ({
+  useCreateQuote: vi.fn().mockReturnValue({
     createQuote: vi.fn().mockResolvedValue({ data: { quote_id: 'test-quote-id' } })
   }),
-  useCreateTransaction: () => ({
+  useCreateTransaction: vi.fn().mockReturnValue({
     createTransaction: vi.fn().mockResolvedValue({ data: { transaction_ref_number: 'test-txn-ref' } })
   }),
-  useConfirmTransaction: () => ({
+  useConfirmTransaction: vi.fn().mockReturnValue({
     confirmTransaction: vi.fn().mockResolvedValue({ data: { status: 'CONFIRMED' } })
   })
 }));
@@ -39,8 +39,11 @@ describe('TransactionFlow', () => {
   });
 
   it('should handle quote creation error', async () => {
+    // Mock implementation for error case
+    const mockCreateQuote = vi.fn().mockRejectedValue(new Error('Quote creation failed'));
+    
     vi.mocked(useCreateQuote).mockImplementationOnce(() => ({
-      createQuote: vi.fn().mockRejectedValue(new Error('Quote creation failed'))
+      createQuote: mockCreateQuote
     }));
 
     render(<TransactionFlow {...mockProps} />);
@@ -55,3 +58,6 @@ describe('TransactionFlow', () => {
     });
   });
 });
+
+// Import the mocked function to fix the type error
+import { useCreateQuote } from '@/lib/useWorldApiHooks';

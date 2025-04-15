@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
@@ -32,20 +33,22 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     conversation,
     isAgentTyping,
     handleReset,
-    appendAgentMessage
+    handleSendMessage
   } = useChatState({ currentStepId, onStageChange });
 
   const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
 
   useEffect(() => {
     if (stage === 'intro') {
-      appendAgentMessage("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
+      setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
+      handleSendMessage();
       setTimeout(() => {
-        appendAgentMessage("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
+        setInputValue("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
+        handleSendMessage();
         setStage('choosePath');
       }, 1000);
     }
-  }, [stage, appendAgentMessage]);
+  }, [stage, setInputValue, handleSendMessage, setStage]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -62,9 +65,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             CANCELLED: "🚫 Update: Your transaction was *CANCELLED*.",
           };
 
-          // Use setInputValue + originalHandleSendMessage to send the message
+          // Use setInputValue + handleSendMessage to send the message
           setInputValue(statusMsg[status] || `ℹ️ Status: ${status}`);
-          appendAgentMessage();
+          handleSendMessage();
 
           if (['DELIVERED', 'FAILED', 'CANCELLED'].includes(status)) {
             clearInterval(interval);
@@ -76,7 +79,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       }, 10000);
     }
     return () => clearInterval(interval);
-  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, appendAgentMessage, setInputValue]);
+  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, handleSendMessage, setInputValue, setAutoPoll]);
 
   const handleIntent = async (message: string) => {
     if (!message.trim()) return;
@@ -94,9 +97,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
           CANCELLED: "🚫 This transaction was *CANCELLED*.",
         }[status] || `ℹ️ Status: ${status}`;
         
-        // Set the value and then call the original handler
+        // Set the value and then call the handler
         setInputValue(statusMsg);
-        appendAgentMessage();
+        handleSendMessage();
       } catch (error) {
         toast({
           title: "Error",
@@ -109,7 +112,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
     // Transaction flow handling
     if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
-      appendAgentMessage("💬 Great! How much would you like to send?");
+      setInputValue("💬 Great! How much would you like to send?");
+      handleSendMessage();
       setQuoteContext({});
       setStage('amount');
       return;
@@ -118,7 +122,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     if (stage === 'amount' && lower.match(/\d+/)) {
       const amount = parseFloat(lower.match(/\d+/)![0]);
       setQuoteContext(prev => ({ ...prev, amount }));
-      appendAgentMessage("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
+      setInputValue("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
+      handleSendMessage();
       setStage('country');
       return;
     }
@@ -147,7 +152,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
           `💱 Rate: ${quoteResult?.data?.fx_rates?.[0]?.rate}\n\n` +
           "✅ Would you like to proceed with this transaction? (yes/no)"
         );
-        appendAgentMessage();
+        handleSendMessage();
       } catch (error) {
         toast({
           title: "Error",
@@ -165,7 +170,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
 
     if (stage === 'confirm' && lower === 'no') {
-      appendAgentMessage("🚫 Transaction cancelled. Let me know if you'd like to try again.");
+      setInputValue("🚫 Transaction cancelled. Let me know if you'd like to try again.");
+      handleSendMessage();
       setStage('init');
       return;
     }
@@ -197,8 +203,11 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       
       <ChatStageHandler
         stage={stage}
-        onStageChange={setStage}
-        onMessage={appendAgentMessage}
+        onStageChange={(newStage) => setStage(newStage as any)}
+        onMessage={(message) => {
+          setInputValue(message);
+          handleSendMessage();
+        }}
       />
       
       <div className="border-t p-4 bg-white rounded-b-lg">

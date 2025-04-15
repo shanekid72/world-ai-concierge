@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { useCreateQuote, useCreateTransaction, useConfirmTransaction, useEnquireTransaction } from '../lib/useWorldApiHooks';
 import { toast } from "@/hooks/use-toast";
 
-type Stage = 'intro' | 'choosePath' | 'collectMinimalInfo' | 'standardOnboarding' | 'init' | 'amount' | 'country' | 'confirm';
+export type Stage = 'intro' | 'choosePath' | 'collectMinimalInfo' | 'standardOnboarding' | 'init' | 'amount' | 'country' | 'confirm';
 
 interface QuoteContext {
   amount?: number;
@@ -50,4 +50,3 @@ export const useWorldApiChat = () => {
     enquireTransaction
   };
 };
-

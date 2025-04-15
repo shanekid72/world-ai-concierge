@@ -1,9 +1,11 @@
 
 import React from 'react';
 
+type Stage = 'intro' | 'choosePath' | 'collectMinimalInfo' | 'standardOnboarding' | 'init' | 'amount' | 'country' | 'confirm';
+
 interface ChatStageHandlerProps {
-  stage: string;
-  onStageChange: (stage: string) => void;
+  stage: Stage;
+  onStageChange: (stage: Stage) => void;
   onMessage: (message: string) => void;
 }
 
@@ -12,34 +14,31 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   onStageChange,
   onMessage
 }) => {
-  const handleStageMessage = (message: string) => {
-    const lower = message.toLowerCase();
-
-    switch (stage) {
-      case 'choosePath':
-        if (lower.includes('onboarding')) {
+  React.useEffect(() => {
+    const handleStageMessage = () => {
+      switch (stage) {
+        case 'choosePath':
           onMessage("Awesome! Let's start your onboarding. First, what's your full name?");
           onStageChange('standardOnboarding');
-        } else if (lower.includes('test') || lower.includes('integrate')) {
-          onMessage("⚙️ Sweet! Let's get you into testing mode. Just need a few deets:");
-          onMessage("1. Your name\n2. Company name\n3. Contact info (email/phone)\n— then we'll launch you straight into integration testing 🚀");
-          onStageChange('collectMinimalInfo');
-        } else {
-          onMessage("Hmm, I didn't catch that — onboarding or testing?");
-        }
-        break;
-
-      case 'standardOnboarding':
-        onMessage("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
-        onStageChange('init');
-        break;
-
-      case 'collectMinimalInfo':
-        onMessage("🙌 Got what I need! Let's jump into worldAPI testing mode.");
-        onStageChange('init');
-        break;
+          break;
+          
+        case 'standardOnboarding':
+          onMessage("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
+          onStageChange('init');
+          break;
+          
+        case 'collectMinimalInfo':
+          onMessage("🙌 Got what I need! Let's jump into worldAPI testing mode.");
+          onStageChange('init');
+          break;
+      }
+    };
+    
+    // Only run for the stages that need automatic messaging
+    if (['choosePath', 'standardOnboarding', 'collectMinimalInfo'].includes(stage)) {
+      handleStageMessage();
     }
-  };
+  }, [stage, onMessage, onStageChange]);
 
   return null; // This is a logic-only component
 };
