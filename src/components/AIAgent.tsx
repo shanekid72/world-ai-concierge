@@ -1,10 +1,12 @@
-
 import React, { useEffect } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import ChatControls from './chat/ChatControls';
 import { useChatState } from '../hooks/useChatState';
 import { useWorldApiChat } from '../hooks/useWorldApiChat';
+import { TransactionFlow } from './chat/TransactionFlow';
+import { ChatStageHandler } from './chat/ChatStageHandler';
+import { useTransactionPolling } from '../hooks/useTransactionPolling';
 import { toast } from "@/hooks/use-toast";
 
 interface AIAgentProps {
@@ -14,40 +16,36 @@ interface AIAgentProps {
 
 const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const {
-    inputValue,
-    setInputValue,
-    conversation,
-    isAgentTyping,
-    handleSendMessage: originalHandleSendMessage,
-    handleReset
-  } = useChatState({ currentStepId, onStageChange });
-
-  const {
     stage,
     setStage,
     quoteContext,
     setQuoteContext,
     autoPoll,
     setAutoPoll,
-    quoteLoading,
     handleCreateQuote,
-    createTransaction,
-    confirmTransaction,
     enquireTransaction
   } = useWorldApiChat();
 
+  const {
+    inputValue,
+    setInputValue,
+    conversation,
+    isAgentTyping,
+    handleReset,
+    appendAgentMessage
+  } = useChatState({ currentStepId, onStageChange });
+
+  const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
+
   useEffect(() => {
     if (stage === 'intro') {
-      setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
-      originalHandleSendMessage();
-      
+      appendAgentMessage("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
       setTimeout(() => {
-        setInputValue("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
-        originalHandleSendMessage();
+        appendAgentMessage("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
         setStage('choosePath');
       }, 1000);
     }
-  }, [stage, setInputValue, originalHandleSendMessage]);
+  }, [stage, appendAgentMessage]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -66,7 +64,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
           // Use setInputValue + originalHandleSendMessage to send the message
           setInputValue(statusMsg[status] || `ℹ️ Status: ${status}`);
-          originalHandleSendMessage();
+          appendAgentMessage();
 
           if (['DELIVERED', 'FAILED', 'CANCELLED'].includes(status)) {
             clearInterval(interval);
@@ -78,7 +76,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       }, 10000);
     }
     return () => clearInterval(interval);
-  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, originalHandleSendMessage, setInputValue]);
+  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, appendAgentMessage, setInputValue]);
 
   const handleIntent = async (message: string) => {
     if (!message.trim()) return;
@@ -98,7 +96,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         
         // Set the value and then call the original handler
         setInputValue(statusMsg);
-        originalHandleSendMessage();
+        appendAgentMessage();
       } catch (error) {
         toast({
           title: "Error",
@@ -109,9 +107,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
+    // Transaction flow handling
     if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
-      setInputValue("💬 Great! How much would you like to send?");
-      originalHandleSendMessage();
+      appendAgentMessage("💬 Great! How much would you like to send?");
       setQuoteContext({});
       setStage('amount');
       return;
@@ -120,8 +118,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     if (stage === 'amount' && lower.match(/\d+/)) {
       const amount = parseFloat(lower.match(/\d+/)![0]);
       setQuoteContext(prev => ({ ...prev, amount }));
-      setInputValue("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
-      originalHandleSendMessage();
+      appendAgentMessage("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
       setStage('country');
       return;
     }
@@ -150,8 +147,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
           `💱 Rate: ${quoteResult?.data?.fx_rates?.[0]?.rate}\n\n` +
           "✅ Would you like to proceed with this transaction? (yes/no)"
         );
-        originalHandleSendMessage();
-        setStage('confirm');
+        appendAgentMessage();
       } catch (error) {
         toast({
           title: "Error",
@@ -163,126 +159,46 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
 
     if (stage === 'confirm' && lower === 'yes' && quoteContext.quoteId) {
-      try {
-        const txnPayload = {
-          type: 'SEND',
-          source_of_income: 'SLRY',
-          purpose_of_txn: 'SAVG',
-          instrument: 'REMITTANCE',
-          message: 'Chat-based transaction',
-          sender: {
-            agent_customer_number: '1234567890',
-            mobile_number: '+971500000000',
-            first_name: 'John',
-            last_name: 'Doe',
-            sender_id: [{ id_code: '15', id: 'ID123456789' }],
-            date_of_birth: '1990-01-01',
-            country_of_birth: 'IN',
-            sender_address: [{
-              address_type: 'PRESENT',
-              address_line: 'Main St',
-              town_name: 'Dubai',
-              country_code: 'AE'
-            }],
-            nationality: 'IN'
-          },
-          receiver: {
-            mobile_number: '+919000000000',
-            first_name: 'Ali',
-            last_name: 'Khan',
-            nationality: quoteContext.to || 'PK',
-            relation_code: '32',
-            bank_details: {
-              account_type_code: '1',
-              account_number: '1234567890',
-              iso_code: 'ALFHPKKA068'
-            }
-          },
-          transaction: {
-            quote_id: quoteContext.quoteId
-          }
-        };
-
-        const txnResult = await createTransaction(txnPayload);
-        const txnRef = txnResult?.data?.transaction_ref_number;
-
-        if (txnRef) {
-          await confirmTransaction(txnRef);
-          setQuoteContext(prev => ({ ...prev, lastTxnRef: txnRef }));
-          setInputValue(`📦 Transaction created and confirmed! Reference Number: ${txnRef}`);
-          originalHandleSendMessage();
-          setAutoPoll(true);
-        } else {
-          throw new Error('No transaction reference received');
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create or confirm transaction. Please try again.",
-          variant: "destructive",
-        });
-      }
+      
       setStage('init');
       return;
     }
 
     if (stage === 'confirm' && lower === 'no') {
-      setInputValue("🚫 Transaction cancelled. Let me know if you'd like to try again.");
-      originalHandleSendMessage();
+      appendAgentMessage("🚫 Transaction cancelled. Let me know if you'd like to try again.");
       setStage('init');
       return;
     }
 
-    if (stage === 'choosePath') {
-      if (lower.includes('onboarding')) {
-        setInputValue("Awesome! Let's start your onboarding. First, what's your full name?");
-        originalHandleSendMessage();
-        setStage('standardOnboarding');
-        return;
-      } else if (lower.includes('test') || lower.includes('integrate')) {
-        setInputValue("⚙️ Sweet! Let's get you into testing mode. Just need a few deets:");
-        originalHandleSendMessage();
-        setInputValue("1. Your name\n2. Company name\n3. Contact info (email/phone)\n— then we'll launch you straight into integration testing 🚀");
-        originalHandleSendMessage();
-        setStage('collectMinimalInfo');
-        return;
-      }
-      setInputValue("Hmm, I didn't catch that — onboarding or testing?");
-      originalHandleSendMessage();
-      return;
-    }
-
-    if (stage === 'standardOnboarding') {
-      setInputValue("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
-      originalHandleSendMessage();
-      setStage('init');
-      return;
-    }
-
-    if (stage === 'collectMinimalInfo') {
-      setInputValue("🙌 Got what I need! Let's jump into worldAPI testing mode.");
-      originalHandleSendMessage();
-      setStage('init');
-      return;
-    }
-
-    setInputValue("🤖 Sorry, I didn't understand. Try saying 'I want to send money'.");
-    originalHandleSendMessage();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleIntent(inputValue);
-      setInputValue('');
-    }
+    setInputValue('');
   };
 
   return (
     <div className="flex flex-col h-full">
       <MessageList 
         messages={conversation.messages} 
-        isAgentTyping={isAgentTyping || quoteLoading} 
+        isAgentTyping={isAgentTyping || isPolling} 
+      />
+      
+      <TransactionFlow
+        amount={quoteContext.amount || 0}
+        destinationCountry={quoteContext.to || ''}
+        onQuoteCreated={(quoteId) => {
+          setQuoteContext(prev => ({ ...prev, quoteId }));
+          setStage('confirm');
+        }}
+        onTransactionCreated={(txnRef) => {
+          setQuoteContext(prev => ({ ...prev, lastTxnRef: txnRef }));
+          setAutoPoll(true);
+          setStage('init');
+        }}
+        onError={() => setStage('init')}
+      />
+      
+      <ChatStageHandler
+        stage={stage}
+        onStageChange={setStage}
+        onMessage={appendAgentMessage}
       />
       
       <div className="border-t p-4 bg-white rounded-b-lg">
@@ -295,7 +211,13 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
               handleIntent(inputValue);
               setInputValue('');
             }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleIntent(inputValue);
+                setInputValue('');
+              }
+            }}
           />
           <ChatControls onReset={handleReset} />
         </div>
@@ -305,4 +227,3 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 };
 
 export default AIAgent;
-
