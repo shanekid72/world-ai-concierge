@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import { Input } from "@/components/ui/input";
@@ -21,13 +20,19 @@ const AIAgent: React.FC<{
   const [inputValue, setInputValue] = useState<string>('');
   const [conversation, setConversation] = useState<ConversationState>(initializeConversation());
   const [isAgentTyping, setIsAgentTyping] = useState<boolean>(false);
+  const [previousStepId, setPreviousStepId] = useState<string>(conversation.currentStageId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // When currentStepId changes from parent, update the conversation
   useEffect(() => {
-    if (currentStepId !== conversation.currentStageId) {
+    // Only process the stage change if it's different from the previous one
+    // This prevents the toggle effect between stages
+    if (currentStepId !== conversation.currentStageId && currentStepId !== previousStepId) {
+      setPreviousStepId(conversation.currentStageId);
+      
       const stage = onboardingStages.find(s => s.id === currentStepId);
       if (stage) {
+        // Create a welcome message for the new stage
         const newMessage: Message = {
           id: generateId(),
           content: `${stage.description}. ${stage.questions[0].text}`,
@@ -35,34 +40,34 @@ const AIAgent: React.FC<{
           timestamp: new Date()
         };
         
-        // Initialize a new conversation state focused on the selected stage
+        // Create a new conversation state for the selected stage
         const newState: ConversationState = {
           currentStageId: currentStepId,
           currentQuestionIndex: 0,
           completedStages: [...conversation.completedStages],
           answers: {...conversation.answers},
-          messages: [...conversation.messages, newMessage]
+          // Start with a fresh set of messages for this stage
+          messages: [newMessage]
         };
         
         setConversation(newState);
-        
-        // Inform the parent component about the stage change
-        onStageChange(currentStepId);
       }
     }
-  }, [currentStepId, conversation.currentStageId, onStageChange, conversation.completedStages, conversation.answers, conversation.messages]);
+  }, [currentStepId, conversation.currentStageId, conversation.completedStages, conversation.answers, conversation.messages, previousStepId]);
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation.messages]);
   
-  // We're now tracking the stage change in the useEffect above
-  // This will be called when the agent naturally progresses through stages
+  // This useEffect only handles natural progression through stages by AI agent
   useEffect(() => {
-    if (conversation.currentStageId !== currentStepId) {
+    // Only inform parent component if the stage changed through natural conversation
+    // and not from a user clicking on a stage (which would be handled by the above useEffect)
+    if (conversation.currentStageId !== currentStepId && conversation.currentStageId !== previousStepId) {
       onStageChange(conversation.currentStageId);
+      setPreviousStepId(currentStepId);
     }
-  }, [conversation.currentStageId, onStageChange, currentStepId]);
+  }, [conversation.currentStageId, onStageChange, currentStepId, previousStepId]);
   
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;

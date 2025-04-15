@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
@@ -15,9 +15,13 @@ const ChatInterface: React.FC = () => {
     return initialSteps;
   });
   const [currentStepId, setCurrentStepId] = useState<string>(steps[0].id);
+  const stageChangeRef = useRef<boolean>(false);
   
   const handleStageChange = (stageId: string) => {
     if (stageId === currentStepId) return;
+    
+    // Set a flag to indicate this is a user-initiated stage change
+    stageChangeRef.current = true;
     
     // Update steps statuses
     setSteps(prevSteps => {
