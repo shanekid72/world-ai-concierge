@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import { Input } from "@/components/ui/input";
@@ -22,38 +23,62 @@ const AIAgent: React.FC<{
   const [isAgentTyping, setIsAgentTyping] = useState<boolean>(false);
   const [previousStepId, setPreviousStepId] = useState<string>(conversation.currentStageId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [stageConversations, setStageConversations] = useState<Record<string, Message[]>>({});
   
-  // When currentStepId changes from parent, update the conversation
+  // Initialize stage conversations with welcome messages
   useEffect(() => {
-    // Only process the stage change if it's different from the previous one
-    // This prevents the toggle effect between stages
-    if (currentStepId !== conversation.currentStageId && currentStepId !== previousStepId) {
-      setPreviousStepId(conversation.currentStageId);
+    if (Object.keys(stageConversations).length === 0) {
+      const initialStageConversations: Record<string, Message[]> = {};
       
-      const stage = onboardingStages.find(s => s.id === currentStepId);
-      if (stage) {
-        // Create a welcome message for the new stage
-        const newMessage: Message = {
+      onboardingStages.forEach(stage => {
+        initialStageConversations[stage.id] = [{
           id: generateId(),
           content: `${stage.description}. ${stage.questions[0].text}`,
           isUser: false,
           timestamp: new Date()
-        };
-        
-        // Create a new conversation state for the selected stage
-        const newState: ConversationState = {
-          currentStageId: currentStepId,
-          currentQuestionIndex: 0,
-          completedStages: [...conversation.completedStages],
-          answers: {...conversation.answers},
-          // Start with a fresh set of messages for this stage
-          messages: [newMessage]
-        };
-        
-        setConversation(newState);
-      }
+        }];
+      });
+      
+      setStageConversations(initialStageConversations);
     }
-  }, [currentStepId, conversation.currentStageId, conversation.completedStages, conversation.answers, conversation.messages, previousStepId]);
+  }, [stageConversations]);
+  
+  // When currentStepId changes from parent, update the conversation
+  useEffect(() => {
+    if (currentStepId === conversation.currentStageId) return;
+    
+    const stage = onboardingStages.find(s => s.id === currentStepId);
+    if (!stage) return;
+    
+    // Save current stage messages
+    setStageConversations(prev => ({
+      ...prev,
+      [conversation.currentStageId]: conversation.messages
+    }));
+    
+    // Get messages for the new stage or create initial message if not exists
+    let newStageMessages = stageConversations[currentStepId];
+    if (!newStageMessages || newStageMessages.length === 0) {
+      newStageMessages = [{
+        id: generateId(),
+        content: `${stage.description}. ${stage.questions[0].text}`,
+        isUser: false,
+        timestamp: new Date()
+      }];
+    }
+    
+    // Update conversation with the new stage
+    setConversation(prev => ({
+      ...prev,
+      currentStageId: currentStepId,
+      currentQuestionIndex: 0,
+      messages: newStageMessages
+    }));
+    
+    // Update previous step ID to prevent toggling
+    setPreviousStepId(conversation.currentStageId);
+    
+  }, [currentStepId, conversation.currentStageId, stageConversations, conversation.messages]);
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,12 +87,10 @@ const AIAgent: React.FC<{
   // This useEffect only handles natural progression through stages by AI agent
   useEffect(() => {
     // Only inform parent component if the stage changed through natural conversation
-    // and not from a user clicking on a stage (which would be handled by the above useEffect)
-    if (conversation.currentStageId !== currentStepId && conversation.currentStageId !== previousStepId) {
+    if (conversation.currentStageId !== currentStepId) {
       onStageChange(conversation.currentStageId);
-      setPreviousStepId(currentStepId);
     }
-  }, [conversation.currentStageId, onStageChange, currentStepId, previousStepId]);
+  }, [conversation.currentStageId, onStageChange, currentStepId]);
   
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -115,6 +138,13 @@ const AIAgent: React.FC<{
           ...newState,
           messages: [...prev.messages.filter(m => m.id !== typingMessage.id), aiMessage]
         }));
+        
+        // Save updated conversation for this stage
+        setStageConversations(prev => ({
+          ...prev,
+          [newState.currentStageId]: [...prev[newState.currentStageId] || [], userMessage, aiMessage]
+        }));
+        
         setIsAgentTyping(false);
       }, typingDelay);
     } catch (error) {
@@ -148,6 +178,7 @@ const AIAgent: React.FC<{
   const handleReset = () => {
     if (window.confirm('This will reset your conversation. Are you sure?')) {
       setConversation(initializeConversation());
+      setStageConversations({});
     }
   };
   

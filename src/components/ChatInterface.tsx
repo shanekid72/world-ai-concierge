@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ChatInterface: React.FC = () => {
   const [steps, setSteps] = useState<Step[]>(() => {
@@ -15,13 +16,9 @@ const ChatInterface: React.FC = () => {
     return initialSteps;
   });
   const [currentStepId, setCurrentStepId] = useState<string>(steps[0].id);
-  const stageChangeRef = useRef<boolean>(false);
   
   const handleStageChange = (stageId: string) => {
     if (stageId === currentStepId) return;
-    
-    // Set a flag to indicate this is a user-initiated stage change
-    stageChangeRef.current = true;
     
     // Update steps statuses
     setSteps(prevSteps => {
@@ -39,14 +36,10 @@ const ChatInterface: React.FC = () => {
     setCurrentStepId(stageId);
   };
   
-  const handleQuickNav = (stageId: string) => {
-    handleStageChange(stageId);
-  };
-  
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-76px)] gap-4 p-4">
       <div className="md:w-1/4 w-full md:h-full overflow-y-auto">
-        <ProgressTracker steps={steps} currentStepId={currentStepId} onStepClick={handleQuickNav} />
+        <ProgressTracker steps={steps} currentStepId={currentStepId} onStepClick={handleStageChange} />
         
         <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg">
           <div className="flex items-center mb-3">
@@ -87,21 +80,19 @@ const ChatInterface: React.FC = () => {
             </div>
           </div>
           
-          <ScrollArea className="w-full">
-            <div className="flex gap-2 pb-2 overflow-x-auto">
+          <Tabs value={currentStepId} onValueChange={handleStageChange} className="w-full">
+            <TabsList className="w-full justify-start mb-2 bg-gray-50 p-1 overflow-x-auto flex-nowrap whitespace-nowrap">
               {steps.map((step) => (
-                <Button
+                <TabsTrigger
                   key={step.id}
-                  variant={step.id === currentStepId ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleQuickNav(step.id)}
-                  className="whitespace-nowrap"
+                  value={step.id}
+                  className={`${step.id === currentStepId ? 'bg-white shadow-sm text-worldapi-blue-700' : 'text-gray-600'} whitespace-nowrap`}
                 >
                   {step.title}
-                </Button>
+                </TabsTrigger>
               ))}
-            </div>
-          </ScrollArea>
+            </TabsList>
+          </Tabs>
         </div>
         
         <div className="flex-1 overflow-hidden">
