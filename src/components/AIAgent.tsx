@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
@@ -252,14 +253,14 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
 
     if (stage === 'standardOnboarding') {
-      setInputValue("🎓 (Pretend we’re doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
+      setInputValue("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
       originalHandleSendMessage();
       setStage('init');
       return;
     }
 
     if (stage === 'collectMinimalInfo') {
-      setInputValue("🙌 Got what I need! Let’s jump into worldAPI testing mode.");
+      setInputValue("🙌 Got what I need! Let's jump into worldAPI testing mode.");
       originalHandleSendMessage();
       setStage('init');
       return;
@@ -304,3 +305,4 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 };
 
 export default AIAgent;
+
