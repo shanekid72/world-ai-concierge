@@ -16,6 +16,7 @@ export default defineConfig({
         'src/setupTests.ts',
       ],
     },
+    mockReset: true,
   },
   resolve: {
     alias: {
