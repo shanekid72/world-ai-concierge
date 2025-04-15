@@ -1,3 +1,4 @@
+
 import { ConversationState } from "./types";
 import { onboardingStages } from "../components/OnboardingStages";
 import { 
@@ -6,7 +7,7 @@ import {
   isBusinessPartnerProfileQuery,
   createEmptyBusinessPartnerProfile,
   exportPartnerProfileToCSV
-} from "./currencyService";
+} from "./currencyRateService";
 import { getFollowUpResponse } from "./conversationUtils";
 import { isCountryServiceInquiry, getCountryServiceResponse } from "./d9NetworkService";
 
