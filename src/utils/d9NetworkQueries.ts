@@ -1,6 +1,7 @@
 
 import { d9NetworkData } from './d9NetworkData';
 import { D9_NETWORK_PATTERNS } from './d9NetworkConstants';
+import { isValidD9Country, detectServiceType } from './d9NetworkUtils';
 
 export interface CountryServiceInquiry {
   country: string;
@@ -39,7 +40,7 @@ export const isCountryServiceInquiry = (message: string): CountryServiceInquiry 
   
   // Check if the message is just a country name
   match = message.match(D9_NETWORK_PATTERNS.COUNTRY_ONLY);
-  if (match && Object.keys(d9NetworkData.countries).includes(match[1].trim())) {
+  if (match && isValidD9Country(match[1].trim())) {
     country = match[1].trim();
     return { country, serviceType: null };
   }
@@ -48,11 +49,7 @@ export const isCountryServiceInquiry = (message: string): CountryServiceInquiry 
   for (const c of Object.keys(d9NetworkData.countries)) {
     if (message.includes(c)) {
       country = c;
-      if (message.includes("payout") || message.includes("send") || message.includes("transfer")) {
-        serviceType = "payout";
-      } else if (message.includes("payin") || message.includes("receive") || message.includes("collect")) {
-        serviceType = "payin";
-      }
+      serviceType = detectServiceType(message);
       return { country, serviceType };
     }
   }
