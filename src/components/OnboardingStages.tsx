@@ -52,25 +52,6 @@ export const onboardingStages: OnboardingStage[] = [
     ]
   },
   {
-    id: 'technical-requirements',
-    title: 'Technical Requirements',
-    description: 'Understanding your technical setup',
-    questions: [
-      {
-        id: 'technical-1',
-        text: "Do you have a preference for how you'd like to integrate? (REST API, webhooks, SFTP, etc.)",
-      },
-      {
-        id: 'technical-2',
-        text: "Will you need real-time transaction updates or is batch processing sufficient?",
-      },
-      {
-        id: 'technical-3',
-        text: "Are there any specific security requirements we should be aware of?",
-      }
-    ]
-  },
-  {
     id: 'compliance-kyc',
     title: 'Compliance & KYC',
     description: 'Gathering compliance information',
@@ -90,6 +71,25 @@ export const onboardingStages: OnboardingStage[] = [
       {
         id: 'compliance-4',
         text: "Who's the primary compliance contact at your organization?",
+      }
+    ]
+  },
+  {
+    id: 'technical-requirements',
+    title: 'Technical Requirements',
+    description: 'Understanding your technical setup',
+    questions: [
+      {
+        id: 'technical-1',
+        text: "Do you have a preference for how you'd like to integrate? (REST API, webhooks, SFTP, etc.)",
+      },
+      {
+        id: 'technical-2',
+        text: "Will you need real-time transaction updates or is batch processing sufficient?",
+      },
+      {
+        id: 'technical-3',
+        text: "Are there any specific security requirements we should be aware of?",
       }
     ]
   },
