@@ -1,15 +1,9 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import ChatControls from './chat/ChatControls';
 import { useChatState } from '../hooks/useChatState';
-import {
-  useCreateQuote,
-  useCreateTransaction,
-  useConfirmTransaction,
-  useEnquireTransaction
-} from '../lib/useWorldApiHooks';
+import { useWorldApiChat } from '../hooks/useWorldApiChat';
 import { toast } from "@/hooks/use-toast";
 
 interface AIAgentProps {
@@ -27,19 +21,32 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     handleReset
   } = useChatState({ currentStepId, onStageChange });
 
-  const { createQuote, loading: quoteLoading } = useCreateQuote();
-  const { createTransaction } = useCreateTransaction();
-  const { confirmTransaction } = useConfirmTransaction();
-  const { enquireTransaction } = useEnquireTransaction();
+  const {
+    stage,
+    setStage,
+    quoteContext,
+    setQuoteContext,
+    autoPoll,
+    setAutoPoll,
+    quoteLoading,
+    handleCreateQuote,
+    createTransaction,
+    confirmTransaction,
+    enquireTransaction
+  } = useWorldApiChat();
 
-  const [quoteContext, setQuoteContext] = useState<{
-    amount?: number;
-    to?: string;
-    quoteId?: string;
-    lastTxnRef?: string;
-  }>({});
-  const [stage, setStage] = useState<'init' | 'amount' | 'country' | 'confirm'>('init');
-  const [autoPoll, setAutoPoll] = useState(false);
+  useEffect(() => {
+    if (stage === 'intro') {
+      setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
+      originalHandleSendMessage();
+      
+      setTimeout(() => {
+        setInputValue("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
+        originalHandleSendMessage();
+        setStage('choosePath');
+      }, 1000);
+    }
+  }, [stage, setInputValue, originalHandleSendMessage]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -70,14 +77,13 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       }, 10000);
     }
     return () => clearInterval(interval);
-  }, [autoPoll, quoteContext.lastTxnRef]);
+  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, originalHandleSendMessage, setInputValue]);
 
   const handleIntent = async (message: string) => {
     if (!message.trim()) return;
 
     const lower = message.toLowerCase();
 
-    // Check transaction status
     if (lower.includes('status') && quoteContext.lastTxnRef) {
       try {
         const result = await enquireTransaction(quoteContext.lastTxnRef);
@@ -102,7 +108,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
-    // Start new money transfer
     if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
       setInputValue("💬 Great! How much would you like to send?");
       originalHandleSendMessage();
@@ -111,7 +116,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
-    // Handle amount input
     if (stage === 'amount' && lower.match(/\d+/)) {
       const amount = parseFloat(lower.match(/\d+/)![0]);
       setQuoteContext(prev => ({ ...prev, amount }));
@@ -121,7 +125,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
-    // Handle country input and create quote
     if (stage === 'country' && lower.match(/^[A-Z]{2}$/i) && quoteContext.amount) {
       const to = lower.toUpperCase();
       try {
@@ -136,7 +139,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
           instrument: 'REMITTANCE'
         };
         
-        const quoteResult = await createQuote(payload);
+        const quoteResult = await handleCreateQuote(payload);
         const quoteId = quoteResult?.data?.quote_id;
         setQuoteContext(prev => ({ ...prev, to, quoteId }));
         
@@ -158,7 +161,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
-    // Handle confirmation and create transaction
     if (stage === 'confirm' && lower === 'yes' && quoteContext.quoteId) {
       try {
         const txnPayload = {
@@ -223,7 +225,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
-    // Handle rejection
     if (stage === 'confirm' && lower === 'no') {
       setInputValue("🚫 Transaction cancelled. Let me know if you'd like to try again.");
       originalHandleSendMessage();
@@ -231,7 +232,39 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       return;
     }
 
-    // Default response for unrecognized input
+    if (stage === 'choosePath') {
+      if (lower.includes('onboarding')) {
+        setInputValue("Awesome! Let's start your onboarding. First, what's your full name?");
+        originalHandleSendMessage();
+        setStage('standardOnboarding');
+        return;
+      } else if (lower.includes('test') || lower.includes('integrate')) {
+        setInputValue("⚙️ Sweet! Let's get you into testing mode. Just need a few deets:");
+        originalHandleSendMessage();
+        setInputValue("1. Your name\n2. Company name\n3. Contact info (email/phone)\n— then we'll launch you straight into integration testing 🚀");
+        originalHandleSendMessage();
+        setStage('collectMinimalInfo');
+        return;
+      }
+      setInputValue("Hmm, I didn't catch that — onboarding or testing?");
+      originalHandleSendMessage();
+      return;
+    }
+
+    if (stage === 'standardOnboarding') {
+      setInputValue("🎓 (Pretend we’re doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
+      originalHandleSendMessage();
+      setStage('init');
+      return;
+    }
+
+    if (stage === 'collectMinimalInfo') {
+      setInputValue("🙌 Got what I need! Let’s jump into worldAPI testing mode.");
+      originalHandleSendMessage();
+      setStage('init');
+      return;
+    }
+
     setInputValue("🤖 Sorry, I didn't understand. Try saying 'I want to send money'.");
     originalHandleSendMessage();
   };
