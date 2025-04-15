@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ChatInterface: React.FC = () => {
   const [steps, setSteps] = useState<Step[]>(() => {
@@ -33,10 +34,14 @@ const ChatInterface: React.FC = () => {
     setCurrentStepId(stageId);
   };
   
+  const handleQuickNav = (stageId: string) => {
+    handleStageChange(stageId);
+  };
+  
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-76px)] gap-4 p-4">
       <div className="md:w-1/4 w-full md:h-full overflow-y-auto">
-        <ProgressTracker steps={steps} currentStepId={currentStepId} />
+        <ProgressTracker steps={steps} currentStepId={currentStepId} onStepClick={handleQuickNav} />
         
         <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg">
           <div className="flex items-center mb-3">
@@ -60,20 +65,38 @@ const ChatInterface: React.FC = () => {
       </div>
       
       <div className="md:w-3/4 w-full bg-white rounded-lg border border-gray-100 shadow-sm flex flex-col h-full">
-        <div className="p-4 border-b flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-worldapi-teal-100 flex items-center justify-center mr-3">
-              <MessageSquare size={20} className="text-worldapi-teal-600" />
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-worldapi-teal-100 flex items-center justify-center mr-3">
+                <MessageSquare size={20} className="text-worldapi-teal-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-medium text-worldapi-blue-800">Dolly</h2>
+                <p className="text-sm text-gray-500">I'll guide you through connecting to worldAPI</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-medium text-worldapi-blue-800">Dolly</h2>
-              <p className="text-sm text-gray-500">I'll guide you through connecting to worldAPI</p>
+            <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              Online
             </div>
           </div>
-          <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs flex items-center">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-            Online
-          </div>
+          
+          <ScrollArea className="w-full">
+            <div className="flex gap-2 pb-2 overflow-x-auto">
+              {steps.map((step) => (
+                <Button
+                  key={step.id}
+                  variant={step.id === currentStepId ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleQuickNav(step.id)}
+                  className="whitespace-nowrap"
+                >
+                  {step.title}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
         
         <div className="flex-1 overflow-hidden">

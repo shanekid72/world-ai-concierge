@@ -14,9 +14,10 @@ export interface Step {
 interface ProgressTrackerProps {
   steps: Step[];
   currentStepId: string;
+  onStepClick?: (stageId: string) => void;
 }
 
-const ProgressTracker: React.FC<ProgressTrackerProps> = ({ steps, currentStepId }) => {
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ steps, currentStepId, onStepClick }) => {
   return (
     <div className="w-full bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
       <h3 className="text-sm font-medium text-worldapi-blue-600 mb-4">Integration Progress</h3>
@@ -28,9 +29,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ steps, currentStepId 
           
           return (
             <div 
-              key={step.id} 
+              key={step.id}
+              onClick={() => onStepClick?.(step.id)}
               className={cn(
-                "flex items-center",
+                "flex items-center cursor-pointer hover:bg-gray-50 rounded p-2 transition-colors",
                 isCurrent ? "text-worldapi-blue-500 font-medium" : "",
                 isCompleted ? "text-worldapi-teal-500" : "",
                 !isCurrent && !isCompleted ? "text-gray-400" : ""
