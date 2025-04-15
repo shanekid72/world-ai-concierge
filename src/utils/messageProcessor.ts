@@ -1,13 +1,12 @@
-
 import { ConversationState } from "./types";
 import { onboardingStages } from "../components/OnboardingStages";
 import { 
   fetchCurrencyRate, 
-  isCurrencyRateQuery, 
+  isCurrencyRateQuery,
   isBusinessPartnerProfileQuery,
   createEmptyBusinessPartnerProfile,
   exportPartnerProfileToCSV
-} from "./currencyRateService";
+} from "./currencyService";
 import { getFollowUpResponse } from "./conversationUtils";
 import { isCountryServiceInquiry, getCountryServiceResponse } from "./d9NetworkService";
 
