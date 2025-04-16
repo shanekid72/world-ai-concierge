@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
@@ -22,6 +23,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     setQuoteContext,
     autoPoll,
     setAutoPoll,
+    enquireTransaction
   } = useWorldApiChat();
 
   const {
