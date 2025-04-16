@@ -1,32 +1,38 @@
+import React, { useEffect, useState } from 'react';
+import DollyCyberpunkChat from './components/DollyCyberpunkChat';
+import DollyBootup from './components/DollyBootup';
 
-import React from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+function App() {
+  const [booted, setBooted] = useState(false);
 
-const App: React.FC = () => {
-  // Create a client instance inside the component
-  const queryClient = new QueryClient();
+  useEffect(() => {
+    const timer = setTimeout(() => setBooted(true), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <div className="relative h-screen w-screen">
+      {booted ? (
+        <DollyCyberpunkChat />
+      ) : (
+        <DollyBootup />
+      )}
+
+      {/* Dolly Floating Avatar */}
+      {booted && (
+        <div className="absolute top-6 right-6 z-50">
+          <div className="relative animate-pulse hover:animate-none">
+            <img
+              src="/dolly-avatar.png"
+              alt="Dolly Avatar"
+              className="w-20 h-20 rounded-full border-4 border-fuchsia-500 shadow-lg shadow-fuchsia-700 animate-bounce hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 border-2 border-black rounded-full" />
+          </div>
+        </div>
+      )}
+    </div>
   );
-};
+}
 
 export default App;
