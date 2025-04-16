@@ -10,6 +10,7 @@ import AnimatedTerminal from './chat/AnimatedTerminal';
 import { ChatStageHandler } from './chat/ChatStageHandler';
 import { ChatInitializer } from './chat/ChatInitializer';
 import { useConversationLogic } from '../hooks/useConversationLogic';
+import { toast } from "@/hooks/use-toast";
 
 interface AIAgentProps {
   onStageChange: (stageId: string) => void;
@@ -45,10 +46,65 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
   const handleCreateTransaction = async (quoteId: string) => {
     try {
-      const result = await createTransaction({ quoteId });
-      return result;
+      const payload = {
+        type: 'SEND',
+        source_of_income: 'SLRY',
+        purpose_of_txn: 'SAVG',
+        instrument: 'REMITTANCE',
+        message: 'Chat-based transaction',
+        sender: {
+          agent_customer_number: '1234567890',
+          mobile_number: '+971500000000',
+          first_name: 'John',
+          last_name: 'Doe',
+          sender_id: [{ id_code: '15', id: 'ID123456789' }],
+          date_of_birth: '1990-01-01',
+          country_of_birth: 'IN',
+          sender_address: [{
+            address_type: 'PRESENT',
+            address_line: 'Main St',
+            town_name: 'Dubai',
+            country_code: 'AE'
+          }],
+          nationality: 'IN'
+        },
+        receiver: {
+          mobile_number: '+919000000000',
+          first_name: 'Ali',
+          last_name: 'Khan',
+          nationality: quoteContext.to || 'IN',
+          relation_code: '32',
+          bank_details: {
+            account_type_code: '1',
+            account_number: '1234567890',
+            iso_code: 'ALFHPKKA068'
+          }
+        },
+        transaction: {
+          quote_id: quoteId
+        }
+      };
+      
+      const result = await createTransaction(payload);
+      if (!result || !result.data) {
+        throw new Error("Failed to create transaction: No data returned");
+      }
+      
+      const txnRef = result.data.transaction_ref_number;
+      if (txnRef) {
+        await confirmTransaction(txnRef);
+        setQuoteContext(prev => ({ ...prev, lastTxnRef: txnRef }));
+        return result;
+      } else {
+        throw new Error("No transaction reference number received");
+      }
     } catch (error) {
       console.error("Error creating transaction:", error);
+      toast({
+        title: "Transaction Error",
+        description: "Failed to create or confirm the transaction",
+        variant: "destructive"
+      });
       throw error;
     }
   };

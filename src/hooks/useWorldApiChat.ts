@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useCreateQuote, useCreateTransaction, useConfirmTransaction, useEnquireTransaction } from '../lib/useWorldApiHooks';
 import { toast } from "@/hooks/use-toast";
@@ -9,6 +10,7 @@ interface QuoteContext {
   to?: string;
   quoteId?: string;
   lastTxnRef?: string;
+  currency?: string;
 }
 
 export const useWorldApiChat = () => {
