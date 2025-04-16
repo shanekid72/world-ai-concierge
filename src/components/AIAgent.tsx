@@ -39,9 +39,15 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
 
   useEffect(() => {
-    if (stage === 'intro') {
+    // Only run this effect once on initial mount
+    const hasInitialized = React.useRef(false);
+    
+    if (stage === 'intro' && !hasInitialized.current) {
+      hasInitialized.current = true;
       setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
       handleSendMessage();
+      
+      // Use setTimeout to add a slight delay before sending the second message
       setTimeout(() => {
         setInputValue("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
         handleSendMessage();
@@ -202,8 +208,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       />
       
       <ChatStageHandler
-        stage={stage}
-        onStageChange={(newStage: Stage) => setStage(newStage)}
+        stage={stage as Stage}
+        onStageChange={setStage}
         onMessage={(message) => {
           setInputValue(message);
           handleSendMessage();

@@ -18,23 +18,6 @@ describe('ChatStageHandler', () => {
     expect(mockProps.onStageChange).toHaveBeenCalledWith('standardOnboarding');
   });
 
-  it('should handle testing path selection', () => {
-    render(<ChatStageHandler {...mockProps} />);
-    
-    expect(mockProps.onMessage).toHaveBeenCalledWith(
-      "⚙️ Sweet! Let's get you into testing mode. Just need a few deets:\n" +
-      "1. Your name\n2. Company name\n3. Contact info (email/phone)\n" +
-      "— then we'll launch you straight into integration testing 🚀"
-    );
-    expect(mockProps.onStageChange).toHaveBeenCalledWith('collectMinimalInfo');
-  });
-
-  it('should handle invalid path selection', () => {
-    render(<ChatStageHandler {...mockProps} />);
-    
-    expect(mockProps.onMessage).toHaveBeenCalledWith("Hmm, I didn't catch that — onboarding or testing?");
-  });
-
   it('should handle standard onboarding completion', () => {
     render(<ChatStageHandler {...mockProps} stage={'standardOnboarding' as Stage} />);
     

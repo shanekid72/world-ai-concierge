@@ -70,21 +70,18 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const userMessage: Message = {
+    const agentMessage: Message = {
       id: generateId(),
       content: inputValue,
-      isUser: false, // This isn't a user message but an agent message
+      isUser: false, // This is an agent message
       timestamp: new Date()
     };
 
     setConversation(prev => ({
       ...prev,
-      messages: [...prev.messages, userMessage]
+      messages: [...prev.messages, agentMessage]
     }));
     setInputValue('');
-
-    // For agent-generated messages, we don't need the AI processing part
-    // so we simplify this function compared to the original handleSendMessage
   };
 
   const handleReset = () => {
