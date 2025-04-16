@@ -5,7 +5,6 @@ import { getProgressSteps } from './OnboardingStages';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare, Info } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ChatInterface: React.FC = () => {
   const [steps, setSteps] = useState<Step[]>(() => {
@@ -77,24 +76,6 @@ const ChatInterface: React.FC = () => {
               Online
             </div>
           </div>
-          
-          <Tabs value={currentStepId} onValueChange={handleStageChange} className="w-full">
-            <TabsList className="w-full justify-start bg-white/50 backdrop-blur-sm p-1 rounded-lg overflow-x-auto flex-nowrap whitespace-nowrap">
-              {steps.map((step) => (
-                <TabsTrigger
-                  key={step.id}
-                  value={step.id}
-                  className={`${
-                    step.id === currentStepId 
-                      ? 'bg-white shadow-sm text-worldapi-blue-700' 
-                      : 'text-gray-600 hover:text-worldapi-blue-600 transition-colors'
-                  } whitespace-nowrap`}
-                >
-                  {step.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
         </div>
         
         <div className="flex-1 overflow-hidden">
