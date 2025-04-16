@@ -71,6 +71,13 @@ export const useConversationLogic = (
         return;
       }
 
+      if (stage === 'collectMinimalInfo') {
+        appendAgentMessage(
+          "Let’s get a bit of context:\n\n- What's your expected monthly transfer volume?\n- Preferred payout currency?\n- Integration timeline?"
+        );
+        return;
+      }
+
       if (stage === 'intro' || stage === 'amount' || stage === 'country') {
         const aiReply = await getSmartReply({
           stage,
