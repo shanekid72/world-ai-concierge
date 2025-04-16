@@ -64,6 +64,13 @@ export const useConversationLogic = (
         return;
       }
 
+      if (stage === 'technical-requirements') {
+        appendAgentMessage(
+          "worldAPI supports:\n- 🌐 REST APIs\n- 🔁 Real-time FX via Webhooks\n- 🔐 Secure OAuth2\n\nWanna:\n- 🔨 Start Integration\n- 📚 View Docs\n- 🤝 Talk to Support?"
+        );
+        return;
+      }
+
       if (stage === 'intro' || stage === 'amount' || stage === 'country') {
         const aiReply = await getSmartReply({
           stage,
