@@ -60,7 +60,7 @@ export const useTransactionFlow = (
       return;
     }
     
-    // Handle stage-specific logic
+    // Handle stage-specific logic - Using the current stage variable, not hardcoded "intro"
     if (stage === 'technical-requirements' || stage === 'init') {
       if ((lower.includes("send") && lower.includes("money")) || lower.includes("transfer")) {
         responseText = "Let's set up a money transfer. How much would you like to send? 💸";

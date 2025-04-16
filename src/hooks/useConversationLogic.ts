@@ -58,7 +58,13 @@ export const useConversationLogic = (
         return;
       }
 
-      // For all other cases, use the general intent handler
+      // For technical-requirements or any other stage, use the intent handler
+      if (stage === 'technical-requirements' || stage !== 'intro') {
+        await handleIntent(value);
+        return;
+      }
+
+      // Default case - use the general intent handler
       await handleIntent(value);
     } catch (err) {
       console.error("Error handling intent:", err);
