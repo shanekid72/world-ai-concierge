@@ -13,11 +13,9 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   onStageChange,
   onMessage
 }) => {
-  // Track which stages we've already handled to prevent duplicates
   const processedStages = useRef<Set<Stage>>(new Set());
   
   React.useEffect(() => {
-    // Skip if we've already processed this stage
     if (processedStages.current.has(stage)) {
       return;
     }
@@ -25,12 +23,14 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
     const handleStageMessage = () => {
       switch (stage) {
         case 'intro':
-          // Skip the intro message as it's handled in AIAgent
           break;
           
         case 'choosePath':
-          onMessage("Awesome! Let's start your onboarding. First, what's your full name?");
-          onStageChange('standardOnboarding');
+          if (stage === 'choosePath') {
+            const message = "Normally, you'd need to complete all the official onboarding rituals — KYC scrolls, compliance gateways, and all the sacred fintech scrolls 📜.\n\nBut hey — since you're here to test our legendary chat-based integration, we're unlocking the backdoor. Consider this a VIP pass to the core. Just don't forget — the real magic happens once full onboarding is complete. 😉";
+            onMessage(message);
+            onStageChange('technical-requirements');
+          }
           break;
           
         case 'standardOnboarding':
@@ -44,7 +44,6 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           break;
       }
       
-      // Mark this stage as processed
       processedStages.current.add(stage);
     };
     
@@ -53,5 +52,5 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
     }
   }, [stage, onMessage, onStageChange]);
 
-  return null; // This is a logic-only component
-};
+  return null;
+});

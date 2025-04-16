@@ -17,11 +17,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
 }) => {
   const [displayedContent, setDisplayedContent] = useState<string>('');
   const [index, setIndex] = useState<number>(0);
-  const typeSpeed = 15; // in milliseconds
+  const typeSpeed = content.startsWith("Normally") ? 25 : 15; // Slower typing for the skip message
   const contentRef = useRef(content);
   const isTypingRef = useRef(isTyping);
   
-  // Reset the typing state when content changes
   useEffect(() => {
     if (content !== contentRef.current || isTyping !== isTypingRef.current) {
       contentRef.current = content;
@@ -31,7 +30,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     }
   }, [content, isTyping]);
   
-  // Typing effect
   useEffect(() => {
     if (!isUser && !isTyping && content) {
       if (index < content.length) {
@@ -46,7 +44,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       setDisplayedContent(content);
       setIndex(content.length);
     }
-  }, [content, index, isTyping, isUser]);
+  }, [content, index, isTyping, isUser, typeSpeed]);
 
   return (
     <div className={cn(
@@ -63,7 +61,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       )}
       <div className={cn(
-        "rounded-2xl py-3 px-4 shadow-sm",
+        "rounded-2xl py-3 px-4 shadow-sm animate-fade-in",
         isUser 
           ? "bg-worldapi-blue-500 text-white rounded-tr-none"
           : "bg-gray-100 text-gray-800 rounded-tl-none"
