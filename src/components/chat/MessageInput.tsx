@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Paperclip, Mic } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 interface MessageInputProps {
   inputValue: string;
@@ -31,26 +31,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
             className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 py-5 px-4"
             disabled={isAgentTyping}
           />
-          <div className="flex items-center pr-2 space-x-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-gray-400 hover:text-worldapi-teal-500"
-              title="Attach file (coming soon)"
-              disabled
-            >
-              <Paperclip size={18} />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-gray-400 hover:text-worldapi-teal-500"
-              title="Voice input (coming soon)"
-              disabled
-            >
-              <Mic size={18} />
-            </Button>
-          </div>
         </div>
       </div>
       <Button 
