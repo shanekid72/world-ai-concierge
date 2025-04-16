@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
@@ -8,7 +7,7 @@ import { useWorldApiChat, type Stage } from '../hooks/useWorldApiChat';
 import { TransactionFlow } from './chat/TransactionFlow';
 import { ChatStageHandler } from './chat/ChatStageHandler';
 import { useTransactionPolling } from '../hooks/useTransactionPolling';
-import { toast } from "@/hooks/use-toast";
+import { useTransactionFlow } from '../hooks/useTransactionFlow';
 
 interface AIAgentProps {
   onStageChange: (stageId: string) => void;
@@ -23,8 +22,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     setQuoteContext,
     autoPoll,
     setAutoPoll,
-    handleCreateQuote,
-    enquireTransaction
   } = useWorldApiChat();
 
   const {
@@ -38,17 +35,16 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
   const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
   
-  // Create the useRef at the top level of the component
   const hasInitialized = useRef(false);
 
+  const { handleIntent } = useTransactionFlow(setInputValue, handleSendMessage);
+
   useEffect(() => {
-    // Only run this effect once on initial mount
     if (stage === 'intro' && !hasInitialized.current) {
       hasInitialized.current = true;
       setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
       handleSendMessage();
       
-      // Use setTimeout to add a slight delay before sending the second message
       setTimeout(() => {
         setInputValue("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
         handleSendMessage();
@@ -72,7 +68,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             CANCELLED: "🚫 Update: Your transaction was *CANCELLED*.",
           };
 
-          // Use setInputValue + handleSendMessage to send the message
           setInputValue(statusMsg[status] || `ℹ️ Status: ${status}`);
           handleSendMessage();
 
@@ -87,104 +82,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
     return () => clearInterval(interval);
   }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, handleSendMessage, setInputValue, setAutoPoll]);
-
-  const handleIntent = async (message: string) => {
-    if (!message.trim()) return;
-
-    const lower = message.toLowerCase();
-
-    if (lower.includes('status') && quoteContext.lastTxnRef) {
-      try {
-        const result = await enquireTransaction(quoteContext.lastTxnRef);
-        const status = result?.data?.status;
-        const statusMsg = {
-          IN_PROGRESS: "🕒 Your transaction is currently *IN PROGRESS*.",
-          DELIVERED: "✅ Delivered! 🎉 Your money has arrived.",
-          FAILED: "❌ Unfortunately, your transaction *FAILED*.",
-          CANCELLED: "🚫 This transaction was *CANCELLED*.",
-        }[status] || `ℹ️ Status: ${status}`;
-        
-        // Set the value and then call the handler
-        setInputValue(statusMsg);
-        handleSendMessage();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch transaction status. Please try again.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    // Transaction flow handling
-    if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
-      setInputValue("💬 Great! How much would you like to send?");
-      handleSendMessage();
-      setQuoteContext({});
-      setStage('amount');
-      return;
-    }
-
-    if (stage === 'amount' && lower.match(/\d+/)) {
-      const amount = parseFloat(lower.match(/\d+/)![0]);
-      setQuoteContext(prev => ({ ...prev, amount }));
-      setInputValue("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
-      handleSendMessage();
-      setStage('country');
-      return;
-    }
-
-    if (stage === 'country' && lower.match(/^[A-Z]{2}$/i) && quoteContext.amount) {
-      const to = lower.toUpperCase();
-      try {
-        const payload = {
-          sending_country_code: 'AE',
-          sending_currency_code: 'AED',
-          receiving_country_code: to,
-          receiving_currency_code: to === 'PK' ? 'PKR' : 'INR',
-          sending_amount: quoteContext.amount,
-          receiving_mode: 'BANK',
-          type: 'SEND',
-          instrument: 'REMITTANCE'
-        };
-        
-        const quoteResult = await handleCreateQuote(payload);
-        const quoteId = quoteResult?.data?.quote_id;
-        setQuoteContext(prev => ({ ...prev, to, quoteId }));
-        
-        setInputValue(
-          `📄 Here's your quote: Send ${quoteContext.amount} AED to ${to} → ` +
-          `receive ${quoteResult?.data?.receiving_amount} ${quoteResult?.data?.receiving_currency_code}. ` +
-          `💱 Rate: ${quoteResult?.data?.fx_rates?.[0]?.rate}\n\n` +
-          "✅ Would you like to proceed with this transaction? (yes/no)"
-        );
-        handleSendMessage();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create quote. Please try again.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    if (stage === 'confirm' && lower === 'yes' && quoteContext.quoteId) {
-      
-      setStage('init');
-      return;
-    }
-
-    if (stage === 'confirm' && lower === 'no') {
-      setInputValue("🚫 Transaction cancelled. Let me know if you'd like to try again.");
-      handleSendMessage();
-      setStage('init');
-      return;
-    }
-
-    setInputValue('');
-  };
 
   return (
     <div className="flex flex-col h-full">
