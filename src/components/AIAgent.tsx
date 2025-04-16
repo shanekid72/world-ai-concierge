@@ -44,7 +44,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       hasShownIntro.current = true;
       appendAgentMessage("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
       setTimeout(() => {
-        appendAgentMessage("✨ Wanna go through onboarding or skip to testing our legendary worldAPI? I'm flexible, just like our API! 😎");
+        appendAgentMessage("Would you like to go through onboarding or skip to testing our worldAPI?");
         setStage('choosePath');
       }, 800);
     }
@@ -61,9 +61,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         .some(phrase => lower.includes(phrase));
 
       if (isTestIntent) {
-        appendAgentMessage("🚀 Perfect! Setting up worldAPI test environment for you - this is gonna be fun!");
+        appendAgentMessage("Setting up the worldAPI test environment for you now.");
         setTimeout(() => {
-          appendAgentMessage("📌 Just need a few quick details to get started:\n1. Your name (or what you'd like me to call you)\n2. Company name (or 'personal project' if you're flying solo)\n3. Contact info (for the fancy digital paperwork)");
+          appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
           setStage('collectMinimalInfo');
         }, 1000);
         return;
@@ -71,9 +71,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
 
     if (stage === 'collectMinimalInfo') {
-      appendAgentMessage("Awesome info! Let me process that for you...");
+      appendAgentMessage("Thanks for the information. Processing your details now...");
       setTimeout(() => {
-        appendAgentMessage("🤖 Initializing your super-powered assistant... *beep boop* fancy tech noises...");
+        appendAgentMessage("Initializing your worldAPI assistant...");
         setShowBootup(true);
       }, 1200);
       return;
@@ -83,7 +83,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       handleIntent(value);
     } catch (err) {
       console.error("Error handling intent:", err);
-      appendAgentMessage("⚠️ Oops! Even digital assistants have clumsy moments. Mind trying that again? My circuits got a little tangled!");
+      appendAgentMessage("I'm sorry, I encountered an error processing your request. Could you try again?");
     }
   };
 
@@ -110,7 +110,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         {showBootup ? (
           <AnimatedTerminal
             onComplete={() => {
-              appendAgentMessage("✅ Your assistant is live and fabulous! Let's make some worldAPI magic happen! 💥");
+              appendAgentMessage("Your worldAPI assistant is now ready to use. How can I help you today?");
               setShowBootup(false);
               setStage('init');
             }}
