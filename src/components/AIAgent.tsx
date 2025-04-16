@@ -37,17 +37,19 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
   const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
   
+  // Use this ref to ensure welcome message is only shown once
   const hasInitialized = useRef(false);
 
   const { handleIntent } = useTransactionFlow(setInputValue, handleSendMessage);
 
+  // Only send the welcome message once when component mounts
   useEffect(() => {
     if (stage === 'intro' && !hasInitialized.current) {
       hasInitialized.current = true;
-      setInputValue("✨ Wanna go through onboarding or skip to testing our legendary worldAPI?");
+      setInputValue("Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.\n\n✨ Wanna go through onboarding or skip to testing our legendary worldAPI?");
       handleSendMessage();
     }
-  }, [stage, setInputValue, handleSendMessage, setStage]);
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

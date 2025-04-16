@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from "@/lib/utils";
 
 interface MessageBubbleProps {
@@ -18,17 +18,30 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [displayedContent, setDisplayedContent] = useState<string>('');
   const [index, setIndex] = useState<number>(0);
   const typeSpeed = 15; // in milliseconds
+  const contentRef = useRef(content);
+  const isTypingRef = useRef(isTyping);
   
+  // Reset the typing state when content changes
+  useEffect(() => {
+    if (content !== contentRef.current || isTyping !== isTypingRef.current) {
+      contentRef.current = content;
+      isTypingRef.current = isTyping;
+      setIndex(0);
+      setDisplayedContent('');
+    }
+  }, [content, isTyping]);
+  
+  // Typing effect
   useEffect(() => {
     if (!isUser && !isTyping && content) {
-      const timer = setTimeout(() => {
-        if (index < content.length) {
+      if (index < content.length) {
+        const timer = setTimeout(() => {
           setDisplayedContent(content.substring(0, index + 1));
-          setIndex(index + 1);
-        }
-      }, typeSpeed);
-      
-      return () => clearTimeout(timer);
+          setIndex(prevIndex => prevIndex + 1);
+        }, typeSpeed);
+        
+        return () => clearTimeout(timer);
+      }
     } else if (isUser || isTyping) {
       setDisplayedContent(content);
       setIndex(content.length);

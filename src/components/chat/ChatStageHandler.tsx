@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useRef } from 'react';
 import { type Stage } from '../../hooks/useWorldApiChat';
 
 interface ChatStageHandlerProps {
@@ -12,11 +13,19 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   onStageChange,
   onMessage
 }) => {
+  // Track which stages we've already handled to prevent duplicates
+  const processedStages = useRef<Set<Stage>>(new Set());
+  
   React.useEffect(() => {
+    // Skip if we've already processed this stage
+    if (processedStages.current.has(stage)) {
+      return;
+    }
+    
     const handleStageMessage = () => {
       switch (stage) {
         case 'intro':
-          onMessage("Welcome to worldAPI, the API you can talk to.\n\n✨ So… wanna stroll through onboarding, or skip straight to testing our legendary worldAPI like the tech boss you are? 😎");
+          // Skip the intro message as it's handled in AIAgent
           break;
           
         case 'choosePath':
@@ -34,9 +43,12 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           onStageChange('init');
           break;
       }
+      
+      // Mark this stage as processed
+      processedStages.current.add(stage);
     };
     
-    if (['intro', 'choosePath', 'standardOnboarding', 'collectMinimalInfo'].includes(stage)) {
+    if (['choosePath', 'standardOnboarding', 'collectMinimalInfo'].includes(stage)) {
       handleStageMessage();
     }
   }, [stage, onMessage, onStageChange]);
