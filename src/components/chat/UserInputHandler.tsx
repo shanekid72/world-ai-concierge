@@ -22,8 +22,9 @@ export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
     console.log("UserInputHandler: Sending message:", inputValue);
     const trimmedValue = inputValue.trim();
     if (trimmedValue) {
-      // Send the current input value
+      // Send the current input value and clear it
       onSendMessage(trimmedValue);
+      onInputChange('');
     }
   };
 

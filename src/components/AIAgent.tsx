@@ -73,35 +73,36 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     };
     
     conversation.messages.push(userMessage);
+    
+    // Need to update the UI before processing the intent
     handleSendMessage();
     
-    // Clear input after adding the user message
-    setInputValue('');
-    
-    // Process the intent
-    try {
-      console.log("Calling handleIntent with message:", value);
-      handleIntent(value);
-    } catch (err) {
-      console.error("Error handling intent:", err);
-      
-      // Add error message from agent
-      const errorMessage = {
-        id: `agent-error-${Date.now()}`,
-        content: "I'm sorry, there was an error processing your request. Please try again.",
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      conversation.messages.push(errorMessage);
-      handleSendMessage();
-      
-      toast({
-        title: "Error",
-        description: "Failed to process your request. Please try again.",
-        variant: "destructive",
-      });
-    }
+    // Process the intent with a small delay to ensure UI updates first
+    setTimeout(() => {
+      try {
+        console.log("Calling handleIntent with message:", value);
+        handleIntent(value);
+      } catch (err) {
+        console.error("Error handling intent:", err);
+        
+        // Add error message from agent
+        const errorMessage = {
+          id: `agent-error-${Date.now()}`,
+          content: "I'm sorry, there was an error processing your request. Please try again.",
+          isUser: false,
+          timestamp: new Date()
+        };
+        
+        conversation.messages.push(errorMessage);
+        handleSendMessage();
+        
+        toast({
+          title: "Error",
+          description: "Failed to process your request. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }, 100);
   };
 
   return (

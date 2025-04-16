@@ -25,7 +25,18 @@ export const processUserMessage = async (
   if (d9NetworkResponse) return d9NetworkResponse;
   
   // Fallback to the default onboarding flow processor
-  return processOnboardingMessage(message, state);
+  const onboardingResponse = await processOnboardingMessage(message, state);
+  
+  // If even that fails, return a default response
+  if (!onboardingResponse) {
+    return {
+      newState: state,
+      aiResponse: "I'm here to help with worldAPI. What would you like to do next?",
+      isTyping: false
+    };
+  }
+  
+  return onboardingResponse;
 };
 
 // Generate a smart AI response based on conversation context
@@ -38,6 +49,11 @@ export const generateSmartResponse = async (
   if (followUp) return followUp;
   
   // Otherwise process based on conversation state
-  const result = await processUserMessage(userMessage, state);
-  return result.aiResponse;
+  try {
+    const result = await processUserMessage(userMessage, state);
+    return result.aiResponse;
+  } catch (error) {
+    console.error("Error generating response:", error);
+    return "I'm here to help with worldAPI. What would you like to do next?";
+  }
 };
