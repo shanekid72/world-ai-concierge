@@ -41,6 +41,29 @@ export const useConversationLogic = (
         }
       }
 
+      if (stage === 'choosePath') {
+        if (lower.includes("test") || lower.includes("api")) {
+          appendAgentMessage("Awesome! Let’s get you into technical setup...");
+          setStage("technical-requirements");
+          return;
+        }
+
+        if (lower.includes("send money")) {
+          appendAgentMessage("Got it — we’ll collect amount and country next.");
+          setStage("amount");
+          return;
+        }
+
+        if (lower.includes("rates") || lower.includes("fx")) {
+          appendAgentMessage("FX rate coming up — what currency pair?");
+          setStage("rate");
+          return;
+        }
+
+        appendAgentMessage("Hmm, want to:\n- Test API\n- Send Money\n- Get Rates?");
+        return;
+      }
+
       if (stage === 'intro' || stage === 'amount' || stage === 'country') {
         const aiReply = await getSmartReply({
           stage,
