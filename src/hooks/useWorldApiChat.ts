@@ -1,9 +1,27 @@
-
 import { useState, useCallback } from 'react';
-import { useCreateQuote, useCreateTransaction, useConfirmTransaction, useEnquireTransaction } from '../lib/useWorldApiHooks';
+import {
+  useCreateQuote,
+  useCreateTransaction,
+  useConfirmTransaction,
+  useEnquireTransaction
+} from '../lib/useWorldApiHooks';
 import { toast } from "@/hooks/use-toast";
 
-export type Stage = 'intro' | 'choosePath' | 'collectMinimalInfo' | 'standardOnboarding' | 'init' | 'amount' | 'country' | 'confirm' | 'technical-requirements' | 'completed';
+export type Stage =
+  | 'intro'
+  | 'choosePath'
+  | 'collectMinimalInfo'
+  | 'standardOnboarding'
+  | 'init'
+  | 'amount'
+  | 'country'
+  | 'confirm'
+  | 'technical-requirements'
+  | 'completed'
+  | 'fastOnboardPrompt'
+  | 'fastOnboardInfo'
+  | 'dollyEpicBoot'
+  | 'history';
 
 interface QuoteContext {
   amount?: number;
@@ -37,7 +55,6 @@ export const useWorldApiChat = () => {
     }
   }, [createQuote]);
 
-  // Log stage changes for debugging
   const setStageWithLogging = useCallback((newStage: Stage) => {
     console.log(`Stage changing from ${stage} to ${newStage}`);
     setStage(newStage);
