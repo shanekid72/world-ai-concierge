@@ -26,19 +26,6 @@ export const useTransactionFlow = (
     
     // Handle initial response for testing worldAPI
     if (stage === 'intro' && (lower.includes("test") || lower.includes("skip"))) {
-      setInputValue('');
-      
-      // Add user message to conversation
-      const userMessage = {
-        id: Date.now().toString(),
-        content: message,
-        isUser: true,
-        timestamp: new Date()
-      };
-      
-      // Force render with user message
-      handleSendMessage();
-      
       // Set stage to choosePath to trigger animation
       setStage('choosePath');
       return;
@@ -108,9 +95,9 @@ export const useTransactionFlow = (
       return;
     }
 
-    // If no specific intent was matched, just add the message to the conversation
+    // If we didn't match any specific intent, let's just set the input to empty
+    // and let the message be added to the conversation
     setInputValue('');
-    handleSendMessage();
   }, [stage, quoteContext, setQuoteContext, setStage, setInputValue, handleSendMessage, handleCreateQuote]);
 
   return { handleIntent };
