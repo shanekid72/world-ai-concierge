@@ -38,15 +38,14 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const { handleIntent } = useTransactionFlow(setInputValue, appendAgentMessage);
   const [showBootup, setShowBootup] = useState(false);
 
-  // Show intro + prompt then switch stage
+  // Show intro message but don't auto-progress to choose path
   useEffect(() => {
     if (stage === 'intro' && !hasShownIntro.current) {
       hasShownIntro.current = true;
       appendAgentMessage("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
-      setTimeout(() => {
-        appendAgentMessage("Would you like to go through onboarding or skip to testing our worldAPI?");
-        setStage('choosePath');
-      }, 800);
+      // Wait for user to respond before showing the next prompt
+      appendAgentMessage("Would you like to go through onboarding or skip to testing our worldAPI?");
+      // Don't automatically change stage - wait for user input
     }
   }, [stage, appendAgentMessage, setStage]);
 
@@ -56,6 +55,19 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     appendUserMessage(value);
     const lower = value.toLowerCase();
 
+    if (stage === 'intro') {
+      // Now handle intro stage response in the processUserInput function
+      if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi")) {
+        appendAgentMessage("Great! Let me set up the test environment for you.");
+        setStage('choosePath');
+        return;
+      } else if (lower.includes("onboard") || lower.includes("start") || lower.includes("full") || lower.includes("experience")) {
+        appendAgentMessage("Perfect! Let's walk through the onboarding process together.");
+        setStage('standardOnboarding');
+        return;
+      }
+    }
+    
     if (stage === 'choosePath') {
       const isTestIntent = ['test', 'test worldapi', 'i want to test', 'skip onboarding', 'proceed to integration', 'jump to technical', 'skip', 'legendary']
         .some(phrase => lower.includes(phrase));
@@ -99,12 +111,14 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     <div className="flex flex-col h-full">
       <MessageList messages={conversation.messages} isAgentTyping={isAgentTyping} />
       
-      {/* Stage handler for conditional special cases */}
-      <ChatStageHandler 
-        stage={stage} 
-        onStageChange={setStage} 
-        onMessage={appendAgentMessage} 
-      />
+      {/* Stage handler for conditional special cases - prevent auto progression */}
+      {stage !== 'intro' && (
+        <ChatStageHandler 
+          stage={stage} 
+          onStageChange={setStage} 
+          onMessage={appendAgentMessage} 
+        />
+      )}
       
       <div className="border-t p-4 bg-white rounded-b-lg">
         {showBootup ? (

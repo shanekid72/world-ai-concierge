@@ -29,12 +29,6 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       console.log("ChatStageHandler: Handling stage message for", stage);
       
       switch (stage) {
-        case 'intro':
-          console.log("Processing intro stage");
-          // Intro message is handled in AIAgent component
-          processedStages.current.add(stage);
-          break;
-          
         case 'choosePath':
           console.log("Processing choosePath stage, showing terminal and message");
           // Clear previous messages first to avoid duplication
@@ -48,15 +42,15 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           
         case 'standardOnboarding':
           console.log("Processing standardOnboarding stage");
-          onMessage("I've completed the compliance and business requirements for you. You're now ready to start using worldAPI. What would you like to do first?");
-          onStageChange('init');
+          onMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization?");
+          // Don't auto-progress - wait for user to provide input
           processedStages.current.add(stage);
           break;
           
         case 'collectMinimalInfo':
           console.log("Processing collectMinimalInfo stage");
-          onMessage("Thanks for providing your information. Your account is now set up for testing worldAPI.");
-          onStageChange('init');
+          onMessage("To set up your account for testing worldAPI, I'll need some basic information. Could you provide your name and what you're planning to build?");
+          // Don't auto-progress - wait for user to provide input
           processedStages.current.add(stage);
           break;
           
@@ -69,7 +63,6 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
         // Add default case to handle any unmatched stage
         default:
           console.log("No specific handler for stage:", stage);
-          onMessage("I'm here to help with worldAPI. What would you like to do today?");
           processedStages.current.add(stage);
           break;
       }
