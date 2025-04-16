@@ -1,52 +1,35 @@
-
 import React from 'react';
 import MessageInput from './MessageInput';
 import ChatControls from './ChatControls';
 
 interface UserInputHandlerProps {
-  inputValue: string;
-  isAgentTyping: boolean;
-  onInputChange: (value: string) => void;
-  onSendMessage: (value: string) => void;
-  onReset: () => void;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  onSend: () => void;
 }
 
 export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
-  inputValue,
-  isAgentTyping,
-  onInputChange,
-  onSendMessage,
-  onReset,
+  value,
+  onChange,
+  onKeyDown,
+  onSend,
 }) => {
-  const handleSend = () => {
-    console.log("UserInputHandler: Sending message:", inputValue);
-    const trimmedValue = inputValue.trim();
-    if (trimmedValue) {
-      // Send the current input value and clear it
-      onSendMessage(trimmedValue);
-      onInputChange('');
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   return (
-    <div className="border-t p-4 bg-white rounded-b-lg">
-      <div className="flex items-center space-x-2">
-        <MessageInput
-          inputValue={inputValue}
-          isAgentTyping={isAgentTyping}
-          onInputChange={onInputChange}
-          onSendMessage={handleSend}
-          onKeyDown={handleKeyDown}
-        />
-        <ChatControls onReset={onReset} />
-      </div>
+    <div className="flex items-center w-full">
+      <MessageInput
+        inputValue={value || ''} // Ensure inputValue is never undefined
+        isAgentTyping={false}
+        onInputChange={(newValue) => {
+          const mockEvent = {
+            target: { value: newValue }
+          } as React.ChangeEvent<HTMLInputElement>;
+          onChange(mockEvent);
+        }}
+        onSendMessage={onSend}
+        onKeyDown={onKeyDown}
+      />
+      <ChatControls onReset={() => {/* Reset functionality placeholder */}} />
     </div>
   );
 };

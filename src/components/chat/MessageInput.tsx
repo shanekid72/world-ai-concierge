@@ -19,12 +19,15 @@ const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
   onKeyDown,
 }) => {
+  // Ensure inputValue is never undefined
+  const safeInputValue = inputValue || '';
+  
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 w-full">
       <div className="flex-1 relative rounded-full border border-gray-200 bg-white overflow-hidden shadow-sm">
         <div className="flex">
           <Input
-            value={inputValue}
+            value={safeInputValue}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Type your message..."
@@ -35,7 +38,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       </div>
       <Button 
         onClick={onSendMessage}
-        disabled={!inputValue.trim() || isAgentTyping}
+        disabled={!safeInputValue.trim() || isAgentTyping}
         size="icon"
         className="bg-worldapi-teal-500 hover:bg-worldapi-teal-600 h-12 w-12 rounded-full shadow-sm"
       >
