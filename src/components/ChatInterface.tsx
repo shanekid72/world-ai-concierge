@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
