@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
 import { getDefaultResponse, getRandomFunFact, getFollowUpResponse } from './chat/useStageResponses';
@@ -50,7 +49,7 @@ export const useTransactionFlow = (
     let shouldChangeStage: Stage | null = null;
     
     // Much lower chance of adding a fun fact (5% instead of 15%)
-    const shouldAddFunFact = Math.random() < 0.05;
+    const shouldAddFunFact = Math.random() < 0.15;
     
     if (stage === 'intro') {
       console.log("Processing input in intro stage");
