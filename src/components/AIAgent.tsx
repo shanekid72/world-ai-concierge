@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import MessageList from './chat/MessageList';
 import { useChatState } from '../hooks/useChatState';
@@ -6,6 +5,7 @@ import { useWorldApiChat } from '../hooks/useWorldApiChat';
 import { useTransactionPolling } from '../hooks/useTransactionPolling';
 import { useTransactionFlow } from '../hooks/useTransactionFlow';
 import { UserInputHandler } from './chat/UserInputHandler';
+import AnimatedTerminal from './AnimatedTerminal';
 
 interface AIAgentProps {
   onStageChange: (stageId: string) => void;
@@ -22,12 +22,20 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     enquireTransaction
   } = useWorldApiChat();
 
-  const [inputValue, setInputValue] = useState('');
-  const [isAgentTyping, setIsAgentTyping] = useState(false);
-  const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([]);
-  
+  const {
+    inputValue,
+    setInputValue,
+    conversation,
+    isAgentTyping,
+    appendAgentMessage,
+    appendUserMessage
+  } = useChatState({ currentStepId, onStageChange });
+
+  const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
   const hasShownIntro = useRef(false);
-  
+  const { handleIntent } = useTransactionFlow(setInputValue, appendAgentMessage);
+  const [showBootup, setShowBootup] = useState(false);
+
   // Show intro + prompt then switch stage
   useEffect(() => {
     if (stage === 'intro' && !hasShownIntro.current) {
@@ -38,24 +46,14 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         setStage('choosePath');
       }, 800);
     }
-  }, [stage, setStage]);
-
-  const appendAgentMessage = (text: string) => {
-    setMessages(prev => [...prev, { text, isUser: false }]);
-    setIsAgentTyping(false);
-  };
-
-  const appendUserMessage = (text: string) => {
-    setMessages(prev => [...prev, { text, isUser: true }]);
-    setIsAgentTyping(true);
-  };
+  }, [stage, appendAgentMessage, setStage]);
 
   const processUserInput = (value: string) => {
     if (!value.trim()) return;
 
     appendUserMessage(value);
-
     const lower = value.toLowerCase();
+
     if (stage === 'choosePath') {
       const isTestIntent = ['test', 'test worldapi', 'i want to test', 'skip onboarding', 'proceed to integration', 'jump to technical']
         .some(phrase => lower.includes(phrase));
@@ -63,26 +61,28 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       if (isTestIntent) {
         appendAgentMessage("🛠 Setting up worldAPI test environment for you...");
         setTimeout(() => {
-          appendAgentMessage("🧪 Just need a few details:\n1. Your name\n2. Company name\n3. Contact info");
+          appendAgentMessage("📌 Just need a few details:\n1. Your name\n2. Company name\n3. Contact info");
           setStage('collectMinimalInfo');
         }, 1000);
         return;
       }
     }
 
+    if (stage === 'collectMinimalInfo') {
+      appendAgentMessage("I'm processing your request...");
+      setTimeout(() => {
+        appendAgentMessage("🤖 Initializing your assistant...");
+        setShowBootup(true);
+      }, 1200);
+      return;
+    }
+
     try {
-      handleIntentWithFallback(value);
+      handleIntent(value);
     } catch (err) {
       console.error("Error handling intent:", err);
       appendAgentMessage("⚠️ Something glitched. Mind trying that again?");
     }
-  };
-
-  const handleIntentWithFallback = (value: string) => {
-    // Simple fallback handling
-    setTimeout(() => {
-      appendAgentMessage("I'm processing your request...");
-    }, 500);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -95,22 +95,29 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <MessageList messages={messages.map((m, i) => ({
-        id: i.toString(),
-        content: m.text,
-        isUser: m.isUser,
-        timestamp: new Date()
-      }))} isAgentTyping={isAgentTyping} />
+      <MessageList messages={conversation.messages} isAgentTyping={isAgentTyping} />
       <div className="border-t p-4 bg-white rounded-b-lg">
-        <UserInputHandler
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onSend={() => {
-            processUserInput(inputValue);
-            setInputValue('');
-          }}
-        />
+        {showBootup ? (
+          <AnimatedTerminal
+            onComplete={() => {
+              appendAgentMessage("✅ Your assistant is now online. Let’s dive into worldAPI! 💥");
+              setShowBootup(false);
+              setStage('init');
+            }}
+          />
+        ) : (
+          <div className="flex items-center">
+            <UserInputHandler
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onSend={() => {
+                processUserInput(inputValue);
+                setInputValue('');
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
