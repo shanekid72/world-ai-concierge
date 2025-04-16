@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
@@ -25,14 +26,22 @@ export const useTransactionFlow = (
     const lower = message.toLowerCase();
     
     // Handle initial response for testing worldAPI
-    if (stage === 'intro' && (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi"))) {
-      console.log("Detected test/skip/worldapi command in intro stage");
-      // Set stage to choosePath to trigger animation
-      setStage('choosePath');
-      return;
+    if (stage === 'intro') {
+      console.log("Processing input in intro stage");
+      if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi") || lower.includes("legendary")) {
+        console.log("Detected test/skip/worldapi command in intro stage");
+        // Set stage to choosePath to trigger animation
+        setStage('choosePath');
+        return;
+      } else {
+        console.log("No matching command found in intro, using default response");
+        setInputValue("I see you'd like to explore worldAPI. Would you like to go through onboarding or skip to testing?");
+        handleSendMessage();
+        return;
+      }
     }
 
-    if (stage === 'technical-requirements' && lower.includes("send") && lower.includes("money")) {
+    if (stage === 'technical-requirements' && (lower.includes("send") && lower.includes("money"))) {
       setInputValue("💬 Great! How much would you like to send?");
       handleSendMessage();
       setQuoteContext({});
@@ -81,6 +90,11 @@ export const useTransactionFlow = (
           description: "Failed to create quote. Please try again.",
           variant: "destructive",
         });
+        
+        // Add a default response when error occurs
+        setInputValue("I'm having trouble creating that quote. Let's try something else. What would you like to do with worldAPI?");
+        handleSendMessage();
+        setStage('init');
       }
       return;
     }
@@ -98,9 +112,9 @@ export const useTransactionFlow = (
     }
 
     console.log("No specific intent matched for message in stage", stage);
-    // If we didn't match any specific intent, let's just set the input to empty
-    // and let the message be added to the conversation
-    setInputValue('');
+    // If we didn't match any specific intent, respond with a default message
+    setInputValue("I'm here to help with worldAPI. You can ask about sending money, checking rates, or learning about our network coverage.");
+    handleSendMessage();
   }, [stage, quoteContext, setQuoteContext, setStage, setInputValue, handleSendMessage, handleCreateQuote]);
 
   return { handleIntent };

@@ -21,7 +21,10 @@ export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
   const handleSend = () => {
     console.log("UserInputHandler: Sending message:", inputValue);
     if (inputValue.trim()) {
+      // Send the current input value
       onSendMessage(inputValue);
+      // Clear the input field after sending
+      onInputChange('');
     }
   };
 

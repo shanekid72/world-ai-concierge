@@ -35,8 +35,12 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           
         case 'choosePath':
           console.log("Processing choosePath stage, showing terminal and message");
-          onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
-          setShowTerminal(true);
+          // Clear previous messages first to avoid duplication
+          setShowTerminal(false);
+          setTimeout(() => {
+            onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
+            setShowTerminal(true);
+          }, 100);
           break;
           
         case 'standardOnboarding':
@@ -54,6 +58,12 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
         case 'technical-requirements':
           console.log("Processing technical-requirements stage");
           onMessage("Now that we're set up, what would you like to do with worldAPI? You can send money, check rates, or ask about our network coverage.");
+          break;
+          
+        // Add default case to handle any unmatched stage
+        default:
+          console.log("No specific handler for stage:", stage);
+          onMessage("I'm here to help with worldAPI. What would you like to do next?");
           break;
       }
       
