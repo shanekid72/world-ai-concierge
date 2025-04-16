@@ -36,9 +36,15 @@ export const useWorldApiChat = () => {
     }
   }, [createQuote]);
 
+  // Log stage changes for debugging
+  const setStageWithLogging = useCallback((newStage: Stage) => {
+    console.log(`Stage changing from ${stage} to ${newStage}`);
+    setStage(newStage);
+  }, [stage]);
+
   return {
     stage,
-    setStage,
+    setStage: setStageWithLogging,
     quoteContext,
     setQuoteContext,
     autoPoll,

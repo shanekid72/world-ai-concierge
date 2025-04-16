@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { type Stage } from '../../hooks/useWorldApiChat';
 import AnimatedTerminal from './AnimatedTerminal';
 
@@ -17,7 +17,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   const processedStages = useRef<Set<Stage>>(new Set());
   const [showTerminal, setShowTerminal] = useState(false);
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (processedStages.current.has(stage)) {
       return;
     }

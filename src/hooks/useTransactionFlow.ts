@@ -26,9 +26,9 @@ export const useTransactionFlow = (
     
     // Handle initial response for testing worldAPI
     if (stage === 'intro' && (lower.includes("test") || lower.includes("skip"))) {
+      console.log("Handling test/skip command in intro stage");
       // Set stage to choosePath to trigger animation
       setStage('choosePath');
-      // No need to set input value as the message has already been added to the conversation
       return;
     }
 
@@ -74,6 +74,7 @@ export const useTransactionFlow = (
           "✅ Would you like to proceed with this transaction? (yes/no)"
         );
         handleSendMessage();
+        setStage('confirm');
       } catch (error) {
         toast({
           title: "Error",

@@ -42,6 +42,11 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 
   const { handleIntent } = useTransactionFlow(setInputValue, handleSendMessage);
 
+  // For debugging
+  useEffect(() => {
+    console.log("Current stage:", stage);
+  }, [stage]);
+
   // Only send the welcome message once when component mounts
   useEffect(() => {
     if (stage === 'intro' && !hasShownIntro.current) {
@@ -65,6 +70,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
   }, [stage, setInputValue, conversation.messages, handleSendMessage]);
 
+  // Handle transaction status polling
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (autoPoll && quoteContext.lastTxnRef) {
@@ -107,6 +113,30 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     }
     return () => clearInterval(interval);
   }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, handleSendMessage, setInputValue, setAutoPoll, conversation.messages]);
+
+  const processUserInput = (value: string) => {
+    if (!value.trim()) return;
+    
+    // Create and add user message
+    const userMessage = {
+      id: Date.now().toString(),
+      content: value,
+      isUser: true,
+      timestamp: new Date()
+    };
+    
+    // Add to conversation
+    conversation.messages.push(userMessage);
+    
+    // Force render update first to show user message
+    handleSendMessage();
+    
+    // Then process the intent
+    handleIntent(value);
+    
+    // Clear input
+    setInputValue('');
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -159,42 +189,14 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             onInputChange={setInputValue}
             onSendMessage={() => {
               if (inputValue.trim()) {
-                // Add user message to conversation first
-                const userMessage = {
-                  id: Date.now().toString(),
-                  content: inputValue,
-                  isUser: true,
-                  timestamp: new Date()
-                };
-                
-                conversation.messages.push(userMessage);
-                
-                // Force a render to update UI with user message
-                handleSendMessage();
-                
-                // Process the intent after message is shown
-                handleIntent(inputValue);
+                processUserInput(inputValue);
               }
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 if (inputValue.trim()) {
-                  // Add user message to conversation first
-                  const userMessage = {
-                    id: Date.now().toString(),
-                    content: inputValue,
-                    isUser: true,
-                    timestamp: new Date()
-                  };
-                  
-                  conversation.messages.push(userMessage);
-                  
-                  // Force a render to update UI with user message
-                  handleSendMessage();
-                  
-                  // Process the intent after message is shown
-                  handleIntent(inputValue);
+                  processUserInput(inputValue);
                 }
               }
             }}
