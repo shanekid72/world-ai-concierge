@@ -32,6 +32,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
         case 'intro':
           console.log("Processing intro stage");
           // Intro message is handled in AIAgent component
+          processedStages.current.add(stage);
           break;
           
         case 'choosePath':
@@ -41,6 +42,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           setTimeout(() => {
             onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
             setShowTerminal(true);
+            processedStages.current.add(stage);
           }, 100);
           break;
           
@@ -48,27 +50,29 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           console.log("Processing standardOnboarding stage");
           onMessage("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
           onStageChange('init');
+          processedStages.current.add(stage);
           break;
           
         case 'collectMinimalInfo':
           console.log("Processing collectMinimalInfo stage");
           onMessage("🙌 Got what I need! Let's jump into worldAPI testing mode.");
           onStageChange('init');
+          processedStages.current.add(stage);
           break;
           
         case 'technical-requirements':
           console.log("Processing technical-requirements stage");
           onMessage("Now that we're set up, what would you like to do with worldAPI? You can send money, check rates, or ask about our network coverage.");
+          processedStages.current.add(stage);
           break;
           
         // Add default case to handle any unmatched stage
         default:
           console.log("No specific handler for stage:", stage);
           onMessage("I'm here to help with worldAPI. What would you like to do next?");
+          processedStages.current.add(stage);
           break;
       }
-      
-      processedStages.current.add(stage);
     };
     
     // Process all stages that need handling

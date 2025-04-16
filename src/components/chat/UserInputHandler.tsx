@@ -23,7 +23,6 @@ export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
     if (inputValue.trim()) {
       // Send the current input value
       onSendMessage(inputValue);
-      // The input field is cleared in the AIAgent component after sending
     }
   };
 

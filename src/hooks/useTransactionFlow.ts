@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
 
@@ -25,13 +25,8 @@ export const useTransactionFlow = (
     console.log(`Processing intent in stage "${stage}" with message: "${message}"`);
     const lower = message.toLowerCase();
     
-    // Remove the initial processing message
-    if (stage !== 'confirm') {
-      // This will replace the "processing" message with an actual response
-      const response = getResponseForStageAndMessage(stage, lower);
-      setInputValue(response);
-      handleSendMessage();
-    }
+    // Find the processing message and replace it with a more appropriate response
+    const response = getResponseForStageAndMessage(stage, lower);
     
     // Handle initial response for testing worldAPI
     if (stage === 'intro') {
@@ -42,10 +37,27 @@ export const useTransactionFlow = (
         setStage('choosePath');
         return;
       }
+      
+      // If we're in intro but command wasn't recognized, send general response
+      setInputValue("");
+      const introResponse = "I'm Dolly! Would you like to go through onboarding or skip straight to testing worldAPI?";
+      const lastMessage = document.querySelector('.processing-message');
+      if (lastMessage) {
+        lastMessage.textContent = introResponse;
+      } else {
+        // If we can't find the processing message, add a new response
+        console.log("Adding default intro response");
+        setInputValue(introResponse);
+        handleSendMessage();
+      }
+      return;
     }
 
     if (stage === 'technical-requirements' && (lower.includes("send") && lower.includes("money"))) {
-      setInputValue("💬 Great! How much would you like to send?");
+      setInputValue("");
+      const responseText = "💬 Great! How much would you like to send?";
+      console.log("Adding money transfer response:", responseText);
+      setInputValue(responseText);
       handleSendMessage();
       setQuoteContext({});
       setStage('amount');
@@ -55,7 +67,10 @@ export const useTransactionFlow = (
     if (stage === 'amount' && lower.match(/\d+/)) {
       const amount = parseFloat(lower.match(/\d+/)![0]);
       setQuoteContext(prev => ({ ...prev, amount }));
-      setInputValue("📍 Got it. What is the destination country code? (e.g., PK for Pakistan)");
+      setInputValue("");
+      const responseText = "📍 Got it. What is the destination country code? (e.g., PK for Pakistan)";
+      console.log("Adding amount response:", responseText);
+      setInputValue(responseText);
       handleSendMessage();
       setStage('country');
       return;
@@ -79,12 +94,15 @@ export const useTransactionFlow = (
         const quoteId = quoteResult?.data?.quote_id;
         setQuoteContext(prev => ({ ...prev, to, quoteId }));
         
-        setInputValue(
+        setInputValue("");
+        const responseText = 
           `📄 Here's your quote: Send ${quoteContext.amount} AED to ${to} → ` +
           `receive ${quoteResult?.data?.receiving_amount} ${quoteResult?.data?.receiving_currency_code}. ` +
           `💱 Rate: ${quoteResult?.data?.fx_rates?.[0]?.rate}\n\n` +
-          "✅ Would you like to proceed with this transaction? (yes/no)"
-        );
+          "✅ Would you like to proceed with this transaction? (yes/no)";
+        
+        console.log("Adding quote response:", responseText);
+        setInputValue(responseText);
         handleSendMessage();
         setStage('confirm');
       } catch (error) {
@@ -95,7 +113,10 @@ export const useTransactionFlow = (
         });
         
         // Add a default response when error occurs
-        setInputValue("I'm having trouble creating that quote. Let's try something else. What would you like to do with worldAPI?");
+        setInputValue("");
+        const errorResponse = "I'm having trouble creating that quote. Let's try something else. What would you like to do with worldAPI?";
+        console.log("Adding error response:", errorResponse);
+        setInputValue(errorResponse);
         handleSendMessage();
         setStage('init');
       }
@@ -103,16 +124,30 @@ export const useTransactionFlow = (
     }
 
     if (stage === 'confirm' && lower === 'yes' && quoteContext.quoteId) {
+      setInputValue("");
+      const confirmResponse = "Great! Processing your transaction now...";
+      console.log("Adding confirmation response:", confirmResponse);
+      setInputValue(confirmResponse);
+      handleSendMessage();
       setStage('init');
       return;
     }
 
     if (stage === 'confirm' && lower === 'no') {
-      setInputValue("🚫 Transaction cancelled. Let me know if you'd like to try again.");
+      setInputValue("");
+      const cancelResponse = "🚫 Transaction cancelled. Let me know if you'd like to try again.";
+      console.log("Adding cancellation response:", cancelResponse);
+      setInputValue(cancelResponse);
       handleSendMessage();
       setStage('init');
       return;
     }
+    
+    // Default fallback - if we reach here, send a default response based on the stage
+    console.log("Sending default response for stage:", stage);
+    setInputValue("");
+    setInputValue(response);
+    handleSendMessage();
   }, [stage, quoteContext, setQuoteContext, setStage, setInputValue, handleSendMessage, handleCreateQuote]);
 
   // Helper function to generate responses based on stage and message
