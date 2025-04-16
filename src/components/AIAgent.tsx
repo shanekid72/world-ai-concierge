@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
@@ -44,7 +43,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   useEffect(() => {
     if (stage === 'intro' && !hasInitialized.current) {
       hasInitialized.current = true;
-      setInputValue("Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
+      setInputValue("Hello! I'm your World API integration assistant. I'll help you connect your financial institution to our global payment networks. What type of organization are you connecting today?");
       handleSendMessage();
       
       // No automatic second message - wait for user input to trigger next stage
