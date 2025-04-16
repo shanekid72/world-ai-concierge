@@ -44,7 +44,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   useEffect(() => {
     if (stage === 'intro' && !hasInitialized.current) {
       hasInitialized.current = true;
-      setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
+      setInputValue("Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
       handleSendMessage();
       
       setTimeout(() => {
