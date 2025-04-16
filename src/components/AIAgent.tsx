@@ -63,6 +63,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     
     console.log("Processing user input:", value);
     
+    // First add the user message to the conversation
     const userMessage = {
       id: Date.now().toString(),
       content: value,
@@ -73,9 +74,21 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     conversation.messages.push(userMessage);
     handleSendMessage();
     
-    // Clear input right after adding user message
+    // Clear input after adding the user message
     setInputValue('');
     
+    // Then immediately add a default response while processing the intent
+    const defaultResponse = {
+      id: Date.now().toString(),
+      content: "I'm processing your request...",
+      isUser: false,
+      timestamp: new Date()
+    };
+    
+    conversation.messages.push(defaultResponse);
+    handleSendMessage();
+    
+    // Now process the intent which may add additional messages
     handleIntent(value).catch(err => {
       console.error("Error handling intent:", err);
       

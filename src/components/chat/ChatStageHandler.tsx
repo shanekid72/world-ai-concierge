@@ -31,6 +31,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       switch (stage) {
         case 'intro':
           console.log("Processing intro stage");
+          // Intro message is handled in AIAgent component
           break;
           
         case 'choosePath':
