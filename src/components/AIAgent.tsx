@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import MessageList from './chat/MessageList';
 import { useChatState } from '../hooks/useChatState';
@@ -5,7 +6,7 @@ import { useWorldApiChat } from '../hooks/useWorldApiChat';
 import { useTransactionPolling } from '../hooks/useTransactionPolling';
 import { useTransactionFlow } from '../hooks/useTransactionFlow';
 import { UserInputHandler } from './chat/UserInputHandler';
-import AnimatedTerminal from './AnimatedTerminal';
+import AnimatedTerminal from './chat/AnimatedTerminal';
 
 interface AIAgentProps {
   onStageChange: (stageId: string) => void;
@@ -100,7 +101,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         {showBootup ? (
           <AnimatedTerminal
             onComplete={() => {
-              appendAgentMessage("✅ Your assistant is now online. Let’s dive into worldAPI! 💥");
+              appendAgentMessage("✅ Your assistant is now online. Let's dive into worldAPI! 💥");
               setShowBootup(false);
               setStage('init');
             }}
