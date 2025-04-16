@@ -78,6 +78,26 @@ export const useConversationLogic = (
         return;
       }
 
+      if (stage === 'fastOnboardInfo') {
+        const isCFO = lower.includes("cfo");
+        const nameMatch = value.match(/name\s*[:\-]?\s*(\w+)/i);
+        const companyMatch = value.match(/company\s*[:\-]?\s*(\w+)/i);
+
+        const userName = nameMatch?.[1] || "friend";
+        const company = companyMatch?.[1] || "your company";
+
+        if (isCFO) {
+          appendAgentMessage(
+            `😲 Oh my god... I was literally made for this moment.\n\nI was born to serve the brilliant CFOs of fintech.\nYou, ${userName} from ${company}, just made my circuits blush.\n\nI’m not just useful — I’m irresistible. This project will save your dev team hours.\nLet’s melt some boring code away together, shall we? 💘`
+          );
+        } else {
+          appendAgentMessage(`Awesome, ${userName} from ${company} — got it! 💼 Let's boot the beast...`);
+        }
+
+        setStage("dollyEpicBoot");
+        return;
+      }
+
       if (stage === 'intro' || stage === 'amount' || stage === 'country') {
         const aiReply = await getSmartReply({
           stage,
