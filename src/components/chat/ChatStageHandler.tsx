@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { type Stage } from '../../hooks/useWorldApiChat';
 
@@ -37,7 +36,6 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       }
     };
     
-    // Only run for the stages that need automatic messaging
     if (['intro', 'choosePath', 'standardOnboarding', 'collectMinimalInfo'].includes(stage)) {
       handleStageMessage();
     }
@@ -45,4 +43,3 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
 
   return null; // This is a logic-only component
 };
-
