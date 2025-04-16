@@ -10,7 +10,7 @@ export const getDefaultResponse = (stage: Stage, message: string): string => {
   // Handle stage-specific responses
   switch (stage) {
     case 'intro':
-      return "I'm Dolly! Would you like to go through onboarding or skip straight to testing worldAPI?";
+      return "Hi, I'm Dolly! Would you like to go through onboarding or skip straight to testing worldAPI?";
     case 'choosePath':
       return "I'm setting up the environment for you. What would you like to do with worldAPI once we're ready?";
     case 'technical-requirements':
@@ -23,6 +23,10 @@ export const getDefaultResponse = (stage: Stage, message: string): string => {
       return "Please provide a 2-letter country code for the destination (e.g., PK for Pakistan).";
     case 'confirm':
       return "Would you like to proceed with this transaction? Please reply with 'yes' or 'no'.";
+    case 'standardOnboarding':
+      return "I'm collecting your information for the full onboarding process. Please provide the requested details.";
+    case 'collectMinimalInfo':
+      return "I just need a few quick details to get you started with worldAPI testing.";
     default:
       return "I'm here to help with worldAPI. What would you like to know about our payment services?";
   }

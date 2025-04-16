@@ -40,6 +40,10 @@ export const useTransactionFlow = (
         shouldChangeStage = 'standardOnboarding';
       }
     }
+    else if (stage === 'choosePath') {
+      // This stage is handled by AnimatedTerminal component
+      responseText = "Processing your request...";
+    }
     else if (stage === 'technical-requirements') {
       if ((lower.includes("send") && lower.includes("money"))) {
         responseText = "💬 Great! How much would you like to send?";
@@ -76,11 +80,27 @@ export const useTransactionFlow = (
         shouldChangeStage = 'init';
       }
     }
+    else if (stage === 'standardOnboarding' || stage === 'collectMinimalInfo') {
+      // These stages are handled directly by ChatStageHandler
+      responseText = "Processing your information...";
+    }
+    else if (stage === 'init') {
+      // Handle any input in init stage
+      if (lower.includes("send") && lower.includes("money")) {
+        responseText = "How much would you like to send?";
+        shouldChangeStage = 'amount';
+      } else if (lower.includes("help") || lower.includes("what") || lower.includes("can you")) {
+        responseText = "I can help you send money, check rates, or explore our network coverage. What would you like to do?";
+      } else {
+        responseText = "I'm here to help with worldAPI. You can ask me about sending money, checking rates, or exploring our network coverage.";
+      }
+    }
     
     console.log("Sending response:", responseText);
     appendMessageToChat(responseText);
     
     if (shouldChangeStage) {
+      console.log(`Changing stage from ${stage} to ${shouldChangeStage}`);
       setStage(shouldChangeStage);
     }
   }, [stage, quoteContext, setQuoteContext, setStage, handleCreateQuote]);

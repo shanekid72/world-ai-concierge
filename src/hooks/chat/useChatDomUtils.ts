@@ -18,3 +18,9 @@ export const appendMessageToChat = (responseText: string) => {
     messageContainer.scrollTop = messageContainer.scrollHeight;
   }
 };
+
+// Add a helper to get message container for direct DOM manipulation
+export const getMessageContainer = (): HTMLElement | null => {
+  return document.querySelector('.chat-container');
+};
+
