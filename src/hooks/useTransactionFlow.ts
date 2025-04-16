@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
@@ -21,18 +20,19 @@ export const useTransactionFlow = (
 
   const handleIntent = useCallback(async (message: string) => {
     if (!message.trim()) return;
-
+    
+    console.log(`Processing intent in stage "${stage}" with message: "${message}"`);
     const lower = message.toLowerCase();
     
     // Handle initial response for testing worldAPI
-    if (stage === 'intro' && (lower.includes("test") || lower.includes("skip"))) {
-      console.log("Handling test/skip command in intro stage");
+    if (stage === 'intro' && (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi"))) {
+      console.log("Detected test/skip/worldapi command in intro stage");
       // Set stage to choosePath to trigger animation
       setStage('choosePath');
       return;
     }
 
-    if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
+    if (stage === 'technical-requirements' && lower.includes("send") && lower.includes("money")) {
       setInputValue("💬 Great! How much would you like to send?");
       handleSendMessage();
       setQuoteContext({});
@@ -97,6 +97,7 @@ export const useTransactionFlow = (
       return;
     }
 
+    console.log("No specific intent matched for message in stage", stage);
     // If we didn't match any specific intent, let's just set the input to empty
     // and let the message be added to the conversation
     setInputValue('');

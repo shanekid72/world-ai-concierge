@@ -117,6 +117,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const processUserInput = (value: string) => {
     if (!value.trim()) return;
     
+    console.log("Processing user input:", value);
+    
     // Create and add user message
     const userMessage = {
       id: Date.now().toString(),
@@ -132,10 +134,11 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     handleSendMessage();
     
     // Then process the intent
-    handleIntent(value);
-    
-    // Clear input
-    setInputValue('');
+    handleIntent(value).catch(err => {
+      console.error("Error handling intent:", err);
+      setInputValue("I'm sorry, there was an error processing your request. Please try again.");
+      handleSendMessage();
+    });
   };
 
   return (
@@ -164,6 +167,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         stage={stage as Stage}
         onStageChange={setStage}
         onMessage={(message) => {
+          console.log("Adding agent message:", message);
           setInputValue('');
           
           // Add message directly to conversation
