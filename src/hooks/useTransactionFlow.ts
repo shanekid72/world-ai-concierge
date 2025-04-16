@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
 import { getDefaultResponse } from './chat/useStageResponses';
@@ -33,26 +32,26 @@ export const useTransactionFlow = (
     if (stage === 'intro') {
       console.log("Processing input in intro stage");
       if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi") || lower.includes("legendary")) {
-        responseText = "Setting up worldAPI test environment for you...";
+        responseText = "Oh, you like to move fast - I respect that! 🚀 Let me spin up the test environment for you real quick...";
         shouldChangeStage = 'choosePath';
       } else if (lower.includes("onboard") || lower.includes("start")) {
-        responseText = "Starting the onboarding process...";
+        responseText = "Love the enthusiasm! Let's walk through this together step by step - I promise to make it fun! 🎉";
         shouldChangeStage = 'standardOnboarding';
       }
     }
     else if (stage === 'choosePath') {
       // This stage is handled by AnimatedTerminal component
-      responseText = "Processing your request...";
+      responseText = "Awesome, gimme just a sec to get everything ready for you... 🛠️";
     }
     else if (stage === 'technical-requirements') {
       if ((lower.includes("send") && lower.includes("money"))) {
-        responseText = "💬 Great! How much would you like to send?";
+        responseText = "Alright, let's get that money moving! 💸 How much are we talking about here?";
         shouldChangeStage = 'amount';
         setQuoteContext({});
       } else if (lower.includes("rate") || lower.includes("exchange")) {
-        responseText = "I can check current exchange rates for you. Which currencies are you interested in?";
+        responseText = "Exchange rates? I've got you covered! Which currencies are you curious about? 💱";
       } else if (lower.includes("network") || lower.includes("coverage") || lower.includes("countries")) {
-        responseText = "Our D9 Network covers over 100 countries across Africa, Americas, Asia, Europe, and GCC regions. Any specific region you're interested in?";
+        responseText = "Oh, you're gonna love this! We're practically everywhere - 100+ countries across Africa, Americas, Asia, Europe, and GCC! 🌍 Any specific region you're curious about?";
       }
     }
     else if (stage === 'amount' && lower.match(/\d+/)) {
@@ -97,7 +96,6 @@ export const useTransactionFlow = (
     }
     
     console.log("Sending response:", responseText);
-    // Use the provided appendAgentMessage function instead of appendMessageToChat
     appendAgentMessage(responseText);
     
     if (shouldChangeStage) {

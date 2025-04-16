@@ -2,52 +2,67 @@
 import { Stage } from '../useWorldApiChat';
 
 export const getDefaultResponse = (stage: Stage, message: string): string => {
-  // Handle common greetings across all stages
+  // Handle common greetings across all stages with more personality
   if (/^(hi|hello|hey|greetings|howdy)(\s|$)/i.test(message)) {
-    return `👋 Hey there! I'm Dolly, your AI assistant. ${getStageSpecificPrompt(stage)}`;
+    return `Hey there! 🌟 Always lovely to chat with someone new! ${getStageSpecificPrompt(stage)}`;
   }
-  
-  // Handle stage-specific responses
+
+  // Handle stage-specific responses with more personality
   switch (stage) {
     case 'intro':
-      return "Hi, I'm Dolly! Would you like to go through onboarding or skip straight to testing worldAPI?";
+      return "👋 Hi there! I'm Dolly, and I've got to say - I'm pretty excited to chat with you! Want to dive into the full onboarding experience, or should we skip straight to the good stuff with worldAPI? I'm cool either way! 😊";
+    
     case 'choosePath':
-      return "I'm setting up the environment for you. What would you like to do with worldAPI once we're ready?";
+      return "Alright, awesome! I'm getting everything ready for you. While I'm at it, what's got you interested in worldAPI? I'd love to hear what you're planning to build! 🚀";
+    
     case 'technical-requirements':
-      return "You can ask me about sending money, checking rates, or exploring our network coverage across different countries.";
+      return "You know what's cool? I can help you with all sorts of things - sending money around the globe 🌍, checking those exchange rates 💱, or even exploring our massive network (100+ countries, just saying! 😉). What sounds interesting to you?";
+    
     case 'init':
-      return "I'm ready to help with worldAPI! You can ask about sending money, checking exchange rates, or exploring our network coverage.";
+      return "Hey! I'm all ears - what can I help you explore in worldAPI today? Whether it's sending money, checking rates, or just poking around our network coverage, I'm your girl! 🌟";
+    
     case 'amount':
-      return "Please provide a number for the amount you'd like to send.";
+      return "Alright, let's get this money moving! 💸 What amount are you thinking of sending?";
+    
     case 'country':
-      return "Please provide a 2-letter country code for the destination (e.g., PK for Pakistan).";
+      return "Cool cool! And where are we sending this to? Just drop me the 2-letter country code (like PK for Pakistan) and I'll get right on it! 🗺️";
+    
     case 'confirm':
-      return "Would you like to proceed with this transaction? Please reply with 'yes' or 'no'.";
+      return "Almost there! Everything look good to you? Just hit me with a 'yes' if you're ready to roll, or 'no' if we need to tweak anything! 🎯";
+    
     case 'standardOnboarding':
-      return "I'm collecting your information for the full onboarding process. Please provide the requested details.";
+      return "Time for the fun part! 🎉 I'll need to grab some info from you - promise to make it as painless as possible! What should I call you?";
+    
     case 'collectMinimalInfo':
-      return "I just need a few quick details to get you started with worldAPI testing.";
+      return "Let's keep this quick and snappy! Just need a few details to get you started - nothing too heavy, I promise! 😊";
+    
     default:
-      return "I'm here to help with worldAPI. What would you like to know about our payment services?";
+      return "Hey there! What's on your mind? I'm here to help with anything worldAPI related - just shoot! 🎯";
   }
 };
 
 export const getStageSpecificPrompt = (stage: Stage): string => {
   switch (stage) {
     case 'intro':
-      return "Would you like to go through onboarding or skip to testing worldAPI?";
+      return "So... wanna explore everything step by step, or should we jump straight to the fun stuff? 😎";
+    
     case 'choosePath':
-      return "I'm preparing your environment. What would you like to explore first?";
+      return "While I'm getting everything set up, what's got you excited about worldAPI? 🚀";
+    
     case 'technical-requirements':
     case 'init':
-      return "You can ask about sending money, checking rates, or exploring our network coverage.";
+      return "I've got all sorts of cool tricks up my sleeve - want to send some money, check rates, or explore where we can help you reach? 🌍";
+    
     case 'amount':
-      return "How much would you like to send?";
+      return "How much are we working with here? 💰";
+    
     case 'country':
-      return "What is the destination country?";
+      return "And where's this headed? Drop me a country code! 🗺️";
+    
     case 'confirm':
-      return "Would you like to proceed with this transaction?";
+      return "Ready to make this happen? 🎯";
+    
     default:
-      return "How can I assist you with worldAPI today?";
+      return "What can I help you explore today? 🌟";
   }
 };
