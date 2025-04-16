@@ -53,4 +53,5 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   }, [stage, onMessage, onStageChange]);
 
   return null;
-});
+};
+
