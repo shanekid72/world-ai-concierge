@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import MessageList from './chat/MessageList';
 import MessageInput from './chat/MessageInput';
 import ChatControls from './chat/ChatControls';
@@ -37,11 +37,12 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   } = useChatState({ currentStepId, onStageChange });
 
   const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
+  
+  // Create the useRef at the top level of the component
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
     // Only run this effect once on initial mount
-    const hasInitialized = React.useRef(false);
-    
     if (stage === 'intro' && !hasInitialized.current) {
       hasInitialized.current = true;
       setInputValue("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
