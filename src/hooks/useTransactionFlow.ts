@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
 import { getDefaultResponse, getRandomFunFact, getFollowUpResponse } from './chat/useStageResponses';
@@ -5,6 +6,7 @@ import { handleQuoteCreation } from './chat/useQuoteHandling';
 import { fetchCurrencyRate } from '@/utils/currencyRateService';
 import { useQuoteExtraction } from './useQuoteExtraction';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface UseTransactionFlowReturn {
   handleIntent: (message: string) => Promise<void>;
@@ -41,10 +43,7 @@ export const useTransactionFlow = (
         toast({
           title: `Quote Created`,
           description: `Amount: ${extracted.amount} ${extracted.currency}\nTo: ${extracted.to}\nFX Rate: ${quote?.fxRate || 'N/A'}\nFee: ${quote?.fee || 'N/A'}\nDelivery: ${quote?.deliveryTime || '1-2 days'}`,
-          action: {
-            label: "Confirm",
-            onClick: () => setStage('confirm')
-          }
+          action: <Button variant="outline" onClick={() => setStage('confirm')}>Confirm</Button>
         });
 
         return;
@@ -54,7 +53,7 @@ export const useTransactionFlow = (
       }
     }
 
-    appendAgentMessage("I’m here to help! You can tell me to send money, check rates, or get started.");
+    appendAgentMessage("I'm here to help! You can tell me to send money, check rates, or get started.");
   }, [stage, quoteContext, handleCreateQuote, setQuoteContext, setStage, appendAgentMessage, toast]);
 
   return { handleIntent };

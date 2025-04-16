@@ -24,6 +24,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     autoPoll,
     setQuoteContext,
     handleCreateQuote,
+    createTransaction,
+    confirmTransaction,
+    enquireTransaction
   } = useWorldApiChat();
 
   const {
@@ -40,6 +43,16 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const conversationStarted = useRef(false);
   const { handleIntent } = useTransactionFlow(setInputValue, appendAgentMessage);
 
+  const handleCreateTransaction = async (quoteId: string) => {
+    try {
+      const result = await createTransaction({ quoteId });
+      return result;
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      throw error;
+    }
+  };
+
   const { processUserInput } = useConversationLogic(
     stage,
     setStage,
@@ -47,7 +60,9 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     setShowBootup,
     setQuoteContext,
     handleIntent,
-    handleCreateQuote
+    handleCreateQuote,
+    handleCreateTransaction,
+    quoteContext
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
