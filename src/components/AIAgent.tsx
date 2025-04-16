@@ -165,4 +165,3 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 };
 
 export default AIAgent;
-
