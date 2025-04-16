@@ -1,7 +1,7 @@
+
 import { useCallback } from 'react';
 import { useWorldApiChat, type Stage } from './useWorldApiChat';
 import { getDefaultResponse, getRandomFunFact, getFollowUpResponse } from './chat/useStageResponses';
-import { appendMessageToChat } from './chat/useChatDomUtils';
 import { handleQuoteCreation } from './chat/useQuoteHandling';
 
 interface UseTransactionFlowReturn {
@@ -44,13 +44,20 @@ export const useTransactionFlow = (
       return;
     }
     
+    // For currency rate inquiries - handle them in any stage
+    if (lower.includes('rate') || lower.includes('exchange') || (lower.includes('check') && lower.includes('rates'))) {
+      appendAgentMessage("I can help with exchange rates. Which currencies are you interested in? For example, you can ask about USD to EUR or GBP to INR.");
+      return;
+    }
+    
     // Get default response based on stage
     let responseText = getDefaultResponse(stage, lower);
     let shouldChangeStage: Stage | null = null;
     
-    // Much lower chance of adding a fun fact (5% instead of 15%)
+    // Add fun facts occasionally (15% chance)
     const shouldAddFunFact = Math.random() < 0.15;
     
+    // Handle stage-specific logic
     if (stage === 'intro') {
       console.log("Processing input in intro stage");
       if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi")) {
@@ -65,13 +72,13 @@ export const useTransactionFlow = (
       // This stage is handled by AnimatedTerminal component
       responseText = "Setting things up for you now. This will just take a moment.";
     }
-    else if (stage === 'technical-requirements') {
+    else if (stage === 'technical-requirements' || stage === 'init') {
       if ((lower.includes("send") && lower.includes("money")) || lower.includes("transfer")) {
         responseText = "Let's set up a money transfer. How much would you like to send?";
         shouldChangeStage = 'amount';
         setQuoteContext({});
       } else if (lower.includes("rate") || lower.includes("exchange") || lower.includes("currency")) {
-        responseText = "I can help with exchange rates. Which currencies are you interested in?";
+        responseText = "I can help with exchange rates. Which currencies are you interested in? For example, you can ask about USD to EUR or GBP to INR.";
       } else if (lower.includes("network") || lower.includes("coverage") || lower.includes("countries") || lower.includes("where")) {
         responseText = "Our network covers over 100 countries across Africa, Americas, Asia, Europe, and the GCC region. Is there a specific region you're interested in?";
       } else if (lower.includes("help") || lower.includes("what") || lower.includes("can you do")) {
@@ -107,28 +114,16 @@ export const useTransactionFlow = (
       }
     }
     else if (stage === 'standardOnboarding' || stage === 'collectMinimalInfo') {
-      // These stages are handled directly by ChatStageHandler
-      responseText = "Processing your information now. This will just take a moment.";
-    }
-    else if (stage === 'init') {
-      // Handle any input in init stage
-      if (lower.includes("send") && (lower.includes("money") || lower.includes("cash"))) {
-        responseText = "I can help you send money. How much would you like to transfer?";
-        shouldChangeStage = 'amount';
-      } else if (lower.includes("help") || lower.includes("what") || lower.includes("can you")) {
-        responseText = "I can help you send money globally, check current exchange rates, or explore our network coverage. What would you like to do?";
-      } else if (lower.includes("rate") || lower.includes("exchange")) {
-        responseText = "I can check exchange rates for you. Which currencies are you interested in?";
-      } else if (lower.includes("thank")) {
-        responseText = "You're welcome! Is there anything else I can help you with regarding worldAPI?";
+      // These stages collect user input before moving to the next stage
+      if (stage === 'standardOnboarding') {
+        responseText = "Thank you! I'll add that to your profile. Now, could you tell me a bit about your business model?";
       } else {
-        // Direct response for other questions
-        responseText = "I'm here to help with worldAPI. You can ask about sending money, checking rates, or our global coverage. What would you like to know?";
+        responseText = "Thank you for providing that information. Just to confirm, what's the best email to reach you at?";
       }
     }
     
     // Only occasionally add a fun fact if appropriate
-    if (shouldAddFunFact && !shouldChangeStage && stage === 'init') {
+    if (shouldAddFunFact && (stage === 'init' || stage === 'technical-requirements')) {
       responseText += "\n\n" + getRandomFunFact();
     }
     

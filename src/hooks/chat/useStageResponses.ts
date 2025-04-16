@@ -26,10 +26,8 @@ export const getDefaultResponse = (stage: Stage, message: string): string => {
       return "I'm getting everything ready for you. While I'm setting up, what got you interested in worldAPI? Are you building something specific?";
     
     case 'technical-requirements':
-      return "I'm here to help with worldAPI! I can assist with sending money globally, checking exchange rates, or showing you our network coverage. What would you like to do today?";
-    
     case 'init':
-      return "What would you like to do with worldAPI today? I can help you send money, check rates, or learn about our global network.";
+      return "I'm here to help with worldAPI! I can assist with sending money globally, checking exchange rates, or showing you our network coverage. What would you like to do today?";
     
     case 'amount':
       return "How much would you like to send?";
@@ -91,6 +89,11 @@ export const getRandomFunFact = (): string => {
 
 // Handle follow-up responses
 export const getFollowUpResponse = (message: string): string | null => {
+  if (message.toLowerCase().includes('exchange rate') || 
+      (message.toLowerCase().includes('check') && message.toLowerCase().includes('rate'))) {
+    return "I'd be happy to check exchange rates for you. Which currencies would you like to compare? For example, 'USD to INR' or 'EUR to GBP'.";
+  }
+  
   if (message.toLowerCase().includes('help')) {
     return "I'm here to help! I can assist with sending money globally, checking exchange rates, or exploring our network coverage. What would you like to know more about?";
   }

@@ -53,45 +53,57 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     if (!value.trim()) return;
 
     appendUserMessage(value);
-    const lower = value.toLowerCase();
-
-    if (stage === 'intro') {
-      // Now handle intro stage response in the processUserInput function
-      if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi")) {
-        appendAgentMessage("Great! Let me set up the test environment for you.");
-        setStage('choosePath');
-        return;
-      } else if (lower.includes("onboard") || lower.includes("start") || lower.includes("full") || lower.includes("experience")) {
-        appendAgentMessage("Perfect! Let's walk through the onboarding process together.");
-        setStage('standardOnboarding');
-        return;
-      }
-    }
+    console.log("Processing user input in stage:", stage);
     
-    if (stage === 'choosePath') {
-      const isTestIntent = ['test', 'test worldapi', 'i want to test', 'skip onboarding', 'proceed to integration', 'jump to technical', 'skip', 'legendary']
-        .some(phrase => lower.includes(phrase));
+    try {
+      if (stage === 'intro') {
+        // Handle intro stage response in the processUserInput function
+        const lower = value.toLowerCase();
+        if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi")) {
+          appendAgentMessage("Great! Let me set up the test environment for you.");
+          setStage('choosePath');
+          return;
+        } else if (lower.includes("onboard") || lower.includes("start") || lower.includes("full") || lower.includes("experience")) {
+          appendAgentMessage("Perfect! Let's walk through the onboarding process together.");
+          setStage('standardOnboarding');
+          return;
+        }
+      }
+      
+      if (stage === 'choosePath') {
+        const lower = value.toLowerCase();
+        const isTestIntent = ['test', 'test worldapi', 'i want to test', 'skip onboarding', 'proceed to integration', 'jump to technical', 'skip', 'legendary']
+          .some(phrase => lower.includes(phrase));
 
-      if (isTestIntent) {
-        appendAgentMessage("Setting up the worldAPI test environment for you now.");
+        if (isTestIntent) {
+          appendAgentMessage("Setting up the worldAPI test environment for you now.");
+          setTimeout(() => {
+            appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
+            setStage('collectMinimalInfo');
+          }, 1000);
+          return;
+        }
+      }
+
+      if (stage === 'collectMinimalInfo') {
+        appendAgentMessage("Thanks for the information. Processing your details now...");
         setTimeout(() => {
-          appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
-          setStage('collectMinimalInfo');
-        }, 1000);
+          appendAgentMessage("Initializing your worldAPI assistant...");
+          setShowBootup(true);
+        }, 1200);
         return;
       }
-    }
 
-    if (stage === 'collectMinimalInfo') {
-      appendAgentMessage("Thanks for the information. Processing your details now...");
-      setTimeout(() => {
-        appendAgentMessage("Initializing your worldAPI assistant...");
-        setShowBootup(true);
-      }, 1200);
-      return;
-    }
+      if (stage === 'standardOnboarding') {
+        appendAgentMessage("Thank you for that information. Just a few more questions about your business requirements...");
+        setTimeout(() => {
+          appendAgentMessage("Processing onboarding information...");
+          setShowBootup(true);
+        }, 1500);
+        return;
+      }
 
-    try {
+      // For all other cases, use the general intent handler
       handleIntent(value);
     } catch (err) {
       console.error("Error handling intent:", err);
@@ -126,7 +138,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             onComplete={() => {
               appendAgentMessage("Your worldAPI assistant is now ready to use. How can I help you today?");
               setShowBootup(false);
-              setStage('init');
+              setStage('technical-requirements');
             }}
           />
         ) : (
