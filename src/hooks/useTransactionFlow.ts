@@ -27,6 +27,9 @@ export const useTransactionFlow = (
     console.log(`Processing intent in stage "${stage}" with message: "${message}"`);
     const lower = message.toLowerCase();
     
+    // Initialize responseText variable at the beginning
+    let responseText = "";
+    
     // Check for follow-up response first
     const followUp = getFollowUpResponse(lower);
     if (followUp) {
@@ -58,8 +61,6 @@ export const useTransactionFlow = (
     }
     
     // Handle stage-specific logic
-    let responseText = "";
-    
     if (stage === 'technical-requirements' || stage === 'init') {
       if ((lower.includes("send") && lower.includes("money")) || lower.includes("transfer")) {
         responseText = "Let's set up a money transfer. How much would you like to send? 💸";

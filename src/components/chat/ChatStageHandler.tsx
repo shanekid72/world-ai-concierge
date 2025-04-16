@@ -7,12 +7,14 @@ interface ChatStageHandlerProps {
   stage: Stage;
   onStageChange: (stage: Stage) => void;
   onMessage: (message: string) => void;
+  conversationStarted?: boolean;
 }
 
 export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   stage,
   onStageChange,
-  onMessage
+  onMessage,
+  conversationStarted = false
 }) => {
   const processedStages = useRef<Set<Stage>>(new Set());
   const [showTerminal, setShowTerminal] = useState(false);
@@ -30,14 +32,19 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       
       switch (stage) {
         case 'choosePath':
-          console.log("Processing choosePath stage, showing terminal and message");
-          // Clear previous messages first to avoid duplication
-          setShowTerminal(false);
-          setTimeout(() => {
-            onMessage("Setting up the API testing environment for you. This will just take a moment. ⚙️");
-            setShowTerminal(true);
+          // Only show setup message if conversation hasn't started yet
+          if (!conversationStarted) {
+            console.log("Processing choosePath stage, showing terminal and message");
+            // Clear previous messages first to avoid duplication
+            setShowTerminal(false);
+            setTimeout(() => {
+              onMessage("Setting up the API testing environment for you. This will just take a moment. ⚙️");
+              setShowTerminal(true);
+              processedStages.current.add(stage);
+            }, 100);
+          } else {
             processedStages.current.add(stage);
-          }, 100);
+          }
           break;
           
         case 'standardOnboarding':
@@ -67,7 +74,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
     
     // Process all stages that need handling
     handleStageMessage();
-  }, [stage, onMessage, onStageChange]);
+  }, [stage, onMessage, onStageChange, conversationStarted]);
 
   return showTerminal ? (
     <AnimatedTerminal 

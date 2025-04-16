@@ -40,6 +40,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const [showBootup, setShowBootup] = useState(false);
   const techStageInitialized = useRef(false);
   const processingCurrency = useRef(false);
+  const conversationStarted = useRef(false);
 
   // Show intro message but don't auto-progress to choose path
   useEffect(() => {
@@ -97,6 +98,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     if (!value.trim()) return;
 
     appendUserMessage(value);
+    conversationStarted.current = true;
     console.log("Processing user input in stage:", stage);
     
     try {
@@ -152,7 +154,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       }
 
       // For all other cases, use the general intent handler
-      handleIntent(value);
+      await handleIntent(value);
     } catch (err) {
       console.error("Error handling intent:", err);
       appendAgentMessage("I'm sorry, I encountered an error processing your request. Could you try again? 😕");
@@ -176,7 +178,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         <ChatStageHandler 
           stage={stage} 
           onStageChange={setStage} 
-          onMessage={appendAgentMessage} 
+          onMessage={appendAgentMessage}
+          conversationStarted={conversationStarted.current}
         />
       )}
       
