@@ -40,7 +40,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           // Clear previous messages first to avoid duplication
           setShowTerminal(false);
           setTimeout(() => {
-            onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
+            onMessage("Coming right up! 🕶️ Running some fancy code magic just for you...\n\nDon't worry if this looks like I'm hacking the Pentagon - it's all part of the show!");
             setShowTerminal(true);
             processedStages.current.add(stage);
           }, 100);
@@ -48,28 +48,28 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           
         case 'standardOnboarding':
           console.log("Processing standardOnboarding stage");
-          onMessage("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
+          onMessage("🎭 *Puts on KYC hat*\n\nJust kidding! Let's pretend we did all that boring compliance stuff and business requirements... and... DONE! ✅\n\nSee how painless that was? Ready to start playing with worldAPI for real?");
           onStageChange('init');
           processedStages.current.add(stage);
           break;
           
         case 'collectMinimalInfo':
           console.log("Processing collectMinimalInfo stage");
-          onMessage("🙌 Got what I need! Let's jump into worldAPI testing mode.");
+          onMessage("Got it! All set up with those minimal details. Who needs paperwork when you have Dolly, right? 💁‍♀️✨ Let's dive into worldAPI testing mode!");
           onStageChange('init');
           processedStages.current.add(stage);
           break;
           
         case 'technical-requirements':
           console.log("Processing technical-requirements stage");
-          onMessage("Now that we're set up, what would you like to do with worldAPI? You can send money, check rates, or ask about our network coverage.");
+          onMessage("Alright superstar, you're all set! 🌟 What worldAPI magic shall we conjure up today? Send money around the globe? Check exchange rates? Explore our massive network? The digital world is your oyster!");
           processedStages.current.add(stage);
           break;
           
         // Add default case to handle any unmatched stage
         default:
           console.log("No specific handler for stage:", stage);
-          onMessage("I'm here to help with worldAPI. What would you like to do next?");
+          onMessage("I'm here and ready to make worldAPI simple and maybe even fun! What would you like to explore today?");
           processedStages.current.add(stage);
           break;
       }
@@ -84,7 +84,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       onComplete={() => {
         console.log("Terminal animation completed, moving to technical-requirements");
         setShowTerminal(false);
-        onMessage("We're in. You're wired, logged, and jacked into worldAPI. Let's break something beautiful. 🕶️💥");
+        onMessage("And we're in! 🎉 You're now officially jacked into worldAPI - where money flows like digital champagne! Let's do something cool, shall we? 💥");
         onStageChange('technical-requirements');
       }} 
     />
