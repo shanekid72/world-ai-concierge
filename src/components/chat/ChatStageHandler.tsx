@@ -32,32 +32,20 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       
       switch (stage) {
         case 'choosePath':
-          // Only show setup message if conversation hasn't started yet
-          if (!conversationStarted) {
-            console.log("Processing choosePath stage, showing terminal and message");
-            // Clear previous messages first to avoid duplication
-            setShowTerminal(false);
-            setTimeout(() => {
-              onMessage("Setting up the API testing environment for you. This will just take a moment. ⚙️");
-              setShowTerminal(true);
-              processedStages.current.add(stage);
-            }, 100);
-          } else {
-            processedStages.current.add(stage);
-          }
+          // We're now handling this differently in useConversationLogic
+          // to prevent users from having to input twice
+          processedStages.current.add(stage);
           break;
           
         case 'standardOnboarding':
           console.log("Processing standardOnboarding stage");
           onMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢");
-          // Don't auto-progress - wait for user to provide input
           processedStages.current.add(stage);
           break;
           
         case 'collectMinimalInfo':
-          console.log("Processing collectMinimalInfo stage");
-          onMessage("To set up your account for testing worldAPI, I'll need some basic information. Could you provide your name and what you're planning to build? 👨‍💻");
-          // Don't auto-progress - wait for user to provide input
+          // This message is now handled by useConversationLogic
+          // to ensure a smoother transition
           processedStages.current.add(stage);
           break;
           

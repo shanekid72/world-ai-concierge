@@ -20,10 +20,17 @@ export const useConversationLogic = (
     try {
       const lower = value.toLowerCase();
       
+      // Handle intro stage responses
       if (stage === 'intro') {
         if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi") || lower.includes("legend")) {
           appendAgentMessage("Great! Let me set up the test environment for you. 🚀");
           setStage('choosePath');
+          
+          // Move directly to test path without requiring second input
+          setTimeout(() => {
+            appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
+            setStage('collectMinimalInfo');
+          }, 1000);
           return;
         } else if (lower.includes("onboard") || lower.includes("start") || lower.includes("full") || lower.includes("experience")) {
           appendAgentMessage("Perfect! Let's walk through the onboarding process together. 📝");
@@ -32,6 +39,8 @@ export const useConversationLogic = (
         }
       }
       
+      // This is now a fallback section for the choosePath stage
+      // We shouldn't typically reach here with the improved flow above
       if (stage === 'choosePath') {
         const isTestIntent = ['test', 'test worldapi', 'i want to test', 'skip onboarding', 'proceed to integration', 'jump to technical', 'skip', 'legendary']
           .some(phrase => lower.includes(phrase));
@@ -44,6 +53,15 @@ export const useConversationLogic = (
           }, 1000);
           return;
         }
+        
+        // If we're still in choosePath but no intent was detected, move forward anyway
+        // This prevents users from having to input twice
+        appendAgentMessage("I'll help you get started with worldAPI testing. 🚀");
+        setTimeout(() => {
+          appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
+          setStage('collectMinimalInfo');
+        }, 1000);
+        return;
       }
 
       if (stage === 'collectMinimalInfo' || stage === 'standardOnboarding') {
