@@ -19,6 +19,7 @@ export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
   onReset,
 }) => {
   const handleSend = () => {
+    console.log("UserInputHandler: Sending message:", inputValue);
     if (inputValue.trim()) {
       onSendMessage(inputValue);
     }

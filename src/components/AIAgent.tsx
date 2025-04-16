@@ -42,6 +42,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   useEffect(() => {
     if (stage === 'intro' && !hasShownIntro.current) {
       hasShownIntro.current = true;
+      console.log("Showing intro message");
       const welcomeMessage = "Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.\n\n✨ Wanna go through onboarding or skip to testing our legendary worldAPI?";
       
       const agentMessage = {
@@ -72,9 +73,21 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     conversation.messages.push(userMessage);
     handleSendMessage();
     
+    // Clear input right after adding user message
+    setInputValue('');
+    
     handleIntent(value).catch(err => {
       console.error("Error handling intent:", err);
-      setInputValue("I'm sorry, there was an error processing your request. Please try again.");
+      
+      // Add error message from agent
+      const errorMessage = {
+        id: Date.now().toString(),
+        content: "I'm sorry, there was an error processing your request. Please try again.",
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      conversation.messages.push(errorMessage);
       handleSendMessage();
     });
   };
@@ -115,7 +128,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         onStageChange={setStage}
         onMessage={(message) => {
           console.log("Adding agent message:", message);
-          setInputValue('');
           
           const agentMessage = {
             id: Date.now().toString(),

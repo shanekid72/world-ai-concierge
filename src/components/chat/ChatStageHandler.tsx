@@ -21,6 +21,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
     console.log("ChatStageHandler: Current stage is", stage);
     
     if (processedStages.current.has(stage)) {
+      console.log("Stage already processed:", stage);
       return;
     }
     
@@ -29,24 +30,29 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       
       switch (stage) {
         case 'intro':
+          console.log("Processing intro stage");
           break;
           
         case 'choosePath':
+          console.log("Processing choosePath stage, showing terminal and message");
           onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
           setShowTerminal(true);
           break;
           
         case 'standardOnboarding':
+          console.log("Processing standardOnboarding stage");
           onMessage("🎓 (Pretend we're doing KYC, compliance, and business requirements...) All done! ✅ Ready to integrate?");
           onStageChange('init');
           break;
           
         case 'collectMinimalInfo':
+          console.log("Processing collectMinimalInfo stage");
           onMessage("🙌 Got what I need! Let's jump into worldAPI testing mode.");
           onStageChange('init');
           break;
           
         case 'technical-requirements':
+          console.log("Processing technical-requirements stage");
           onMessage("Now that we're set up, what would you like to do with worldAPI? You can send money, check rates, or ask about our network coverage.");
           break;
       }
