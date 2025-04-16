@@ -48,7 +48,6 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       hasShownIntro.current = true;
       // Update welcome message
       const welcomeMessage = "Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.\n\n✨ Wanna go through onboarding or skip to testing our legendary worldAPI?";
-      setInputValue('');
       
       // Add message directly to conversation
       const agentMessage = {
@@ -61,6 +60,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       conversation.messages.push(agentMessage);
       
       // Force update to trigger re-render
+      setInputValue('');
       handleSendMessage();
     }
   }, [stage, setInputValue, conversation.messages, handleSendMessage]);
@@ -159,7 +159,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             onInputChange={setInputValue}
             onSendMessage={() => {
               if (inputValue.trim()) {
-                // Only add user message to conversation if there's actually input
+                // Add user message to conversation first
                 const userMessage = {
                   id: Date.now().toString(),
                   content: inputValue,
@@ -168,6 +168,11 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
                 };
                 
                 conversation.messages.push(userMessage);
+                
+                // Force a render to update UI with user message
+                handleSendMessage();
+                
+                // Process the intent after message is shown
                 handleIntent(inputValue);
               }
             }}
@@ -175,7 +180,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 if (inputValue.trim()) {
-                  // Only add user message to conversation if there's actually input
+                  // Add user message to conversation first
                   const userMessage = {
                     id: Date.now().toString(),
                     content: inputValue,
@@ -184,6 +189,11 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
                   };
                   
                   conversation.messages.push(userMessage);
+                  
+                  // Force a render to update UI with user message
+                  handleSendMessage();
+                  
+                  // Process the intent after message is shown
                   handleIntent(inputValue);
                 }
               }

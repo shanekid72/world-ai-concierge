@@ -28,6 +28,7 @@ export const useTransactionFlow = (
     if (stage === 'intro' && (lower.includes("test") || lower.includes("skip"))) {
       // Set stage to choosePath to trigger animation
       setStage('choosePath');
+      // No need to set input value as the message has already been added to the conversation
       return;
     }
 

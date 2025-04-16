@@ -28,10 +28,8 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           break;
           
         case 'choosePath':
-          if (stage === 'choosePath') {
-            onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
-            setShowTerminal(true);
-          }
+          onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
+          setShowTerminal(true);
           break;
           
         case 'standardOnboarding':
