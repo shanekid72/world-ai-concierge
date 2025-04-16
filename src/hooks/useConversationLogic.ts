@@ -60,7 +60,13 @@ export const useConversationLogic = (
           return;
         }
 
-        appendAgentMessage("Hmm, want to:\n- Test API\n- Send Money\n- Get Rates?");
+        if (lower.includes("history") || lower.includes("past") || lower.includes("transactions")) {
+          appendAgentMessage("Here’s a summary of your past moves through the matrix 💸...\n\n(Showing recent transactions...)");
+          setStage("history");
+          return;
+        }
+
+        appendAgentMessage("Hmm, want to:\n- Test API\n- Send Money\n- Get Rates?\n- See Transaction History?");
         return;
       }
 
@@ -95,6 +101,11 @@ export const useConversationLogic = (
         }
 
         setStage("dollyEpicBoot");
+        return;
+      }
+
+      if (stage === 'history') {
+        appendAgentMessage("📜 Recent transactions:\n- 1,000 USD to India ✅\n- 500 EUR to Kenya ✅\n- 200 GBP to Nigeria ✅");
         return;
       }
 
