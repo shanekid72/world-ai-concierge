@@ -47,11 +47,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       setInputValue("Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
       handleSendMessage();
       
-      setTimeout(() => {
-        setInputValue("✨ Would you like to go through the full onboarding journey, or jump straight into testing our legendary worldAPI?");
-        handleSendMessage();
-        setStage('choosePath');
-      }, 1000);
+      // Remove the automatic second message
+      // Let the user input trigger the next stage
     }
   }, [stage, setInputValue, handleSendMessage, setStage]);
 
