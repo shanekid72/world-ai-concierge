@@ -34,7 +34,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           // Clear previous messages first to avoid duplication
           setShowTerminal(false);
           setTimeout(() => {
-            onMessage("Setting up the API testing environment for you. This will just take a moment.");
+            onMessage("Setting up the API testing environment for you. This will just take a moment. ⚙️");
             setShowTerminal(true);
             processedStages.current.add(stage);
           }, 100);
@@ -42,14 +42,14 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           
         case 'standardOnboarding':
           console.log("Processing standardOnboarding stage");
-          onMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization?");
+          onMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢");
           // Don't auto-progress - wait for user to provide input
           processedStages.current.add(stage);
           break;
           
         case 'collectMinimalInfo':
           console.log("Processing collectMinimalInfo stage");
-          onMessage("To set up your account for testing worldAPI, I'll need some basic information. Could you provide your name and what you're planning to build?");
+          onMessage("To set up your account for testing worldAPI, I'll need some basic information. Could you provide your name and what you're planning to build? 👨‍💻");
           // Don't auto-progress - wait for user to provide input
           processedStages.current.add(stage);
           break;
@@ -74,7 +74,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
       onComplete={() => {
         console.log("Terminal animation completed, moving to technical-requirements");
         setShowTerminal(false);
-        onMessage("Setup complete! You're now connected to worldAPI. What would you like to do first?");
+        onMessage("Setup complete! You're now connected to worldAPI. What would you like to do first? 🚀");
         onStageChange('technical-requirements');
       }} 
     />

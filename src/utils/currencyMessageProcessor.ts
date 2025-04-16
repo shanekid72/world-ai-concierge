@@ -1,6 +1,6 @@
 
 import { ConversationState } from "./types";
-import { fetchCurrencyRate, isCurrencyRateQuery } from "./currencyService";
+import { fetchCurrencyRate, isCurrencyRateQuery } from "./currencyRateService";
 
 export const processCurrencyMessage = async (
   message: string,
@@ -41,27 +41,27 @@ export const processCurrencyMessage = async (
       if (sourceCurrency && sourceCurrency !== currencyCode) {
         return { 
           newState, 
-          aiResponse: `The current exchange rate from ${sourceCurrency} to ${currencyName} (${currencyCode}) is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services?`,
+          aiResponse: `The current exchange rate from ${sourceCurrency} to ${currencyName} (${currencyCode}) is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services? 💱`,
           isTyping: true
         };
       }
       
       return { 
         newState, 
-        aiResponse: `The current exchange rate for ${currencyName} (${currencyCode}) is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services?`,
+        aiResponse: `The current exchange rate for ${currencyName} (${currencyCode}) is ${rate.toFixed(4)}. Is there anything else you would like to know about our currency services? 💱`,
         isTyping: true
       };
     }
     return { 
       newState, 
-      aiResponse: `I apologize, but there was an error fetching the rate information for ${currencyCode}. Please try again later or try a different currency.`,
+      aiResponse: `I apologize, but there was an error fetching the rate information for ${currencyCode}. Please try again later or try a different currency. 😕`,
       isTyping: true
     };
   } catch (error) {
     console.error("Error in currency rate processing:", error);
     return { 
       newState, 
-      aiResponse: `I apologize, but there was an error fetching the rate information. Please try again later.`,
+      aiResponse: `I apologize, but there was an error fetching the rate information. Please try again later. 😕`,
       isTyping: true
     };
   }
