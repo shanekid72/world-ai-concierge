@@ -9,6 +9,7 @@ import { useTransactionPolling } from '../hooks/useTransactionPolling';
 import { useTransactionFlow } from '../hooks/useTransactionFlow';
 import { TransactionStatusMessages } from './chat/TransactionStatusMessages';
 import { UserInputHandler } from './chat/UserInputHandler';
+import { toast } from "@/hooks/use-toast";
 
 interface AIAgentProps {
   onStageChange: (stageId: string) => void;
@@ -39,6 +40,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const hasShownIntro = useRef(false);
   const { handleIntent } = useTransactionFlow(setInputValue, handleSendMessage);
 
+  // Show intro message only once
   useEffect(() => {
     if (stage === 'intro' && !hasShownIntro.current) {
       hasShownIntro.current = true;
@@ -46,7 +48,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       const welcomeMessage = "Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.\n\n✨ Wanna go through onboarding or skip to testing our legendary worldAPI?";
       
       const agentMessage = {
-        id: `agent-intro-${Date.now().toString()}`,
+        id: `agent-intro-${Date.now()}`,
         content: welcomeMessage,
         isUser: false,
         timestamp: new Date()
@@ -64,7 +66,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     
     // First add the user message to the conversation
     const userMessage = {
-      id: `user-${Date.now().toString()}`,
+      id: `user-${Date.now()}`,
       content: value,
       isUser: true,
       timestamp: new Date()
@@ -76,32 +78,16 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     // Clear input after adding the user message
     setInputValue('');
     
-    // Then immediately add agent response
-    const processingResponse = {
-      id: `agent-processing-${Date.now().toString()}`,
-      content: "I'm processing your request...",
-      isUser: false,
-      timestamp: new Date()
-    };
-    
-    conversation.messages.push(processingResponse);
-    handleSendMessage();
-    
-    // Process the intent which will replace the processing message
-    handleIntent(value).catch(err => {
+    // Process the intent
+    try {
+      console.log("Calling handleIntent with message:", value);
+      handleIntent(value);
+    } catch (err) {
       console.error("Error handling intent:", err);
-      
-      // Remove the processing message
-      const processingIndex = conversation.messages.findIndex(m => 
-        m.id === processingResponse.id);
-      
-      if (processingIndex !== -1) {
-        conversation.messages.splice(processingIndex, 1);
-      }
       
       // Add error message from agent
       const errorMessage = {
-        id: `agent-error-${Date.now().toString()}`,
+        id: `agent-error-${Date.now()}`,
         content: "I'm sorry, there was an error processing your request. Please try again.",
         isUser: false,
         timestamp: new Date()
@@ -109,7 +95,13 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       
       conversation.messages.push(errorMessage);
       handleSendMessage();
-    });
+      
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -150,7 +142,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
           console.log("Adding agent message:", message);
           
           const agentMessage = {
-            id: `agent-stage-${Date.now().toString()}`,
+            id: `agent-stage-${Date.now()}`,
             content: message,
             isUser: false,
             timestamp: new Date()

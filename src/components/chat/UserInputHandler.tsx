@@ -20,9 +20,17 @@ export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
 }) => {
   const handleSend = () => {
     console.log("UserInputHandler: Sending message:", inputValue);
-    if (inputValue.trim()) {
+    const trimmedValue = inputValue.trim();
+    if (trimmedValue) {
       // Send the current input value
-      onSendMessage(inputValue);
+      onSendMessage(trimmedValue);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
   };
 
@@ -34,12 +42,7 @@ export const UserInputHandler: React.FC<UserInputHandlerProps> = ({
           isAgentTyping={isAgentTyping}
           onInputChange={onInputChange}
           onSendMessage={handleSend}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
+          onKeyDown={handleKeyDown}
         />
         <ChatControls onReset={onReset} />
       </div>
