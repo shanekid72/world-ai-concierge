@@ -1,6 +1,7 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { type Stage } from '../../hooks/useWorldApiChat';
+import AnimatedTerminal from './AnimatedTerminal';
 
 interface ChatStageHandlerProps {
   stage: Stage;
@@ -14,6 +15,7 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   onMessage
 }) => {
   const processedStages = useRef<Set<Stage>>(new Set());
+  const [showTerminal, setShowTerminal] = useState(false);
   
   React.useEffect(() => {
     if (processedStages.current.has(stage)) {
@@ -27,9 +29,8 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           
         case 'choosePath':
           if (stage === 'choosePath') {
-            const message = "Normally, you'd need to complete all the official onboarding rituals — KYC scrolls, compliance gateways, and all the sacred fintech scrolls 📜.\n\nBut hey — since you're here to test our legendary chat-based integration, we're unlocking the backdoor. Consider this a VIP pass to the core. Just don't forget — the real magic happens once full onboarding is complete. 😉";
-            onMessage(message);
-            onStageChange('technical-requirements');
+            onMessage("Copy that. 🕶️ Spinning up a custom ops shell just for you...\n\nThis might look like magic — and honestly, it kinda is.");
+            setShowTerminal(true);
           }
           break;
           
@@ -52,6 +53,13 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
     }
   }, [stage, onMessage, onStageChange]);
 
-  return null;
+  return showTerminal ? (
+    <AnimatedTerminal 
+      onComplete={() => {
+        setShowTerminal(false);
+        onMessage("We're in. You're wired, logged, and jacked into worldAPI. Let's break something beautiful. 🕶️💥");
+        onStageChange('technical-requirements');
+      }} 
+    />
+  ) : null;
 };
-
