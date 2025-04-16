@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
@@ -51,7 +51,7 @@ const ChatInterface: React.FC = () => {
             <h3 className="text-sm font-medium text-worldapi-blue-800">About worldAPI</h3>
           </div>
           <p className="text-xs text-worldapi-blue-700 mb-3 leading-relaxed">
-            worldAPI provides a unified platform for financial institutions to access global payment networks through a single integration, optimizing your international transfer capabilities.
+            worldAPI provides a unified platform for financial institutions to access global payment networks through a single integration, enabling secure international transfers across Africa, Americas, Asia, Europe, and GCC regions.
           </p>
           <Alert className="bg-worldapi-teal-50 border-worldapi-teal-100 text-worldapi-teal-800">
             <AlertDescription className="text-xs flex items-center">

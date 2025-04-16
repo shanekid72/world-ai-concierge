@@ -44,7 +44,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   useEffect(() => {
     if (stage === 'intro' && !hasInitialized.current) {
       hasInitialized.current = true;
-      // No initial message in chat window
+      setInputValue("✨ Wanna go through onboarding or skip to testing our legendary worldAPI?");
+      handleSendMessage();
     }
   }, [stage, setInputValue, handleSendMessage, setStage]);
 
