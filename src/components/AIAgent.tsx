@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import MessageList from './chat/MessageList';
 import { useChatState } from '../hooks/useChatState';
@@ -166,3 +165,4 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
 };
 
 export default AIAgent;
+
