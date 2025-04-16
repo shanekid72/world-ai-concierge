@@ -11,7 +11,7 @@ interface UseTransactionFlowReturn {
 
 export const useTransactionFlow = (
   setInputValue: (value: string) => void,
-  handleSendMessage: () => void
+  appendAgentMessage: (message: string) => void
 ): UseTransactionFlowReturn => {
   const {
     stage,
@@ -97,13 +97,14 @@ export const useTransactionFlow = (
     }
     
     console.log("Sending response:", responseText);
-    appendMessageToChat(responseText);
+    // Use the provided appendAgentMessage function instead of appendMessageToChat
+    appendAgentMessage(responseText);
     
     if (shouldChangeStage) {
       console.log(`Changing stage from ${stage} to ${shouldChangeStage}`);
       setStage(shouldChangeStage);
     }
-  }, [stage, quoteContext, setQuoteContext, setStage, handleCreateQuote]);
+  }, [stage, quoteContext, setQuoteContext, setStage, handleCreateQuote, appendAgentMessage]);
 
   return { handleIntent };
 };

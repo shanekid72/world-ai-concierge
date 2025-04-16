@@ -71,12 +71,43 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
     }
   };
 
+  // Add the missing functions
+  const appendAgentMessage = (content: string) => {
+    const newMessage: Message = {
+      id: generateId(),
+      content,
+      isUser: false,
+      timestamp: new Date()
+    };
+    
+    setConversation(prev => ({
+      ...prev,
+      messages: [...prev.messages, newMessage]
+    }));
+  };
+
+  const appendUserMessage = (content: string) => {
+    const newMessage: Message = {
+      id: generateId(),
+      content,
+      isUser: true,
+      timestamp: new Date()
+    };
+    
+    setConversation(prev => ({
+      ...prev,
+      messages: [...prev.messages, newMessage]
+    }));
+  };
+
   return {
     inputValue,
     setInputValue,
     conversation,
     isAgentTyping,
     handleSendMessage,
-    handleReset
+    handleReset,
+    appendAgentMessage,
+    appendUserMessage
   };
 };
