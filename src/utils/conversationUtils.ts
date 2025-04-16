@@ -7,24 +7,16 @@ export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
-// Initialize conversation with welcome message
+// Initialize conversation with empty messages
 export const initializeConversation = (): ConversationState => {
   const initialStage = onboardingStages[0];
-  const initialQuestion = initialStage.questions[0];
   
   return {
     currentStageId: initialStage.id,
     currentQuestionIndex: 0,
     completedStages: [],
     answers: {},
-    messages: [
-      {
-        id: generateId(),
-        content: initialQuestion.text,
-        isUser: false,
-        timestamp: new Date()
-      }
-    ]
+    messages: []
   };
 };
 

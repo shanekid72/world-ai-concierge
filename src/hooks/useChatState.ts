@@ -25,12 +25,8 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
     if (Object.keys(stageConversations).length === 0) {
       const initialStageConversations: Record<string, Message[]> = {};
       onboardingStages.forEach(stage => {
-        initialStageConversations[stage.id] = [{
-          id: generateId(),
-          content: `${stage.description}. ${stage.questions[0].text}`,
-          isUser: false,
-          timestamp: new Date()
-        }];
+        // Initialize with empty messages array instead of adding a message
+        initialStageConversations[stage.id] = [];
       });
       setStageConversations(initialStageConversations);
     }
@@ -48,13 +44,8 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
     }));
     
     let newStageMessages = stageConversations[currentStepId];
-    if (!newStageMessages || newStageMessages.length === 0) {
-      newStageMessages = [{
-        id: generateId(),
-        content: `${stage.description}. ${stage.questions[0].text}`,
-        isUser: false,
-        timestamp: new Date()
-      }];
+    if (!newStageMessages) {
+      newStageMessages = [];
     }
     
     setConversation(prev => ({
@@ -68,26 +59,15 @@ export const useChatState = ({ currentStepId, onStageChange }: UseChatStateProps
   }, [currentStepId, conversation.currentStageId, stageConversations, conversation.messages]);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
-    const agentMessage: Message = {
-      id: generateId(),
-      content: inputValue,
-      isUser: false, // This is an agent message
-      timestamp: new Date()
-    };
-
-    setConversation(prev => ({
-      ...prev,
-      messages: [...prev.messages, agentMessage]
-    }));
-    setInputValue('');
+    // Just trigger a re-render to update the UI without requiring input
+    setConversation(prev => ({ ...prev }));
   };
 
   const handleReset = () => {
     if (window.confirm('This will reset your conversation. Are you sure?')) {
       setConversation(initializeConversation());
       setStageConversations({});
+      setInputValue('');
     }
   };
 

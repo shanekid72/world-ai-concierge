@@ -38,18 +38,32 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const { isPolling } = useTransactionPolling(quoteContext.lastTxnRef, autoPoll);
   
   // Use this ref to ensure welcome message is only shown once
-  const hasInitialized = useRef(false);
+  const hasShownIntro = useRef(false);
 
   const { handleIntent } = useTransactionFlow(setInputValue, handleSendMessage);
 
   // Only send the welcome message once when component mounts
   useEffect(() => {
-    if (stage === 'intro' && !hasInitialized.current) {
-      hasInitialized.current = true;
-      setInputValue("Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.\n\n✨ Wanna go through onboarding or skip to testing our legendary worldAPI?");
+    if (stage === 'intro' && !hasShownIntro.current) {
+      hasShownIntro.current = true;
+      // Update welcome message
+      const welcomeMessage = "Welcome to worldAPI, the API you can talk to.\n\n✨ So… wanna stroll through onboarding, or skip straight to testing our legendary worldAPI like the tech boss you are? 😎";
+      setInputValue('');
+      
+      // Add message directly to conversation
+      const agentMessage = {
+        id: Date.now().toString(),
+        content: welcomeMessage,
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      conversation.messages.push(agentMessage);
+      
+      // Force update to trigger re-render
       handleSendMessage();
     }
-  }, []);
+  }, [stage]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -66,7 +80,20 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             CANCELLED: "🚫 Update: Your transaction was *CANCELLED*.",
           };
 
-          setInputValue(statusMsg[status] || `ℹ️ Status: ${status}`);
+          setInputValue('');
+          const message = statusMsg[status] || `ℹ️ Status: ${status}`;
+          
+          // Add message directly to conversation
+          const agentMessage = {
+            id: Date.now().toString(),
+            content: message,
+            isUser: false,
+            timestamp: new Date()
+          };
+          
+          conversation.messages.push(agentMessage);
+          
+          // Force update
           handleSendMessage();
 
           if (['DELIVERED', 'FAILED', 'CANCELLED'].includes(status)) {
@@ -107,7 +134,19 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
         stage={stage as Stage}
         onStageChange={setStage}
         onMessage={(message) => {
-          setInputValue(message);
+          setInputValue('');
+          
+          // Add message directly to conversation
+          const agentMessage = {
+            id: Date.now().toString(),
+            content: message,
+            isUser: false,
+            timestamp: new Date()
+          };
+          
+          conversation.messages.push(agentMessage);
+          
+          // Force update
           handleSendMessage();
         }}
       />
