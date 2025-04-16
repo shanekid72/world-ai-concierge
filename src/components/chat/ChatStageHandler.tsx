@@ -16,6 +16,10 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   React.useEffect(() => {
     const handleStageMessage = () => {
       switch (stage) {
+        case 'intro':
+          onMessage("Welcome to worldAPI, the API you can talk to.\n\n✨ So… wanna stroll through onboarding, or skip straight to testing our legendary worldAPI like the tech boss you are? 😎");
+          break;
+          
         case 'choosePath':
           onMessage("Awesome! Let's start your onboarding. First, what's your full name?");
           onStageChange('standardOnboarding');
@@ -34,10 +38,11 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
     };
     
     // Only run for the stages that need automatic messaging
-    if (['choosePath', 'standardOnboarding', 'collectMinimalInfo'].includes(stage)) {
+    if (['intro', 'choosePath', 'standardOnboarding', 'collectMinimalInfo'].includes(stage)) {
       handleStageMessage();
     }
   }, [stage, onMessage, onStageChange]);
 
   return null; // This is a logic-only component
 };
+
