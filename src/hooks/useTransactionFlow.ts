@@ -23,6 +23,26 @@ export const useTransactionFlow = (
     if (!message.trim()) return;
 
     const lower = message.toLowerCase();
+    
+    // Handle initial response for testing worldAPI
+    if (stage === 'intro' && (lower.includes("test") || lower.includes("skip"))) {
+      setInputValue('');
+      
+      // Add user message to conversation
+      const userMessage = {
+        id: Date.now().toString(),
+        content: message,
+        isUser: true,
+        timestamp: new Date()
+      };
+      
+      // Force render with user message
+      handleSendMessage();
+      
+      // Set stage to choosePath to trigger animation
+      setStage('choosePath');
+      return;
+    }
 
     if (stage === 'init' && lower.includes("send") && lower.includes("money")) {
       setInputValue("💬 Great! How much would you like to send?");
@@ -88,7 +108,9 @@ export const useTransactionFlow = (
       return;
     }
 
+    // If no specific intent was matched, just add the message to the conversation
     setInputValue('');
+    handleSendMessage();
   }, [stage, quoteContext, setQuoteContext, setStage, setInputValue, handleSendMessage, handleCreateQuote]);
 
   return { handleIntent };

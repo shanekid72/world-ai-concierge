@@ -47,7 +47,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     if (stage === 'intro' && !hasShownIntro.current) {
       hasShownIntro.current = true;
       // Update welcome message
-      const welcomeMessage = "Welcome to worldAPI, the API you can talk to.\n\n✨ So… wanna stroll through onboarding, or skip straight to testing our legendary worldAPI like the tech boss you are? 😎";
+      const welcomeMessage = "Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.\n\n✨ Wanna go through onboarding or skip to testing our legendary worldAPI?";
       setInputValue('');
       
       // Add message directly to conversation
@@ -63,7 +63,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       // Force update to trigger re-render
       handleSendMessage();
     }
-  }, [stage]);
+  }, [stage, setInputValue, conversation.messages, handleSendMessage]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -106,7 +106,7 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       }, 10000);
     }
     return () => clearInterval(interval);
-  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, handleSendMessage, setInputValue, setAutoPoll]);
+  }, [autoPoll, quoteContext.lastTxnRef, enquireTransaction, handleSendMessage, setInputValue, setAutoPoll, conversation.messages]);
 
   return (
     <div className="flex flex-col h-full">
@@ -158,14 +158,34 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
             isAgentTyping={isAgentTyping}
             onInputChange={setInputValue}
             onSendMessage={() => {
-              handleIntent(inputValue);
-              setInputValue('');
+              if (inputValue.trim()) {
+                // Only add user message to conversation if there's actually input
+                const userMessage = {
+                  id: Date.now().toString(),
+                  content: inputValue,
+                  isUser: true,
+                  timestamp: new Date()
+                };
+                
+                conversation.messages.push(userMessage);
+                handleIntent(inputValue);
+              }
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                handleIntent(inputValue);
-                setInputValue('');
+                if (inputValue.trim()) {
+                  // Only add user message to conversation if there's actually input
+                  const userMessage = {
+                    id: Date.now().toString(),
+                    content: inputValue,
+                    isUser: true,
+                    timestamp: new Date()
+                  };
+                  
+                  conversation.messages.push(userMessage);
+                  handleIntent(inputValue);
+                }
               }
             }}
           />
