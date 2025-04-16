@@ -1,7 +1,8 @@
-
 import { useCallback } from 'react';
 import { Stage } from './useWorldApiChat';
 import { fetchCurrencyRate } from '../utils/currencyRateService';
+import { useSmartAgentResponse } from '../hooks/useSmartAgentResponse';
+import { useToast } from '@/hooks/use-toast';
 
 export const useConversationLogic = (
   stage: Stage,
@@ -10,85 +11,52 @@ export const useConversationLogic = (
   setShowBootup: (show: boolean) => void,
   setQuoteContext: (context: any) => void,
   handleIntent: (message: string) => Promise<void>,
-  handleCreateQuote: (payload: any) => Promise<any>
+  handleCreateQuote: (payload: any) => Promise<any>,
+  handleCreateTransaction: (quoteId: string) => Promise<any>,
+  quoteContext: any
 ) => {
+  const getSmartReply = useSmartAgentResponse();
+  const { toast } = useToast();
+
   const processUserInput = useCallback(async (value: string) => {
     if (!value.trim()) return;
-    
+
     console.log("Processing user input in stage:", stage);
-    
+    const lower = value.toLowerCase();
+
     try {
-      const lower = value.toLowerCase();
-      
-      // Handle intro stage responses
-      if (stage === 'intro') {
-        if (lower.includes("test") || lower.includes("skip") || lower.includes("worldapi") || lower.includes("legend")) {
-          appendAgentMessage("Great! Let me set up the test environment for you. 🚀");
-          setStage('choosePath');
-          
-          // Move directly to test path without requiring second input
-          setTimeout(() => {
-            appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
-            setStage('collectMinimalInfo');
-          }, 1000);
-          return;
-        } else if (lower.includes("onboard") || lower.includes("start") || lower.includes("full") || lower.includes("experience")) {
-          appendAgentMessage("Perfect! Let's walk through the onboarding process together. 📝");
-          setStage('standardOnboarding');
+      if (stage === 'confirm') {
+        if (lower.includes("yes") || lower.includes("confirm") || lower.includes("go ahead")) {
+          appendAgentMessage("Perfect, confirming your transaction now...");
+
+          const txn = await handleCreateTransaction(quoteContext?.quoteId);
+
+          toast({
+            title: 'Transaction Confirmed',
+            description: `You sent ${quoteContext.amount} ${quoteContext.currency} to ${quoteContext.to}.\nRef: ${txn?.id || 'TXN-UNKNOWN'}`
+          });
+
+          setStage('completed');
           return;
         }
       }
-      
-      // This is now a fallback section for the choosePath stage
-      // We shouldn't typically reach here with the improved flow above
-      if (stage === 'choosePath') {
-        const isTestIntent = ['test', 'test worldapi', 'i want to test', 'skip onboarding', 'proceed to integration', 'jump to technical', 'skip', 'legendary']
-          .some(phrase => lower.includes(phrase));
 
-        if (isTestIntent) {
-          appendAgentMessage("Setting up the worldAPI test environment for you now. 🛠️");
-          setTimeout(() => {
-            appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
-            setStage('collectMinimalInfo');
-          }, 1000);
-          return;
-        }
-        
-        // If we're still in choosePath but no intent was detected, move forward anyway
-        // This prevents users from having to input twice
-        appendAgentMessage("I'll help you get started with worldAPI testing. 🚀");
-        setTimeout(() => {
-          appendAgentMessage("I just need a few quick details to get started:\n1. Your name\n2. Company name (or 'personal project')\n3. Contact information");
-          setStage('collectMinimalInfo');
-        }, 1000);
+      if (stage === 'intro' || stage === 'amount' || stage === 'country') {
+        const aiReply = await getSmartReply({
+          stage,
+          userInput: value,
+          context: {},
+        });
+        appendAgentMessage(aiReply);
         return;
       }
 
-      if (stage === 'collectMinimalInfo' || stage === 'standardOnboarding') {
-        appendAgentMessage(stage === 'collectMinimalInfo' 
-          ? "Thanks for the information! Processing your details now... ⚙️"
-          : "Thank you for that information! Just a few more questions about your business requirements... 📊"
-        );
-        setTimeout(() => {
-          appendAgentMessage("Initializing your worldAPI assistant...");
-          setShowBootup(true);
-        }, stage === 'collectMinimalInfo' ? 1200 : 1500);
-        return;
-      }
-
-      // For technical-requirements or any other stage, use the intent handler
-      if (stage === 'technical-requirements' || stage !== 'intro') {
-        await handleIntent(value);
-        return;
-      }
-
-      // Default case - use the general intent handler
       await handleIntent(value);
     } catch (err) {
-      console.error("Error handling intent:", err);
-      appendAgentMessage("I'm sorry, I encountered an error processing your request. Could you try again? 😕");
+      console.error("Error handling user input:", err);
+      appendAgentMessage("Oops! Something went wrong while processing your request. Try again.");
     }
-  }, [stage, setStage, appendAgentMessage, setShowBootup, handleIntent]);
+  }, [stage, setStage, appendAgentMessage, handleIntent, quoteContext]);
 
   return { processUserInput };
 };
