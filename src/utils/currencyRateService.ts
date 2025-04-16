@@ -28,6 +28,16 @@ export const fetchCurrencyRate = async (currencyCode: string): Promise<number | 
 
 // Check if message is asking about currency rates
 export const isCurrencyRateQuery = (message: string): string | null => {
+  // Check for currency pair patterns first (e.g., "USD to INR", "AED to INR")
+  const currencyPairRegex = /([A-Z]{3})\s+to\s+([A-Z]{3})|([A-Z]{3})\s*\/\s*([A-Z]{3})/i;
+  const match = message.toUpperCase().match(currencyPairRegex);
+  
+  if (match) {
+    // Return the target currency (second in the pair)
+    return match[2] || match[4];
+  }
+  
+  // Handle single currency code queries if no pair is found
   const rateKeywords = ['rate', 'exchange', 'fx', 'currency', 'conversion'];
   const currencyCodes = ['USD', 'EUR', 'GBP', 'AED', 'INR', 'AUD', 'CAD', 'SGD', 'JPY', 'CHF'];
   

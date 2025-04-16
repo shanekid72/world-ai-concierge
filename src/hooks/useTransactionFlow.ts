@@ -26,6 +26,25 @@ export const useTransactionFlow = (
     console.log(`Processing intent in stage "${stage}" with message: "${message}"`);
     const lower = message.toLowerCase();
     
+    // Check for specific currency pair patterns (e.g., "USD to INR", "AED to INR")
+    const currencyPairRegex = /([A-Z]{3})\s+to\s+([A-Z]{3})|([A-Z]{3})\s*\/\s*([A-Z]{3})/i;
+    const currencyMatch = message.match(currencyPairRegex);
+    
+    if (currencyMatch) {
+      const sourceCurrency = currencyMatch[1] || currencyMatch[3];
+      const targetCurrency = currencyMatch[2] || currencyMatch[4];
+      
+      appendAgentMessage(`Looking up the current exchange rate from ${sourceCurrency.toUpperCase()} to ${targetCurrency.toUpperCase()}. One moment please...`);
+      
+      // This would be replaced with an actual API call in a real implementation
+      // Simulating response for demo
+      setTimeout(() => {
+        appendAgentMessage(`The current exchange rate from ${sourceCurrency.toUpperCase()} to ${targetCurrency.toUpperCase()} is 22.5123. Is there anything else you would like to know about our currency services?`);
+      }, 1000);
+      
+      return;
+    }
+    
     // Check for follow-up response first
     const followUp = getFollowUpResponse(lower);
     if (followUp) {
@@ -46,7 +65,7 @@ export const useTransactionFlow = (
     
     // For currency rate inquiries - handle them in any stage
     if (lower.includes('rate') || lower.includes('exchange') || (lower.includes('check') && lower.includes('rates'))) {
-      appendAgentMessage("I can help with exchange rates. Which currencies are you interested in? For example, you can ask about USD to EUR or GBP to INR.");
+      appendAgentMessage("I'd be happy to check exchange rates for you. Which currencies would you like to compare? For example, 'USD to INR' or 'EUR to GBP'.");
       return;
     }
     
@@ -78,7 +97,7 @@ export const useTransactionFlow = (
         shouldChangeStage = 'amount';
         setQuoteContext({});
       } else if (lower.includes("rate") || lower.includes("exchange") || lower.includes("currency")) {
-        responseText = "I can help with exchange rates. Which currencies are you interested in? For example, you can ask about USD to EUR or GBP to INR.";
+        responseText = "I'd be happy to check exchange rates for you. Which currencies would you like to compare? For example, 'USD to INR' or 'EUR to GBP'.";
       } else if (lower.includes("network") || lower.includes("coverage") || lower.includes("countries") || lower.includes("where")) {
         responseText = "Our network covers over 100 countries across Africa, Americas, Asia, Europe, and the GCC region. Is there a specific region you're interested in?";
       } else if (lower.includes("help") || lower.includes("what") || lower.includes("can you do")) {

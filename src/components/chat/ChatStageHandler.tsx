@@ -54,11 +54,8 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
           processedStages.current.add(stage);
           break;
           
-        case 'technical-requirements':
-          console.log("Processing technical-requirements stage");
-          onMessage("You're all set! What would you like to do with worldAPI today? You can send money globally, check exchange rates, or explore our network coverage.");
-          processedStages.current.add(stage);
-          break;
+        // Intentionally NOT handling technical-requirements stage here
+        // Let AIAgent component handle that message to avoid duplicating the message
           
         // Add default case to handle any unmatched stage
         default:

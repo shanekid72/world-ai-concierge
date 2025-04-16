@@ -2,6 +2,12 @@
 import { Stage } from '../useWorldApiChat';
 
 export const getDefaultResponse = (stage: Stage, message: string): string => {
+  // Handle currency rate requests across all stages
+  if (/([A-Z]{3})\s+to\s+([A-Z]{3})|([A-Z]{3})\s*\/\s*([A-Z]{3})/i.test(message) ||
+      (message.toLowerCase().includes('rate') && message.toLowerCase().includes('exchange'))) {
+    return "I'd be happy to check exchange rates for you. Which currencies would you like to compare? For example, 'USD to INR' or 'EUR to GBP'.";
+  }
+  
   // Handle common greetings across all stages with appropriate personality
   if (/^(hi|hello|hey|greetings|howdy)(\s|$)/i.test(message)) {
     return `Hi there! 👋 I'm Dolly from Digit9. ${getStageSpecificPrompt(stage)}`;
@@ -83,12 +89,28 @@ export const getRandomFunFact = (): string => {
     "The fastest growing remittance corridors are in Asia and Africa, with some seeing 20%+ growth year over year.",
     "Before electronic transfers, international payments could take months to complete. Now they can happen almost instantly.",
     "The global payments industry is worth over $2 trillion annually.",
+    "The UAE dirham (AED) is pegged to the US dollar at a fixed rate of 3.6725 dirhams per dollar.",
+    "India receives more remittances than any other country in the world, with over $100 billion annually.",
+    "Digital wallets are expected to replace cash as the primary payment method in many countries by 2025."
   ];
   return facts[Math.floor(Math.random() * facts.length)];
 };
 
-// Handle follow-up responses
+// Handle follow-up responses with improved currency handling
 export const getFollowUpResponse = (message: string): string | null => {
+  // Handle currency pair patterns
+  const currencyPairRegex = /([A-Z]{3})\s+to\s+([A-Z]{3})|([A-Z]{3})\s*\/\s*([A-Z]{3})/i;
+  const match = message.match(currencyPairRegex);
+  
+  if (match) {
+    const sourceCurrency = match[1] || match[3];
+    const targetCurrency = match[2] || match[4];
+    
+    if (sourceCurrency && targetCurrency) {
+      return `I'll look up the exchange rate from ${sourceCurrency.toUpperCase()} to ${targetCurrency.toUpperCase()} for you right away.`;
+    }
+  }
+  
   if (message.toLowerCase().includes('exchange rate') || 
       (message.toLowerCase().includes('check') && message.toLowerCase().includes('rate'))) {
     return "I'd be happy to check exchange rates for you. Which currencies would you like to compare? For example, 'USD to INR' or 'EUR to GBP'.";

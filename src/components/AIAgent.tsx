@@ -37,6 +37,8 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
   const hasShownIntro = useRef(false);
   const { handleIntent } = useTransactionFlow(setInputValue, appendAgentMessage);
   const [showBootup, setShowBootup] = useState(false);
+  // Add this to track when technical stage is initialized
+  const techStageInitialized = useRef(false);
 
   // Show intro message but don't auto-progress to choose path
   useEffect(() => {
@@ -47,6 +49,12 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
       appendAgentMessage("Would you like to go through onboarding or skip to testing our worldAPI?");
       // Don't automatically change stage - wait for user input
     }
+    
+    // Initialize technical-requirements stage with a welcome message
+    if (stage === 'technical-requirements' && !techStageInitialized.current) {
+      techStageInitialized.current = true;
+      appendAgentMessage("You're all set to use worldAPI! I can help you send money globally, check exchange rates, or explore our network coverage. What would you like to do today?");
+    }
   }, [stage, appendAgentMessage, setStage]);
 
   const processUserInput = (value: string) => {
@@ -56,6 +64,16 @@ const AIAgent: React.FC<AIAgentProps> = ({ onStageChange, currentStepId }) => {
     console.log("Processing user input in stage:", stage);
     
     try {
+      // Always check for currency queries first, regardless of stage
+      if (value.toLowerCase().includes('rate') || 
+          value.toLowerCase().includes('exchange') || 
+          value.toLowerCase().includes('currency') ||
+          /([A-Z]{3})\s+to\s+([A-Z]{3})/i.test(value)) {
+        
+        appendAgentMessage("I'd be happy to check exchange rates for you. Which currencies would you like to compare? For example, 'USD to INR' or 'EUR to GBP'.");
+        return;
+      }
+      
       if (stage === 'intro') {
         // Handle intro stage response in the processUserInput function
         const lower = value.toLowerCase();
