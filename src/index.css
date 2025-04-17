@@ -80,7 +80,8 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border; /* OR another valid class like border-gray-200 or border-slate-800 */
+;
   }
 
   body {
