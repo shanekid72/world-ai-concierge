@@ -1,51 +1,81 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
+import QuoteHandler from './transaction/QuoteHandler';
+import TransactionHandler from './transaction/TransactionHandler';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare, Info } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useWorldApiChat } from "@/hooks/useWorldApiChat";
 
 const ChatInterface: React.FC = () => {
+  const {
+    stage,
+    setStage
+  } = useWorldApiChat();
+
   const [steps, setSteps] = useState<Step[]>(() => {
-    const initialSteps = getProgressSteps();
-    initialSteps[0].status = 'current'; // Set first step as current
-    return initialSteps;
+    const initial = getProgressSteps();
+    initial[0].status = 'current';
+    return initial;
   });
-  const [currentStepId, setCurrentStepId] = useState<string>(steps[0].id);
-  
-  const handleStageChange = (stageId: string) => {
-    if (stageId === currentStepId) return;
-    
-    // Update steps statuses
-    setSteps(prevSteps => {
-      return prevSteps.map(step => {
-        if (step.id === currentStepId) {
-          return { ...step, status: 'completed' };
-        } else if (step.id === stageId) {
-          return { ...step, status: 'current' };
-        } else {
-          return step;
-        }
-      });
-    });
-    
-    setCurrentStepId(stageId);
+
+  const [currentStepId, setCurrentStepId] = useState<string>('intro');
+
+  useEffect(() => {
+    if (stage !== currentStepId) {
+      setCurrentStepId(stage);
+      setSteps(prev =>
+        prev.map(s =>
+          s.id === stage ? { ...s, status: 'current' } :
+          s.id === currentStepId ? { ...s, status: 'completed' } : s
+        )
+      );
+    }
+  }, [stage]);
+
+  const handleStageChange = (newStageId: string) => {
+    if (newStageId !== stage) {
+      setStage(newStageId);
+    }
   };
-  
+
+  const renderModule = () => {
+    if (stage === 'go-live') {
+      return (
+        <div className="space-y-6 px-4 py-2">
+          <QuoteHandler />
+          <TransactionHandler />
+        </div>
+      );
+    }
+
+    return (
+      <AIAgent
+        onStageChange={handleStageChange}
+        currentStepId={currentStepId}
+      />
+    );
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-76px)] gap-4 p-4">
       <div className="md:w-1/4 w-full md:h-full overflow-y-auto">
-        <ProgressTracker steps={steps} currentStepId={currentStepId} onStepClick={handleStageChange} />
-        
-        <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg shadow-sm">
+        <ProgressTracker
+          steps={steps}
+          currentStepId={currentStepId}
+          onStepClick={handleStageChange}
+        />
+        <div className="bg-worldapi-blue-50 border border-worldapi-blue-100 p-4 rounded-lg shadow-sm mt-6">
           <div className="flex items-center mb-3">
-            <img 
-              src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
-              alt="worldAPI Logo" 
-              className="h-16 w-auto mr-2" 
+            <img
+              src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png"
+              alt="worldAPI Logo"
+              className="h-16 w-auto mr-2"
             />
-            <h3 className="text-sm font-medium text-worldapi-blue-800">About worldAPI</h3>
+            <h3 className="text-sm font-medium text-worldapi-blue-800">
+              About worldAPI
+            </h3>
           </div>
           <p className="text-xs text-worldapi-blue-700 mb-3 leading-relaxed">
             worldAPI provides a unified platform for financial institutions to access global payment networks through a single integration, enabling secure international transfers across Africa, Americas, Asia, Europe, and GCC regions.
@@ -58,7 +88,7 @@ const ChatInterface: React.FC = () => {
           </Alert>
         </div>
       </div>
-      
+
       <div className="md:w-3/4 w-full bg-white rounded-lg border border-gray-100 shadow-sm flex flex-col h-full">
         <div className="p-4 border-b bg-gradient-to-r from-worldapi-blue-50 to-worldapi-teal-50">
           <div className="flex items-center justify-between mb-4">
@@ -67,8 +97,12 @@ const ChatInterface: React.FC = () => {
                 <MessageSquare size={24} className="text-worldapi-teal-600" />
               </div>
               <div>
-                <h2 className="text-xl font-medium text-worldapi-blue-800">Dolly</h2>
-                <p className="text-sm text-gray-600">Hi, I'm Dolly — your AI assistant from Digit9</p>
+                <h2 className="text-xl font-medium text-worldapi-blue-800">
+                  Dolly
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Hi, I'm Dolly — your AI assistant from Digit9
+                </p>
               </div>
             </div>
             <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs flex items-center shadow-sm">
@@ -77,12 +111,9 @@ const ChatInterface: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-hidden">
-          <AIAgent 
-            onStageChange={handleStageChange}
-            currentStepId={currentStepId}
-          />
+          {renderModule()}
         </div>
       </div>
     </div>
