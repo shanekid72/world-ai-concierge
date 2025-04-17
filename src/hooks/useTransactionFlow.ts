@@ -1,57 +1,42 @@
-import { useCallback } from 'react';
-import { useWorldApiChat, type Stage } from './useWorldApiChat';
-import { getDefaultResponse, getRandomFunFact, getFollowUpResponse } from './chat/useStageResponses';
-import { handleQuoteCreation } from './chat/useQuoteHandling';
-import { fetchCurrencyRate } from '@/utils/currencyRateService';
-import { useQuoteExtraction } from './useQuoteExtraction';
+import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { useQuoteExtraction } from './useQuoteExtraction';
 
-interface UseTransactionFlowReturn {
-  handleIntent: (message: string) => Promise<void>;
-}
-
-export const useTransactionFlow = (
-  setInputValue: (value: string) => void,
-  appendAgentMessage: (message: string) => void
-): UseTransactionFlowReturn => {
-  const {
-    stage,
-    setStage,
-    quoteContext,
-    setQuoteContext,
-    handleCreateQuote,
-  } = useWorldApiChat();
-
-  const extractQuoteFields = useQuoteExtraction();
+export const useTransactionFlow = ({
+  message,
+  stage,
+  setStage,
+  setQuoteContext,
+  handleCreateQuote,
+}: any) => {
   const { toast } = useToast();
+  const extract = useQuoteExtraction();
 
-  const handleIntent = useCallback(async (message: string) => {
-    if (!message.trim()) return;
+  useEffect(() => {
+    if (!message || stage !== 'technical-requirements') return;
 
-    console.log(`Processing intent in stage "${stage}" with message: "${message}"`);
+    const extracted = extract(message);
+    if (!extracted.amount || !extracted.to || !extracted.currency) return;
 
-    if (stage === 'amount' || stage === 'country') {
-      const extracted = await extractQuoteFields(message);
-      if (extracted) {
-        appendAgentMessage(`Got it! Creating a quote to send ${extracted.amount} ${extracted.currency} to ${extracted.to}...`);
-        const quote = await handleCreateQuote(extracted);
-        setQuoteContext(prev => ({ ...prev, ...extracted, quoteId: quote?.id }));
-        setStage('confirm');
-
-        toast({
-          title: 'Quote Created',
-          description: `Amount: ${extracted.amount} ${extracted.currency}\nTo: ${extracted.to}\nFX Rate: ${quote?.fxRate || 'N/A'}\nFee: ${quote?.fee || 'N/A'}\nDelivery: ${quote?.deliveryTime || '1-2 days'}`
-        });
-
-        return;
-      } else {
-        appendAgentMessage("I need a bit more info — how much do you want to send and to which country?");
-        return;
-      }
-    }
-
-    appendAgentMessage("I’m here to help! You can tell me to send money, check rates, or get started.");
-  }, [stage, quoteContext, handleCreateQuote, setQuoteContext, setStage, appendAgentMessage, toast]);
-
-  return { handleIntent };
+    toast({
+      title: 'Quote extracted 🚀',
+      description: `Send ${extracted.amount} ${extracted.currency} to ${extracted.to}?`,
+      action: (
+        <Button
+          onClick={async () => {
+            const result = await handleCreateQuote({
+              amount: extracted.amount,
+              currency: extracted.currency,
+              to: extracted.to,
+            });
+            setQuoteContext((prev: any) => ({ ...prev, ...extracted, quoteId: result.id }));
+            setStage('confirm');
+          }}
+        >
+          Confirm
+        </Button>
+      ),
+    });
+  }, [message, stage]);
 };
