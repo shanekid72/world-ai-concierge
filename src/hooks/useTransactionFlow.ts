@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export const useTransactionFlow = (props: TransactionFlowProps) => {
     };
 
     const action = (
-      <Button onClick={handleConfirm}>
+      <Button onClick={handleConfirm} className="bg-cyberpunk-blue hover:bg-cyberpunk-blue/80">
         Confirm
       </Button>
     );
