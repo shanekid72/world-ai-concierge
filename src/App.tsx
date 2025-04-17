@@ -1,16 +1,10 @@
 import React from 'react';
-import DollyEpicBoot from './components/DollyEpicBoot';
-import DollyCyberpunkChat from './components/DollyCyberpunkChat';
-import { useWorldApiChat } from './hooks/useWorldApiChat';
+import ChatInterface from './components/ChatInterface';
 
-function App() {
-  const { stage, setStage } = useWorldApiChat();
-
-  if (stage === 'dollyEpicBoot') {
-    return <DollyEpicBoot onBootComplete={() => setStage('choosePath')} />;
-  }
-
-  return <DollyCyberpunkChat />;
+export default function App() {
+  return (
+    <div className="bg-[#0f0c29] min-h-screen text-white">
+      <ChatInterface />
+    </div>
+  );
 }
-
-export default App;
