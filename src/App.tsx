@@ -1,10 +1,16 @@
-import React from 'react';
-import ChatInterface from './components/ChatInterface';
+import { useEffect, useState } from "react";
+import ChatInterface from "@/components/ChatInterface";
+import DollyBootup from "@/components/DollyBootup";
 
-export default function App() {
-  return (
-    <div className="bg-[#0f0c29] min-h-screen text-white">
-      <ChatInterface />
-    </div>
-  );
-}
+const App = () => {
+  const [showBoot, setShowBoot] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowBoot(false), 4500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return showBoot ? <DollyBootup /> : <ChatInterface />;
+};
+
+export default App;
