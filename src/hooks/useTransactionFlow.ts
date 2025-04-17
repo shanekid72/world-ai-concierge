@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,13 @@ export const useTransactionFlow = ({
   setStage,
   setQuoteContext,
   handleCreateQuote,
-}: any) => {
+}: {
+  message: string;
+  stage: string;
+  setStage: (stage: string) => void;
+  setQuoteContext: (context: any) => void;
+  handleCreateQuote: (payload: any) => Promise<any>;
+}) => {
   const { toast } = useToast();
   const extract = useQuoteExtraction();
 
@@ -38,5 +45,5 @@ export const useTransactionFlow = ({
         </Button>
       ),
     });
-  }, [message, stage]);
+  }, [message, stage, extract, toast, handleCreateQuote, setQuoteContext, setStage]);
 };
