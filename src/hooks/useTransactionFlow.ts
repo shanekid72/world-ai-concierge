@@ -46,4 +46,6 @@ export const useTransactionFlow = ({
       ),
     });
   }, [message, stage, extract, toast, handleCreateQuote, setQuoteContext, setStage]);
+
+  return null;
 };
