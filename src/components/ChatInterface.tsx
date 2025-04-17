@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
 import { MessageSquare, Info, Cpu, Zap, Shield, Globe } from "lucide-react";
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import DollyAvatar from '@/assets/dolly-avatar';
+import { motion } from 'framer-motion';
 
 const ChatInterface: React.FC = () => {
   const [steps, setSteps] = useState<Step[]>(() => {
@@ -14,6 +15,7 @@ const ChatInterface: React.FC = () => {
   });
 
   const [currentStepId, setCurrentStepId] = useState<string>(steps[0].id);
+  const [isAvatarActive, setIsAvatarActive] = useState(false);
 
   const handleStageChange = (stageId: string) => {
     if (stageId === currentStepId) return;
@@ -30,16 +32,36 @@ const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-76px)] gap-4 p-4 text-cyan-400 bg-cyberpunk-bg tech-pattern scanlines">
-      <aside className="md:w-1/4 w-full p-4 border-r border-fuchsia-900 bg-cyberpunk-dark/80 backdrop-blur-md rounded-xl">
-        <div className="mb-6 flex items-center">
+    <motion.div 
+      className="flex flex-col md:flex-row h-[calc(100vh-76px)] gap-4 p-4 text-cyan-400 bg-cyberpunk-bg tech-pattern scanlines"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.aside 
+        className="md:w-1/4 w-full p-4 border-r border-fuchsia-900 bg-cyberpunk-dark/80 backdrop-blur-md rounded-xl"
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <motion.div 
+          className="mb-6 flex items-center"
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
           <Cpu className="h-6 w-6 text-cyberpunk-pink power-glow mr-2" />
           <h2 className="text-xl font-cyber text-cyberpunk-pink neon-text">worldAPI_NEXUS</h2>
-        </div>
+        </motion.div>
         
         <ProgressTracker steps={steps} currentStepId={currentStepId} onStepClick={handleStageChange} />
         
-        <div className="mt-6 p-4 cyber-panel border-cyan-800 rounded-md">
+        <motion.div 
+          className="mt-6 p-4 cyber-panel border-cyan-800 rounded-md"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
           <div className="flex items-center mb-2">
             <Globe className="text-cyberpunk-blue mr-2 h-4 w-4" />
             <strong className="text-cyberpunk-blue font-cyber text-sm">ABOUT_WORLDAPI</strong>
@@ -53,26 +75,55 @@ const ChatInterface: React.FC = () => {
               Data secured with quantum-grade encryption 🔒
             </AlertDescription>
           </Alert>
-        </div>
-      </aside>
+        </motion.div>
+      </motion.aside>
 
-      <main className="md:w-3/4 w-full flex flex-col cyber-grid border-cyan-800 rounded-xl p-4 shadow-lg">
-        <div className="mb-4 border-b border-fuchsia-900 pb-2">
+      <motion.main 
+        className="md:w-3/4 w-full flex flex-col cyber-grid border-cyan-800 rounded-xl p-4 shadow-lg"
+        initial={{ x: 20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <motion.div 
+          className="mb-4 border-b border-fuchsia-900 pb-4"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
           <div className="flex items-center">
-            <div className="h-12 w-12 rounded-full border-2 border-fuchsia-500 mr-3 overflow-hidden shadow-neon flex items-center justify-center bg-cyberpunk-darker">
-              <Zap className="h-6 w-6 text-cyberpunk-pink" />
+            <div className="h-16 w-16 mr-4">
+              <DollyAvatar className="shadow-neon" isActive={isAvatarActive} />
             </div>
             <div>
-              <h2 className="text-xl font-cyber text-cyberpunk-pink glitch">DOLLY</h2>
-              <p className="text-sm text-cyan-400 font-mono">Neural Assistant :: Digit9 // v2.5.0</p>
+              <motion.h2 
+                className="text-2xl font-cyber text-cyberpunk-pink glitch mb-1"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                DOLLY
+              </motion.h2>
+              <motion.p 
+                className="text-sm text-cyan-400 font-mono flex items-center"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 mr-2 animate-pulse" />
+                Neural Assistant :: Digit9 // v2.5.0
+              </motion.p>
             </div>
           </div>
-        </div>
+        </motion.div>
         <div className="flex-1">
-          <AIAgent onStageChange={handleStageChange} currentStepId={currentStepId} />
+          <AIAgent 
+            onStageChange={handleStageChange} 
+            currentStepId={currentStepId}
+            onTypingStateChange={setIsAvatarActive}
+          />
         </div>
-      </main>
-    </div>
+      </motion.main>
+    </motion.div>
   );
 };
 

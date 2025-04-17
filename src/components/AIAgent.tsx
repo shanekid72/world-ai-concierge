@@ -6,6 +6,7 @@ import { useSmartAgentResponse } from "@/hooks/useSmartAgentResponse";
 interface Props {
   onStageChange: (stageId: string) => void;
   currentStepId: string;
+  onTypingStateChange?: (isTyping: boolean) => void;
 }
 
 interface Message {
@@ -15,10 +16,18 @@ interface Message {
   timestamp: Date;
 }
 
-const AIAgent = ({ onStageChange, currentStepId }: Props) => {
+const WELCOME_MESSAGES = [
+  "💬 Hi, I'm Dolly — your AI assistant from Digit9.",
+  "🌍 Welcome to worldAPI, The API you can talk to.",
+  "💡 I'm here to help you explore and integrate with worldAPI. What would you like to know?"
+];
+
+const AIAgent = ({ onStageChange, currentStepId, onTypingStateChange }: Props) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [welcomeIndex, setWelcomeIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const getSmartResponse = useSmartAgentResponse();
 
@@ -31,23 +40,25 @@ const AIAgent = ({ onStageChange, currentStepId }: Props) => {
   }, [messages]);
 
   useEffect(() => {
-    const introMessages = [
-      "💬 Hi, I'm Dolly — your AI assistant from Digit9.",
-      "🌍 Welcome to worldAPI, The API you can talk to.",
-      "💡 Do you want to jump straight into testing the integration — like a boss 😎 — and skip the usual onboarding stuff? (You can always explore other modules later!)"
-    ];
-    
-    introMessages.forEach((msg, i) =>
-      setTimeout(() => {
+    // Display welcome messages one by one
+    if (welcomeIndex < WELCOME_MESSAGES.length) {
+      const timer = setTimeout(() => {
         setMessages(prev => [...prev, {
-          id: `msg-${Date.now()}-${i}`,
-          content: msg,
+          id: `welcome-${welcomeIndex}`,
+          content: WELCOME_MESSAGES[welcomeIndex],
           type: 'assistant',
           timestamp: new Date()
         }]);
-      }, i * 1000)
-    );
-  }, []);
+        setWelcomeIndex(prev => prev + 1);
+      }, welcomeIndex === 0 ? 500 : 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [welcomeIndex]);
+
+  useEffect(() => {
+    onTypingStateChange?.(isTyping);
+  }, [isTyping, onTypingStateChange]);
 
   const handleSubmit = async () => {
     if (!input.trim() || isTyping) return;
@@ -62,6 +73,7 @@ const AIAgent = ({ onStageChange, currentStepId }: Props) => {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
+    setHasUserInteracted(true);
 
     try {
       const response = await getSmartResponse({
@@ -88,35 +100,65 @@ const AIAgent = ({ onStageChange, currentStepId }: Props) => {
     }
   };
 
+  const messageVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 20,
+      scale: 0.95
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.95,
+      transition: { duration: 0.2 }
+    }
+  };
+
   return (
     <div className="h-full flex flex-col justify-between p-4 space-y-4">
       <div className="overflow-y-auto flex-1 space-y-4 pr-2 custom-scrollbar">
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {messages.map((msg) => (
             <motion.div
               key={msg.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              variants={messageVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
               className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[80%] rounded-lg p-3 ${
-                msg.type === 'user' 
-                  ? 'bg-cyberpunk-pink/20 border border-cyberpunk-pink/40' 
-                  : 'bg-cyberpunk-blue/20 border border-cyberpunk-blue/40'
-              }`}>
+              <motion.div 
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  msg.type === 'user' 
+                    ? 'bg-cyberpunk-pink/20 border border-cyberpunk-pink/40' 
+                    : 'bg-cyberpunk-blue/20 border border-cyberpunk-blue/40'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <p className="text-sm text-cyan-300">{msg.content}</p>
                 <span className="text-xs text-cyan-500/50 mt-1 block">
                   {msg.timestamp.toLocaleTimeString()}
                 </span>
-              </div>
+              </motion.div>
             </motion.div>
           ))}
         </AnimatePresence>
+        
         {isTyping && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
             className="flex items-center space-x-2 text-cyan-400"
           >
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -126,7 +168,12 @@ const AIAgent = ({ onStageChange, currentStepId }: Props) => {
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="flex items-center space-x-2">
+      <motion.div 
+        className="flex items-center space-x-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1 }}
+      >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -136,16 +183,18 @@ const AIAgent = ({ onStageChange, currentStepId }: Props) => {
                    placeholder-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyberpunk-pink/50 
                    focus:border-transparent transition-all duration-200"
         />
-        <button
+        <motion.button
           onClick={handleSubmit}
           disabled={isTyping || !input.trim()}
           className="bg-cyberpunk-pink/80 hover:bg-cyberpunk-pink px-4 py-3 text-white rounded-lg 
                    disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200
                    flex items-center justify-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Send className="h-4 w-4" />
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </div>
   );
 };
