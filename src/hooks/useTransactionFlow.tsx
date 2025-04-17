@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export const useTransactionFlow = (props: TransactionFlowProps) => {
     };
 
     const action = (
-      <Button onClick={handleConfirm}>
+      <Button onClick={handleConfirm} className="bg-cyberpunk-blue hover:bg-cyberpunk-blue/80">
         Confirm
       </Button>
     );
@@ -41,7 +42,7 @@ export const useTransactionFlow = (props: TransactionFlowProps) => {
     toast({
       title: 'Quote extracted 🚀',
       description: `Send ${extracted.amount} ${extracted.currency} to ${extracted.to}?`,
-      action,
+      action: action
     });
   }, [message, stage, extract, toast, handleCreateQuote, setQuoteContext, setStage]);
 
