@@ -1,0 +1,5 @@
+[33m096f4aa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: resolve merge conflict in vite.config.ts - Use conditional lovable-tagger in development mode
+[33m0895faf[m fix: resolve TypeScript errors and dependency conflicts - Upgrade Vite to latest version - Fix useTransactionFlow.tsx syntax - Remove duplicate vite.config.ts - Update dependencies
+[33mec21b8c[m Update project template
+[33m7542911[m Update project template
+[33ma7faef6[m Update project template
