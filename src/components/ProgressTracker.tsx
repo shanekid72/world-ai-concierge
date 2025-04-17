@@ -1,7 +1,9 @@
+import React from "react";
+
 export interface Step {
   id: string;
   label: string;
-  status: "current" | "completed" | "upcoming";
+  status: 'completed' | 'current' | 'upcoming';
 }
 
 const ProgressTracker = ({
@@ -14,19 +16,15 @@ const ProgressTracker = ({
   onStepClick: (id: string) => void;
 }) => {
   return (
-    <div className="mb-4 space-y-2">
+    <div className="space-y-2">
       {steps.map((step) => (
         <div
           key={step.id}
           onClick={() => onStepClick(step.id)}
           className={`cursor-pointer p-2 rounded transition-all
-            ${
-              step.status === "current"
-                ? "bg-fuchsia-600 text-white"
-                : step.status === "completed"
-                ? "bg-green-600 text-white"
-                : "bg-gray-700 text-gray-400"
-            }`}
+            ${step.status === 'current' ? 'bg-fuchsia-600 text-white' : ''}
+            ${step.status === 'completed' ? 'bg-green-600 text-white' : ''}
+            ${step.status === 'upcoming' ? 'bg-gray-700 text-gray-400' : ''}`}
         >
           {step.label}
         </div>
