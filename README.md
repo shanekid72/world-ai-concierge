@@ -1,4 +1,9 @@
-# Welcome to your Lovable project
+# World AI Concierge
+
+A sophisticated AI concierge system for global assistance.
+
+## Test Commit
+This is a test commit to verify git identity configuration.
 
 ## Project info
 
