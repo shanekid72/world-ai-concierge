@@ -42,9 +42,10 @@ export const useTransactionFlow = (props: TransactionFlowProps) => {
     toast({
       title: 'Quote extracted 🚀',
       description: `Send ${extracted.amount} ${extracted.currency} to ${extracted.to}?`,
-      action: action
+      action
     });
   }, [message, stage, extract, toast, handleCreateQuote, setQuoteContext, setStage]);
 
   return null;
 };
+
