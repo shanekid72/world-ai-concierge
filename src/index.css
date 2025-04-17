@@ -8,35 +8,25 @@
 
 @layer base {
   :root {
-    --background: 230 35% 7%;
-    --foreground: 216 12% 84%;
-
-    --card: 230 35% 7%;
-    --card-foreground: 216 12% 84%;
-
-    --popover: 230 35% 7%;
-    --popover-foreground: 216 12% 84%;
-
-    --primary: #0ff;
-    --primary-dark: #0cc;
-    --secondary: #f0f;
-    --dark: #111;
-    --light: #eee;
-    --cyber-gradient: linear-gradient(45deg, var(--primary), var(--secondary));
-
-    --muted: 230 25% 15%;
-    --muted-foreground: 216 12% 54%;
-
-    --accent: 58 100% 50%;
-    --accent-foreground: 216 12% 84%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 216 12% 84%;
-
-    --border: 230 25% 15%;
-    --input: 230 25% 15%;
-    --ring: 326 100% 50%;
-
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
 
     --sidebar-background: 240 30% 10%;
@@ -50,33 +40,25 @@
   }
 
   .dark {
-    --background: 240 30% 8%;
-    --foreground: 180 100% 80%;
-
-    --card: 240 25% 12%;
-    --card-foreground: 180 100% 80%;
-
-    --popover: 240 25% 12%;
-    --popover-foreground: 180 100% 80%;
-
-    --primary: 320 100% 60%;
-    --primary-foreground: 240 30% 10%;
-
-    --secondary: 160 100% 50%;
-    --secondary-foreground: 240 30% 10%;
-
-    --muted: 240 20% 20%;
-    --muted-foreground: 180 80% 70%;
-
-    --accent: 270 100% 60%;
-    --accent-foreground: 240 30% 10%;
-
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 240 30% 10%;
-
-    --border: 240 20% 30%;
-    --input: 240 20% 30%;
-    --ring: 320 100% 60%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -245,6 +227,90 @@
       linear-gradient(90deg, rgba(20, 20, 30, 0.3) 1px, transparent 1px),
       linear-gradient(0deg, rgba(20, 20, 30, 0.3) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
+  }
+
+  .cyberpunk-bg {
+    @apply bg-gradient-to-br from-cyan-900/20 via-fuchsia-900/20 to-cyan-900/20;
+  }
+
+  .cyberpunk-dark {
+    @apply bg-gray-900/90;
+  }
+
+  .cyberpunk-darker {
+    @apply bg-gray-950/90;
+  }
+
+  .cyberpunk-pink {
+    @apply text-fuchsia-500;
+  }
+
+  .cyberpunk-blue {
+    @apply text-cyan-400;
+  }
+
+  .cyberpunk-green {
+    @apply text-emerald-400;
+  }
+
+  .scanlines {
+    background-image: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(0, 255, 255, 0.1) 50%
+    );
+    background-size: 100% 4px;
+  }
+
+  .power-glow {
+    filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px #0ff);
+  }
+
+  .cyber-panel {
+    @apply border border-cyan-800/50 bg-cyberpunk-dark/50 backdrop-blur-sm;
+  }
+
+  .cyber-grid {
+    @apply bg-cyberpunk-dark/50 backdrop-blur-sm;
+  }
+
+  .glitch {
+    position: relative;
+    animation: glitch 1s linear infinite;
+  }
+
+  @keyframes glitch {
+    2%, 64% {
+      transform: translate(2px, 0) skew(0deg);
+    }
+    4%, 60% {
+      transform: translate(-2px, 0) skew(0deg);
+    }
+    62% {
+      transform: translate(0, 0) skew(5deg);
+    }
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 255, 0.3) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+  }
+
+  .shadow-neon {
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #0ff, 0 0 20px #0ff;
   }
 }
 
