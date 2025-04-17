@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { Stage } from './useWorldApiChat';
 import { useSmartAgentResponse } from './useSmartAgentResponse';
@@ -32,8 +33,8 @@ export const useConversationLogic = (
 
           toast({
             title: 'Transaction Confirmed',
-            description: \`You sent \${quoteContext.amount} \${quoteContext.currency} to \${quoteContext.to}.
-Ref: \${txn?.id || 'TXN-UNKNOWN'}\`
+            description: `You sent ${quoteContext.amount} ${quoteContext.currency} to ${quoteContext.to}.
+Ref: ${txn?.id || 'TXN-UNKNOWN'}`
           });
 
           setStage('completed');
