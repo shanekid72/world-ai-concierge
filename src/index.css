@@ -79,11 +79,11 @@
 
 @layer base {
   * {
-    @apply border-gray-200;
+    @apply border-border;
   }
 
   body {
-    @apply bg-white text-foreground font-sans;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
