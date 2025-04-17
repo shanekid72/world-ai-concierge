@@ -1,10 +1,20 @@
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 
-const DollyBootup = () => {
+interface Props {
+  onComplete: () => void;
+}
+
+const DollyBootup = ({ onComplete }: Props) => {
+  useEffect(() => {
+    const timeout = setTimeout(onComplete, 45000); // 45 sec animation
+    return () => clearTimeout(timeout);
+  }, [onComplete]);
+
   return (
     <div className="h-screen w-screen bg-black flex items-center justify-center">
       <motion.div
-        className="text-center text-cyberpunk-pink font-mono"
+        className="text-center text-fuchsia-400 font-mono"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.2 }}
@@ -18,7 +28,7 @@ const DollyBootup = () => {
         </motion.h1>
 
         <motion.p
-          className="text-lg text-cyberpunk-purple"
+          className="text-lg text-fuchsia-200"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
