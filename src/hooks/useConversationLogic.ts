@@ -57,7 +57,7 @@ Ref: ${txn?.id || 'TXN-UNKNOWN'}`
       console.error("Error handling user input:", err);
       appendAgentMessage("Oops! Something went wrong while processing your request. Try again.");
     }
-  }, [stage, setStage, appendAgentMessage, handleIntent, quoteContext]);
+  }, [stage, setStage, appendAgentMessage, handleIntent, quoteContext, handleCreateTransaction, getSmartReply, toast]);
 
   return { processUserInput };
 };
