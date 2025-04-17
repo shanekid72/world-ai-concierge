@@ -52,7 +52,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       isUser ? "ml-auto justify-end" : "mr-auto justify-start"
     )}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-worldapi-teal-100 flex-shrink-0 mr-2 flex items-center justify-center overflow-hidden mt-1">
+        <div className="w-8 h-8 rounded-full flex-shrink-0 mr-2 flex items-center justify-center overflow-hidden mt-1 border border-cyan-700 bg-cyberpunk-dark shadow-neon-cyan">
           <img 
             src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
             alt="AI" 
@@ -61,10 +61,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       )}
       <div className={cn(
-        "rounded-2xl py-3 px-4 shadow-sm animate-fade-in",
+        "py-3 px-4 shadow-sm",
         isUser 
-          ? "bg-worldapi-blue-500 text-white rounded-tr-none"
-          : "bg-gray-100 text-gray-800 rounded-tl-none"
+          ? "bg-cyberpunk-dark border-l-2 border-l-cyberpunk-blue text-cyberpunk-blue rounded-r-md rounded-bl-md font-mono"
+          : "bg-cyberpunk-darker border-l-2 border-l-cyberpunk-pink text-cyan-300 rounded-r-md rounded-bl-md font-mono"
       )}>
         {isTyping ? (
           <div className="typing-indicator">
@@ -78,8 +78,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               {displayedContent}
             </div>
             <div className={cn(
-              "text-xs mt-1 text-right",
-              isUser ? "text-worldapi-blue-100" : "text-gray-500"
+              "text-xs mt-1 text-right font-mono",
+              isUser ? "text-cyan-600" : "text-fuchsia-800"
             )}>
               {timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
@@ -87,7 +87,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         )}
       </div>
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-worldapi-blue-100 flex-shrink-0 ml-2 flex items-center justify-center text-worldapi-blue-500 font-medium text-sm mt-1">
+        <div className="w-8 h-8 rounded-full flex-shrink-0 ml-2 flex items-center justify-center text-cyberpunk-blue font-mono text-sm mt-1 border border-cyberpunk-blue bg-cyberpunk-dark shadow-neon-cyan">
           GP
         </div>
       )}

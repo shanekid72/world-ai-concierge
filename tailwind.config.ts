@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -43,34 +44,56 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         "cyberpunk-pink": "#ff00cc",
-        "cyberpunk-purple": "#333399",
-        "cyberpunk-bg": "#0f0c29",
-        "worldapi-blue-50": "#e0f2fe",
-        "worldapi-blue-100": "#bae6fd",
-        "worldapi-blue-800": "#075985",
-        "worldapi-teal-50": "#ccfbf1",
-        "worldapi-teal-100": "#99f6e4",
-        "worldapi-teal-600": "#0d9488",
+        "cyberpunk-purple": "#9f00ff",
+        "cyberpunk-blue": "#00ccff",
+        "cyberpunk-green": "#00ff9f",
+        "cyberpunk-yellow": "#ffcc00",
+        "cyberpunk-bg": "#0a0a1a",
+        "cyberpunk-dark": "#151528",
+        "cyberpunk-darker": "#0f0f1b",
+        "cyberpunk-gray": "#2a2a3a",
+        "matrix-green": "#00ff41",
       },
       fontFamily: {
-        mono: ["'Fira Code'", "monospace"],
+        mono: ["'Share Tech Mono'", "monospace"],
         cyber: ["'Orbitron'", "sans-serif"],
       },
       animation: {
         pulseSlow: "pulse 3s infinite",
         flicker: "flicker 2s infinite",
+        glitch: "glitch 1s infinite",
+        scanline: "scanline 8s linear infinite",
+        float: "float 6s ease-in-out infinite",
       },
       keyframes: {
         flicker: {
           "0%, 19.999%, 22%, 62.999%, 64%, 100%": {
-            opacity: 1,
+            opacity: "1",
             filter: "drop-shadow(0 0 6px #ff00cc)",
           },
           "20%, 21.999%, 63%, 63.999%, 65%": {
-            opacity: 0.4,
+            opacity: "0.4",
             filter: "none",
           },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+      },
+      backgroundImage: {
+        "cyber-grid": "linear-gradient(90deg, rgba(40, 40, 60, 0.3) 1px, transparent 1px), linear-gradient(0deg, rgba(40, 40, 60, 0.3) 1px, transparent 1px)",
+        "cyber-gradient": "linear-gradient(45deg, #0a0a1a 0%, #1a1a3a 100%)",
+        "neon-glow": "radial-gradient(circle at center, rgba(255, 0, 255, 0.1) 0%, transparent 70%)",
+      },
+      boxShadow: {
+        neon: "0 0 10px rgba(255, 0, 255, 0.7)",
+        "neon-cyan": "0 0 10px rgba(0, 255, 255, 0.7)",
+        "neon-strong": "0 0 20px rgba(255, 0, 255, 0.9)",
+      },
+      textShadow: {
+        neon: "0 0 8px rgba(255, 0, 255, 0.8)",
+        "neon-cyan": "0 0 8px rgba(0, 255, 255, 0.8)",
       },
     },
   },
