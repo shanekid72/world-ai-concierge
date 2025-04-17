@@ -4,7 +4,7 @@ import AIAgent from './AIAgent';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
 import { MessageSquare, Info } from "lucide-react";
-import { Alert, AlertDescription } from '../ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const ChatInterface: React.FC = () => {
   const [steps, setSteps] = useState<Step[]>(() => {

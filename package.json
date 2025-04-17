@@ -2,13 +2,14 @@
   "name": "dolly-ui",
   "version": "1.0.0",
   "scripts": {
-  "dev": "vite",
-  "build": "tsc && vite build",
-  "build:dev": "vite build --mode development",
-  "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-  "preview": "vite preview"
-},
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
   "dependencies": {
+    "framer-motion": "^12.7.4",
     "lucide-react": "^0.488.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

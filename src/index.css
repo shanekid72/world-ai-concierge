@@ -1,4 +1,3 @@
-
 @import url('https://rsms.me/inter/inter.css');
 
 @tailwind base;
@@ -80,12 +79,11 @@
 
 @layer base {
   * {
-    @apply border; /* OR another valid class like border-gray-200 or border-slate-800 */
-;
+    @apply border-border; /* Fixed this line */
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-white text-foreground font-sans; /* Changed bg-background to bg-white */
   }
 }
 
