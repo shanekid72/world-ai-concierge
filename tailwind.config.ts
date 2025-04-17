@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -43,57 +42,61 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "cyberpunk-pink": "#ff00cc",
-        "cyberpunk-purple": "#9f00ff",
-        "cyberpunk-blue": "#00ccff",
-        "cyberpunk-green": "#00ff9f",
-        "cyberpunk-yellow": "#ffcc00",
-        "cyberpunk-bg": "#0a0a1a",
-        "cyberpunk-dark": "#151528",
-        "cyberpunk-darker": "#0f0f1b",
-        "cyberpunk-gray": "#2a2a3a",
-        "matrix-green": "#00ff41",
+        // Cyberpunk theme colors
+        'cyber': {
+          'pink': '#ff00cc',
+          'blue': '#00ffff',
+          'purple': '#333399',
+          'neon': '#39ff14',
+          'dark': '#0f0c29',
+          'darker': '#080620',
+        },
+        'neon': {
+          'pink': '#ff71ce',
+          'blue': '#01cdfe',
+          'purple': '#b967ff',
+          'green': '#05ffa1',
+          'yellow': '#fffb96',
+        }
       },
       fontFamily: {
-        mono: ["'Share Tech Mono'", "monospace"],
-        cyber: ["'Orbitron'", "sans-serif"],
+        sans: ['Inter var', 'sans-serif'],
+        mono: ['Fira Code', 'monospace'],
+        cyber: ['Orbitron', 'sans-serif'],
       },
       animation: {
-        pulseSlow: "pulse 3s infinite",
-        flicker: "flicker 2s infinite",
-        glitch: "glitch 1s infinite",
-        scanline: "scanline 8s linear infinite",
-        float: "float 6s ease-in-out infinite",
+        'glitch': 'glitch 1s infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'float': 'float 6s ease-in-out infinite',
+        'scan': 'scan 2s ease-in-out infinite',
+        'pulse-neon': 'pulse-neon 2s infinite',
       },
       keyframes: {
-        flicker: {
-          "0%, 19.999%, 22%, 62.999%, 64%, 100%": {
-            opacity: "1",
-            filter: "drop-shadow(0 0 6px #ff00cc)",
-          },
-          "20%, 21.999%, 63%, 63.999%, 65%": {
-            opacity: "0.4",
-            filter: "none",
-          },
+        glitch: {
+          '0%, 100%': { transform: 'translate(0)' },
+          '33%': { transform: 'translate(-5px, 3px)' },
+          '66%': { transform: 'translate(5px, -3px)' },
+        },
+        glow: {
+          '0%': { textShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff00cc, 0 0 20px #ff00cc' },
+          '100%': { textShadow: '0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff00cc, 0 0 40px #ff00cc' },
         },
         float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        scan: {
+          '0%': { backgroundPosition: '0% 0%' },
+          '100%': { backgroundPosition: '0% 100%' },
+        },
+        'pulse-neon': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.5' },
         },
       },
       backgroundImage: {
-        "cyber-grid": "linear-gradient(90deg, rgba(40, 40, 60, 0.3) 1px, transparent 1px), linear-gradient(0deg, rgba(40, 40, 60, 0.3) 1px, transparent 1px)",
-        "cyber-gradient": "linear-gradient(45deg, #0a0a1a 0%, #1a1a3a 100%)",
-        "neon-glow": "radial-gradient(circle at center, rgba(255, 0, 255, 0.1) 0%, transparent 70%)",
-      },
-      boxShadow: {
-        neon: "0 0 10px rgba(255, 0, 255, 0.7)",
-        "neon-cyan": "0 0 10px rgba(0, 255, 255, 0.7)",
-        "neon-strong": "0 0 20px rgba(255, 0, 255, 0.9)",
-      },
-      textShadow: {
-        neon: "0 0 8px rgba(255, 0, 255, 0.8)",
-        "neon-cyan": "0 0 8px rgba(0, 255, 255, 0.8)",
+        'cyber-grid': 'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)',
+        'cyber-gradient': 'linear-gradient(45deg, #ff00cc, #333399)',
       },
     },
   },
