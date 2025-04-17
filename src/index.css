@@ -79,11 +79,11 @@
 
 @layer base {
   * {
-    @apply border-border; /* Fixed this line */
+    @apply border-gray-200;
   }
 
   body {
-    @apply bg-white text-foreground font-sans; /* Changed bg-background to bg-white */
+    @apply bg-white text-foreground font-sans;
   }
 }
 
