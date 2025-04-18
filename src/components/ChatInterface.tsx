@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import AIAgent from './AIAgent';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Info, Zap } from 'lucide-react';
+import { AIAgent } from './AIAgent';
+import { Alert } from './ui/alert';
 import ProgressTracker, { Step } from './ProgressTracker';
 import { getProgressSteps } from './OnboardingStages';
-import { MessageSquare, Info, Cpu, Zap, Shield, Globe } from "lucide-react";
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import DollyAvatar from '@/assets/dolly-avatar';
-import { motion } from 'framer-motion';
 
-const ChatInterface: React.FC = () => {
+interface Message {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  timestamp: Date;
+}
+
+export function ChatInterface() {
+  const [stage, setStage] = useState('welcome');
+  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [steps, setSteps] = useState<Step[]>(() => {
     const initialSteps = getProgressSteps();
     initialSteps[0].status = 'current';
@@ -50,7 +60,7 @@ const ChatInterface: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <Cpu className="h-6 w-6 text-cyberpunk-pink power-glow mr-2" />
+          <Info className="h-6 w-6 text-cyberpunk-pink power-glow mr-2" />
           <h2 className="text-xl font-cyber text-cyberpunk-pink neon-text">worldAPI_NEXUS</h2>
         </motion.div>
         
@@ -63,7 +73,7 @@ const ChatInterface: React.FC = () => {
           transition={{ delay: 0.6 }}
         >
           <div className="flex items-center mb-2">
-            <Globe className="text-cyberpunk-blue mr-2 h-4 w-4" />
+            <Info className="text-cyberpunk-blue mr-2 h-4 w-4" />
             <strong className="text-cyberpunk-blue font-cyber text-sm">ABOUT_WORLDAPI</strong>
           </div>
           <p className="text-xs leading-relaxed text-cyan-300 font-mono">
@@ -125,6 +135,4 @@ const ChatInterface: React.FC = () => {
       </motion.main>
     </motion.div>
   );
-};
-
-export default ChatInterface;
+}

@@ -4,8 +4,8 @@ import { Send, Loader2 } from "lucide-react";
 import { useSmartAgentResponse } from "@/hooks/useSmartAgentResponse";
 
 interface Props {
-  onStageChange: (stageId: string) => void;
-  currentStepId: string;
+  stage: string;
+  onStageChange?: (stage: string) => void;
   onTypingStateChange?: (isTyping: boolean) => void;
 }
 
@@ -22,7 +22,7 @@ const WELCOME_MESSAGES = [
   "💡 I'm here to help you explore and integrate with worldAPI. What would you like to know?"
 ];
 
-const AIAgent = ({ onStageChange, currentStepId, onTypingStateChange }: Props) => {
+export function AIAgent({ stage, onTypingStateChange }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -77,7 +77,7 @@ const AIAgent = ({ onStageChange, currentStepId, onTypingStateChange }: Props) =
 
     try {
       const response = await getSmartResponse({
-        stage: currentStepId,
+        stage: stage,
         userInput: input,
         context: {}
       });
@@ -197,6 +197,4 @@ const AIAgent = ({ onStageChange, currentStepId, onTypingStateChange }: Props) =
       </motion.div>
     </div>
   );
-};
-
-export default AIAgent;
+}
