@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import postcssImport from 'postcss-import';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
+import postcssPresetEnv from 'postcss-preset-env';
 
 export default defineConfig({
   plugins: [
@@ -35,10 +39,10 @@ export default defineConfig({
     devSourcemap: true,
     postcss: {
       plugins: [
-        require('postcss-import'),
-        require('tailwindcss'),
-        require('autoprefixer'),
-        require('postcss-preset-env')({
+        postcssImport(),
+        tailwindcss(),
+        autoprefixer(),
+        postcssPresetEnv({
           features: {
             'nesting-rules': true,
           },

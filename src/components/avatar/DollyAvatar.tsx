@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, OrbitControls } from "@react-three/drei";
-import { Group } from "three";
+import { Group, Object3D, Mesh } from "three";
 
 interface DollyAvatarProps {
   isSpeaking?: boolean;
@@ -10,14 +10,47 @@ interface DollyAvatarProps {
   gesture?: 'idle' | 'pointing' | 'thinking' | 'explaining';
 }
 
-function Model({ isSpeaking, expression = 'neutral', gesture = 'idle' }) {
+interface ErrorBoundaryProps {
+  fallback: React.ReactNode;
+  children: React.ReactNode;
+}
+
+interface ModelProps {
+  isSpeaking?: boolean;
+  expression?: 'neutral' | 'happy' | 'angry' | 'surprised';
+  gesture?: 'idle' | 'pointing' | 'thinking' | 'explaining';
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
+  state: { hasError: boolean };
+
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+function Model({ isSpeaking, expression = 'neutral', gesture = 'idle' }: ModelProps) {
   const group = useRef<Group>(null);
-  const { scene } = useGLTF("/dolly-avatar.glb");
+  const modelPath = "/models/dolly-avatar.glb";
+  console.log("Loading model from path:", modelPath);
+  const { scene } = useGLTF(modelPath);
 
   useEffect(() => {
     if (scene) {
-      scene.traverse((child) => {
-        if (child.isMesh) {
+      scene.traverse((child: Object3D) => {
+        if ('isMesh' in child && child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
         }
@@ -44,6 +77,13 @@ function Model({ isSpeaking, expression = 'neutral', gesture = 'idle' }) {
 }
 
 export function DollyAvatar({ isSpeaking, expression, position, gesture }: DollyAvatarProps) {
+  useEffect(() => {
+    fetch("/models/dolly-avatar.glb")
+      .then(res => res.text())
+      .then(console.log)
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="w-64 h-64 relative">
       <Canvas
@@ -60,11 +100,15 @@ export function DollyAvatar({ isSpeaking, expression, position, gesture }: Dolly
       >
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1} castShadow />
-        <Model 
-          isSpeaking={isSpeaking} 
-          expression={expression}
-          gesture={gesture}
-        />
+        <Suspense fallback={null}>
+          <ErrorBoundary fallback={null}>
+            <Model 
+              isSpeaking={isSpeaking} 
+              expression={expression}
+              gesture={gesture}
+            />
+          </ErrorBoundary>
+        </Suspense>
         <OrbitControls 
           enableZoom={false}
           enablePan={false}
