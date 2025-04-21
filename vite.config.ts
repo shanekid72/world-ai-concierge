@@ -21,20 +21,33 @@ export default defineConfig({
   css: {
     modules: {
       localsConvention: 'camelCase',
+      generateScopedName: '[name]__[local]__[hash:base64:5]',
     },
     preprocessorOptions: {
       scss: {
         additionalData: `
           @import "@/styles/variables.scss";
           @import "@/styles/mixins.scss";
+          @import "@/styles/cyberpunk.scss";
         `,
       },
     },
     devSourcemap: true,
-    postcss: './postcss.config.mjs'
+    postcss: {
+      plugins: [
+        require('postcss-import'),
+        require('tailwindcss'),
+        require('autoprefixer'),
+        require('postcss-preset-env')({
+          features: {
+            'nesting-rules': true,
+          },
+        }),
+      ],
+    },
   },
   optimizeDeps: {
-    include: ['react-toastify'],
+    include: ['react-toastify', 'framer-motion', '@radix-ui/react-avatar'],
     force: true
   },
   build: {
@@ -42,6 +55,15 @@ export default defineConfig({
     sourcemap: true,
     minify: 'terser',
     cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          animations: ['framer-motion'],
+          ui: ['@radix-ui/react-avatar', 'react-toastify'],
+        },
+      },
+    },
   },
 });
 
