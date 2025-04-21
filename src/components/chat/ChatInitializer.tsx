@@ -1,9 +1,8 @@
-
-import React, { useEffect, useRef } from 'react';
-import { Stage } from '../../hooks/useWorldApiChat';
+import { useEffect, useRef } from 'react';
+import { chatFlow } from '@/utils/chatFlow';
 
 interface ChatInitializerProps {
-  stage: Stage;
+  stage: string;
   appendAgentMessage: (message: string) => void;
 }
 
@@ -15,21 +14,38 @@ export const ChatInitializer: React.FC<ChatInitializerProps> = ({
   const techStageInitialized = useRef(false);
 
   useEffect(() => {
-    // Only show intro message once
+    const currentStage = chatFlow.find(s => s.id === stage);
+    if (!currentStage) return;
+
+    // Handle intro stage
     if (stage === 'intro' && !hasShownIntro.current) {
       hasShownIntro.current = true;
-      console.log("Showing intro message");
-      appendAgentMessage("👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.");
-      setTimeout(() => {
-        appendAgentMessage("✨ Wanna go through onboarding or skip to testing our legendary worldAPI?");
-      }, 1000);
+      if (currentStage.voice) {
+        appendAgentMessage(currentStage.voice);
+      }
+      if (currentStage.chat) {
+        setTimeout(() => {
+          appendAgentMessage(currentStage.chat!);
+        }, 1000);
+      }
     }
-    
-    // Only show technical requirements message once when we reach that stage
+
+    // Handle technical requirements stage
     if (stage === 'technical-requirements' && !techStageInitialized.current) {
       techStageInitialized.current = true;
-      console.log("Showing technical requirements message");
-      appendAgentMessage("You're all set to use worldAPI! I can help you send money globally, check exchange rates, or explore our network coverage. What would you like to do today?");
+      if (currentStage.postAnimation?.voice) {
+        appendAgentMessage(currentStage.postAnimation.voice);
+      }
+      if (currentStage.postAnimation?.chat) {
+        setTimeout(() => {
+          appendAgentMessage(currentStage.postAnimation!.chat);
+        }, 1000);
+      }
+    }
+
+    // Handle other stages
+    if (currentStage.chat && ![stage === 'intro', stage === 'technical-requirements'].includes(true)) {
+      appendAgentMessage(currentStage.chat);
     }
   }, [stage, appendAgentMessage]);
 

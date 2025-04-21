@@ -1,68 +1,65 @@
-// TODO: Replace with actual @lovable/tagger import once installed
-const getModelResponse = async ({ prompt, maxTokens, temperature }: { 
-  prompt: string; 
-  maxTokens: number; 
-  temperature: number;
-}) => {
-  return {
-    reply: `🤖 (Smart Reply) You said: "${prompt.split('User input: ')[1]?.split('\n')[0] || ''}" at stage: "${prompt.split('Stage: ')[1]?.split('\n')[0] || ''}"`
-  };
-};
+import { useState, useCallback } from 'react';
 
 interface SmartAgentResponseProps {
   stage: string;
   userInput: string;
-  context: {
+  context?: {
     quote?: {
       amount: number;
       currency: string;
-      country: string;
     };
     transaction?: {
-      reference: string;
+      id: string;
       status: string;
     };
   };
 }
 
-const CYBERPUNK_PROMPT = `You are Dolly — a futuristic, cyberpunk-themed, witty AI concierge. 
-Your personality traits:
-- Sassy but helpful
-- Tech-savvy with a hint of attitude
-- Uses cyberpunk slang and references
-- Maintains professional service while being entertaining
+const CYBERPUNK_PROMPT = `You are Dolly, a cyberpunk-themed AI concierge. Your responses should:
+1. Be concise and direct
+2. Use cyberpunk slang and terminology
+3. Show technical expertise while remaining approachable
+4. Express a distinct personality that's both professional and edgy
+5. Adapt tone based on context (e.g., more formal for transactions)
 
-Current context:
-Stage: {stage}
+Current conversation stage: {stage}
 User input: {userInput}
-Quote context: {quoteContext}
-Transaction context: {transactionContext}
+Context: {context}
 
-Generate a response that:
-1. Acknowledges the user's input
-2. Provides relevant information or next steps
-3. Maintains your cyberpunk personality
-4. Uses appropriate emojis and formatting`;
+Respond in character as Dolly.`;
 
 export const useSmartAgentResponse = () => {
-  return async ({ stage, userInput, context }: SmartAgentResponseProps): Promise<string> => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const getResponse = useCallback(async ({ stage, userInput, context }: SmartAgentResponseProps) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const prompt = CYBERPUNK_PROMPT
+      // Format the prompt with the provided data
+      const formattedPrompt = CYBERPUNK_PROMPT
         .replace('{stage}', stage)
         .replace('{userInput}', userInput)
-        .replace('{quoteContext}', JSON.stringify(context.quote || {}))
-        .replace('{transactionContext}', JSON.stringify(context.transaction || {}));
+        .replace('{context}', JSON.stringify(context || {}));
 
-      const response = await getModelResponse({
-        prompt,
-        maxTokens: 150,
-        temperature: 0.7,
-      });
+      // TODO: Implement actual API call here
+      const response = await new Promise<string>(resolve => 
+        setTimeout(() => resolve("Greetings, netrunner! I'm processing your request..."), 1000)
+      );
 
-      return response.reply;
-    } catch (error: unknown) {
-      console.error('Error getting model response:', error);
-      return `⚡ System glitch detected! Let me try that again... (Error: ${error instanceof Error ? error.message : 'Unknown error'})`;
+      return response;
+    } catch (error) {
+      setError('Failed to get response from the AI system');
+      return null;
+    } finally {
+      setIsLoading(false);
     }
+  }, []);
+
+  return {
+    getResponse,
+    isLoading,
+    error
   };
 };

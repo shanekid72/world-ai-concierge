@@ -42,7 +42,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Cyberpunk theme colors
         'cyber': {
           'pink': '#ff00cc',
           'blue': '#00ffff',
@@ -95,7 +94,7 @@ const config: Config = {
         },
       },
       backgroundImage: {
-        'cyber-grid': 'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)',
+        'cyber-grid': 'linear-gradient(to right, rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 255, 255, 0.1) 1px, transparent 1px)',
         'cyber-gradient': 'linear-gradient(45deg, #ff00cc, #333399)',
       },
     },

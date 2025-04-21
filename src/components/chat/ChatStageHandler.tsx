@@ -1,12 +1,12 @@
-
 import React, { useRef, useState, useEffect } from 'react';
-import { type Stage } from '../../hooks/useWorldApiChat';
+import { chatFlow } from '@/utils/chatFlow';
 import AnimatedTerminal from './AnimatedTerminal';
 
 interface ChatStageHandlerProps {
-  stage: Stage;
-  onStageChange: (stage: Stage) => void;
+  stage: string;
+  onStageChange: (stageId: string) => void;
   onMessage: (message: string) => void;
+  onVoiceMessage: (message: string) => void;
   conversationStarted?: boolean;
 }
 
@@ -14,60 +14,125 @@ export const ChatStageHandler: React.FC<ChatStageHandlerProps> = ({
   stage,
   onStageChange,
   onMessage,
+  onVoiceMessage,
   conversationStarted = false
 }) => {
-  const processedStages = useRef<Set<Stage>>(new Set());
+  const processedStages = useRef<Set<string>>(new Set());
   const [showTerminal, setShowTerminal] = useState(false);
   
   useEffect(() => {
-    console.log("ChatStageHandler: Current stage is", stage);
-    
     if (processedStages.current.has(stage)) {
-      console.log("Stage already processed:", stage);
       return;
     }
     
+    const currentStage = chatFlow.find(s => s.id === stage);
+    if (!currentStage) return;
+
     const handleStageMessage = () => {
-      console.log("ChatStageHandler: Handling stage message for", stage);
-      
       switch (stage) {
-        case 'choosePath':
-          // We're now handling this differently in useConversationLogic
-          // to prevent users from having to input twice
+        case 'path-selection':
           processedStages.current.add(stage);
           break;
           
-        case 'standardOnboarding':
-          console.log("Processing standardOnboarding stage");
-          onMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢");
+        case 'partner-onboarding':
+          if (currentStage.chat) {
+            onMessage(currentStage.chat);
+          }
           processedStages.current.add(stage);
           break;
           
         case 'collectMinimalInfo':
-          // This message is now handled by useConversationLogic
-          // to ensure a smoother transition
+          if (currentStage.voice) {
+            onVoiceMessage(currentStage.voice);
+          }
+          if (currentStage.questions?.[0]) {
+            setTimeout(() => {
+              onMessage(currentStage.questions![0].text);
+            }, 1000);
+          }
+          processedStages.current.add(stage);
+          break;
+
+        case 'compliance-kyc':
+          if (currentStage.voice) {
+            onVoiceMessage(currentStage.voice);
+          }
+          if (currentStage.chat) {
+            setTimeout(() => {
+              onMessage(currentStage.chat!);
+            }, 1000);
+          }
+          if (currentStage.kycChecklist) {
+            setTimeout(() => {
+              onMessage(currentStage.kycChecklist!.join('\n'));
+            }, 2000);
+          }
+          if (currentStage.voiceAfterList) {
+            setTimeout(() => {
+              onVoiceMessage(currentStage.voiceAfterList!);
+            }, 3000);
+          }
+          processedStages.current.add(stage);
+          break;
+
+        case 'technical-requirements':
+          if (currentStage.animation) {
+            // Handle animation sequence
+            currentStage.animation.connectionFeed.forEach((feed, index) => {
+              setTimeout(() => {
+                onMessage(feed);
+              }, index * 2000);
+            });
+            setTimeout(() => {
+              onVoiceMessage(currentStage.animation!.voiceMidAnimation);
+            }, currentStage.animation.connectionFeed.length * 2000);
+          }
+          
+          // Handle post-animation messages
+          if (currentStage.postAnimation) {
+            if (currentStage.postAnimation.voice) {
+              setTimeout(() => {
+                onVoiceMessage(currentStage.postAnimation!.voice);
+              }, 5000);
+            }
+            if (currentStage.postAnimation.chat) {
+              setTimeout(() => {
+                onMessage(currentStage.postAnimation!.chat);
+              }, 6000);
+            }
+          }
+
+          // Handle cursor setup
+          if (currentStage.cursorSetup) {
+            if (currentStage.cursorSetup.voice) {
+              setTimeout(() => {
+                onVoiceMessage(currentStage.cursorSetup!.voice);
+              }, 7000);
+            }
+          }
+
+          // Handle final prompts
+          if (currentStage.voiceAfterPrompts) {
+            setTimeout(() => {
+              onVoiceMessage(currentStage.voiceAfterPrompts!);
+            }, 8000);
+          }
+          
           processedStages.current.add(stage);
           break;
           
-        // Intentionally NOT handling technical-requirements stage here
-        // Let AIAgent component handle that message to avoid duplicating the message
-          
-        // Add default case to handle any unmatched stage
         default:
-          console.log("No specific handler for stage:", stage);
           processedStages.current.add(stage);
           break;
       }
     };
     
-    // Process all stages that need handling
     handleStageMessage();
-  }, [stage, onMessage, onStageChange, conversationStarted]);
+  }, [stage, onMessage, onVoiceMessage, onStageChange, conversationStarted]);
 
   return showTerminal ? (
     <AnimatedTerminal 
       onComplete={() => {
-        console.log("Terminal animation completed, moving to technical-requirements");
         setShowTerminal(false);
         onMessage("Setup complete! You're now connected to worldAPI. What would you like to do first? 🚀");
         onStageChange('technical-requirements');

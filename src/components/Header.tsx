@@ -1,10 +1,12 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { Shield, Zap, CircuitBoard } from 'lucide-react';
+import { Shield, CircuitBoard, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Header: React.FC = () => {
   const { toast } = useToast();
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [isNetStatusHovered, setIsNetStatusHovered] = useState(false);
 
   const handleContactSupport = () => {
     toast({
@@ -14,41 +16,76 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="w-full py-3 px-6 bg-cyberpunk-darker border-b border-fuchsia-900 shadow-neon flex items-center justify-between">
-      <div className="flex items-center space-x-2">
-        <div className="flex items-center">
-          <img 
-            src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
-            alt="worldAPI Logo" 
-            className="h-16 w-auto"
-          />
-          <div className="ml-3">
-            <h1 className="text-xl font-cyber text-cyberpunk-pink neon-text tracking-wider">worldAPI</h1>
-            <span className="text-xs px-2 py-0.5 bg-cyberpunk-dark text-cyan-400 rounded-full font-mono">
-              by <span className="text-cyberpunk-green">Digit9</span>
-            </span>
-          </div>
+    <motion.header 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative py-4 px-8 flex items-center justify-between border-b border-cyber-blue/30 bg-cyber-darker/80 backdrop-blur-sm"
+    >
+      <div className="flex items-center space-x-4">
+        <motion.div 
+          className="relative"
+          onHoverStart={() => setIsLogoHovered(true)}
+          onHoverEnd={() => setIsLogoHovered(false)}
+          whileHover={{ scale: 1.05 }}
+        >
+          <img src="/logo.png" alt="worldAPI" className="h-10 w-auto" />
+          {isLogoHovered && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 power-glow rounded-full"
+            />
+          )}
+        </motion.div>
+        
+        <div className="flex flex-col">
+          <motion.h1 
+            className="text-2xl font-cyber glitch-text"
+            data-text="worldAPI"
+          >
+            worldAPI
+          </motion.h1>
+          <motion.span 
+            className="text-xs text-cyber-pink border border-cyber-pink/50 px-2 py-0.5"
+            whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(255,0,204,0.5)' }}
+          >
+            by Digit9
+          </motion.span>
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center mr-2 text-xs font-mono">
-          <CircuitBoard size={14} className="text-cyberpunk-green mr-1" />
-          <span className="text-cyan-400">NET_STATUS:</span>
-          <span className="text-cyberpunk-green ml-1">CONNECTED</span>
-        </div>
-        <button 
-          onClick={handleContactSupport}
-          className="text-sm text-cyan-400 hover:text-cyberpunk-pink transition-colors flex items-center font-mono"
+      <div className="flex items-center space-x-6">
+        <motion.div 
+          className="flex items-center space-x-2"
+          onHoverStart={() => setIsNetStatusHovered(true)}
+          onHoverEnd={() => setIsNetStatusHovered(false)}
         >
-          <Shield size={14} className="mr-1" />
-          SUPPORT
-        </button>
-        <div className="h-9 w-9 rounded-full border border-cyberpunk-blue bg-cyberpunk-dark text-cyberpunk-blue flex items-center justify-center shadow-neon-cyan">
-          <span className="font-mono text-sm">GP</span>
+          <div className={`h-2 w-2 rounded-full ${isNetStatusHovered ? 'power-glow' : ''} bg-green-500`} />
+          <span className="text-sm text-cyber-blue">NET_STATUS: ONLINE</span>
+          {isNetStatusHovered && (
+            <Zap className="w-4 h-4 text-cyber-pink" />
+          )}
+        </motion.div>
+
+        <motion.button 
+          onClick={handleContactSupport}
+          className="cyber-button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Contact Support
+        </motion.button>
+
+        <div className="flex items-center space-x-3">
+          <motion.div 
+            className="h-10 w-10 rounded-full bg-cyber-blue/20 border-2 border-cyber-blue flex items-center justify-center power-glow"
+            whileHover={{ scale: 1.1 }}
+          >
+            GP
+          </motion.div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

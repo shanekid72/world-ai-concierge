@@ -1,78 +1,77 @@
 # World AI Concierge
 
-A sophisticated AI concierge system for global assistance.
+A cyberpunk-themed AI concierge application built with React, TypeScript, and Vite.
 
-## Test Commit
-This is a test commit to verify git identity configuration.
+## Features
 
-## Project info
+- 🤖 Interactive AI avatar with cyberpunk aesthetics
+- 💬 Real-time chat interface
+- 🎨 Modern UI with cyberpunk theme
+- 🔊 Voice interaction support
+- 📄 PDF document handling
+- ⚡ Fast development with Vite
+- 🎭 Expressive animations with Framer Motion
 
-**URL**: https://lovable.dev/projects/f30ad8e9-33c1-4858-afb2-b98acbc5dba0
+## Tech Stack
 
-## How can I edit this code?
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Three.js
+- Framer Motion
+- React Three Fiber
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/world-ai-concierge.git
+cd world-ai-concierge
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f30ad8e9-33c1-4858-afb2-b98acbc5dba0) and start prompting.
+2. Install dependencies
+```bash
+npm install
+```
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open your browser and navigate to `http://localhost:3000`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Development
 
-**Use GitHub Codespaces**
+### Project Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+  ├── components/     # React components
+  ├── hooks/         # Custom React hooks
+  ├── utils/         # Utility functions
+  ├── assets/        # Static assets
+  ├── styles/        # Global styles
+  └── types/         # TypeScript type definitions
+```
 
-## What technologies are used for this project?
+### Building for Production
 
-This project is built with:
+```bash
+npm run build
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This will create a `dist` folder with the production build.
 
-## How can I deploy this project?
+## Contributing
 
-Simply open [Lovable](https://lovable.dev/projects/f30ad8e9-33c1-4858-afb2-b98acbc5dba0) and click on Share -> Publish.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

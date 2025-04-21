@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from "@/lib/utils";
 
@@ -54,9 +53,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       {!isUser && (
         <div className="w-8 h-8 rounded-full flex-shrink-0 mr-2 flex items-center justify-center overflow-hidden mt-1 border border-cyan-700 bg-cyberpunk-dark shadow-neon-cyan">
           <img 
-            src="/lovable-uploads/59c87c53-d492-4b80-9901-b57dffc270fb.png" 
-            alt="AI" 
-            className="w-5 h-5 object-contain" 
+            src="/assets/ai-avatar.png"
+            alt="AI"
+            className="w-5 h-5 object-contain"
           />
         </div>
       )}
