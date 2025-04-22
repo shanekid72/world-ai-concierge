@@ -45,9 +45,18 @@
       "chat": "Let's get you started with some basic information.",
       "questions": [
         {
-          "text": "What is your role in the organization?",
-          "voiceAfter": "Thank you for sharing your role.",
-          "expectedAnswers": ["developer", "engineer", "manager", "director", "owner", "founder", "ceo", "cto"]
+          "text": "What is your name?",
+          "voiceAfter": "Nice to meet you, superstar. You and I? We are gonna do big things.",
+          "expectedAnswers": ["first name"]
+        },{
+          "text": "What is the name of your organization?",
+          "voiceAfter": "TOooh, that sounds official. I love a brand with presence!",
+          "expectedAnswers": ["organization", "business", "firm", "enterprise"]
+        }
+        ,{
+          "text": "What\u2019s the best email or phone number to reach you?",
+          "voiceAfter": "Perfect. Now I know where to send the confetti once we\u2019re live.",
+          "expectedAnswers": ["email", "phone", "contact", "number"]
         },
         {
           "text": "Are you a CFO?",
@@ -57,11 +66,6 @@
             "Perfect! I'll make sure to highlight our financial integration capabilities for you."
           ],
           "expectedAnswers": ["yes", "no", "not", "n't"]
-        },
-        {
-          "text": "What type of integration are you looking to build?",
-          "voiceAfter": "Great choice! Let me prepare the relevant documentation for you.",
-          "expectedAnswers": ["payment", "banking", "financial", "api", "integration", "service"]
         }
       ],
       "next": "technical-requirements"
@@ -99,13 +103,13 @@
           "neon sparks"
         ],
         "connectionFeed": [
-          "🔌 Connecting to MTOs... ✅",
-          "Western Union ✅",
-          "TerraPay ✅",
-          "Ria ✅",
-          "Transfast ✅",
-          "🌐 Syncing with Banks... ✅",
-          "📲 Linking 247 digital wallets... ✅"
+          "�� Connecting to MTOs...",
+          "Western Union",
+          "TerraPay",
+          "Ria",
+          "Transfast",
+          "🌐 Syncing with Banks...",
+          "📲 Linking digital wallets..."
         ],
         "voiceMidAnimation": "Bro, I think you're the Spiderman of APIs 🕷️ — there's too much going on in your web!"
       },

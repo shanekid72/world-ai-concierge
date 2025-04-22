@@ -1,11 +1,11 @@
-import { create } from 'zustand';
-import { ConversationFlow, ConversationStage, UserState } from '../types/global';
+import { create, StateCreator } from 'zustand';
+import { FlowService, FlowStage } from '../services/flowService';
 
 // Import voice service (optional - can also be called directly from components)
 import { speakText } from '../services/voiceService';
 
 // The conversation flow from your JSON
-const conversationFlow: ConversationFlow = {
+const conversationFlow = {
   "stages": [
     {
       "id": "intro",
@@ -73,61 +73,80 @@ const conversationFlow: ConversationFlow = {
   ]
 };
 
-// Animation mappings for different conversation states
-export const ANIMATION_MAPPINGS: Record<string, string> = {
-  // General mood states
-  SPEAKING: "Talking On Phone",
-  HAPPY: "Hip Hop Dancing",
-  THINKING: "Golf Pre-Putt",
-  IDLE: "dolly-avatar",
-  EXCITED: "Jog In Circle",
-  EXPLAINING: "Punching",
-  SHOCKED: "Zombie Stand Up",
-  GREETING: "Body Block",
-  WAITING: "Freehang Climb",
-  
-  // Stage specific states
-  "intro": "Talking On Phone",
-  "collectMinimalInfo": "Hip Hop Dancing",
-  "compliance-kyc": "Golf Pre-Putt",
-  "technical-requirements": "Punching",
-};
+export const ANIMATION_MAPPINGS = {
+  IDLE: 'idle',
+  SPEAKING: 'speaking',
+  THINKING: 'thinking',
+  HAPPY: 'happy',
+  EXCITED: 'excited',
+  EXPLAINING: 'explaining'
+} as const;
+
+type AnimationType = typeof ANIMATION_MAPPINGS[keyof typeof ANIMATION_MAPPINGS];
+
+interface Message {
+  text: string;
+  isAI: boolean;
+}
 
 interface ConversationState {
-  currentStage: string;
-  currentAnimation: string;
+  messages: Message[];
+  currentStageId: string;
+  currentAnimation: AnimationType;
   isSpeaking: boolean;
-  messages: { text: string; isAI: boolean }[];
   userAnswers: Record<string, string>;
+  addMessage: (text: string, isUser: boolean) => void;
   moveToStage: (stageId: string) => void;
   selectOption: (option: string) => void;
   setUserAnswer: (question: string, answer: string) => void;
-  setIsSpeaking: (isSpeaking: boolean) => void;
-  setAnimation: (animation: string) => void;
-  addMessage: (text: string, isAI: boolean) => void;
+  setAnimation: (animation: AnimationType) => void;
+  setIsSpeaking: (speaking: boolean) => void;
 }
 
-export const useConversationStore = create<ConversationState>((set) => ({
-  currentStage: "intro",
-  currentAnimation: "idle",
-  isSpeaking: false,
+const useConversationStore = create<ConversationState>((
+  set: Parameters<StateCreator<ConversationState>>[0],
+  get: () => ConversationState
+) => ({
   messages: [],
+  currentStageId: 'intro',
+  currentAnimation: ANIMATION_MAPPINGS.IDLE,
+  isSpeaking: false,
   userAnswers: {},
-  moveToStage: (stageId) => set({ currentStage: stageId }),
-  selectOption: (option) => {
-    const stage = conversationFlow.stages.find(s => s.id === "intro");
-    if (stage?.onOptionSelect?.[option]) {
-      set({ currentStage: stage.onOptionSelect[option] });
+
+  addMessage: (text: string, isUser: boolean) => 
+    set((state: ConversationState) => ({
+      messages: [...state.messages, { text, isAI: !isUser }]
+    })),
+
+  moveToStage: (stageId: string) => {
+    const flowService = FlowService.getInstance();
+    const nextStage = flowService.getStageById(stageId);
+    
+    if (nextStage) {
+      set({ currentStageId: stageId });
     }
   },
-  setUserAnswer: (question, answer) => set((state) => ({
-    userAnswers: { ...state.userAnswers, [question]: answer }
-  })),
-  setIsSpeaking: (isSpeaking) => set({ isSpeaking }),
-  setAnimation: (animation) => set({ currentAnimation: animation }),
-  addMessage: (text, isAI) => set((state) => ({
-    messages: [...state.messages, { text, isAI }]
-  }))
+
+  selectOption: (option: string) => {
+    const flowService = FlowService.getInstance();
+    const currentStage = flowService.getStageById(get().currentStageId);
+    
+    if (currentStage?.onOptionSelect?.[option]) {
+      const nextStageId = currentStage.onOptionSelect[option];
+      get().moveToStage(nextStageId);
+    }
+  },
+
+  setUserAnswer: (question: string, answer: string) =>
+    set((state: ConversationState) => ({
+      userAnswers: { ...state.userAnswers, [question]: answer }
+    })),
+
+  setAnimation: (animation: AnimationType) =>
+    set({ currentAnimation: animation }),
+
+  setIsSpeaking: (speaking: boolean) =>
+    set({ isSpeaking: speaking })
 }));
 
 export default useConversationStore; 

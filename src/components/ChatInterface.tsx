@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Send, StopCircle } from 'lucide-react';
+import { Mic, Send, StopCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import { useVoiceInteraction } from '../hooks/useVoiceInteraction';
 import { toast, ToastContainer } from 'react-toastify';
@@ -11,10 +11,29 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import useConversationStore, { ANIMATION_MAPPINGS } from '../store/conversationStore';
 import { FlowService, FlowStage } from '../services/flowService';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 
-interface Message {
+// Match the enhanced message type from App.tsx
+interface DisplayMessage {
   text: string;
   isAI: boolean;
+  shouldSpeak?: boolean;
+}
+
+// Define type for animation data from flow.json
+interface AnimationData {
+  duration?: string;
+  visuals?: string[];
+  connectionFeed?: string[];
+  voiceMidAnimation?: string;
+}
+
+// Interface for feed item state
+interface FeedItemState {
+  id: number; // Use index as ID for simplicity
+  text: string;
+  status: 'loading' | 'completed';
 }
 
 interface ChatInterfaceProps {
@@ -22,10 +41,15 @@ interface ChatInterfaceProps {
   onStopListening: () => void;
   onStartSpeaking: () => void;
   onStopSpeaking: () => void;
-  messages: Message[];
+  messages?: DisplayMessage[];
   onSendMessage: (message: string) => void;
   onMessage: (message: string) => void;
   isLoading?: boolean;
+  isTechReqAnimating?: boolean;
+  directSpeechText?: string | null;
+  onDirectSpeechComplete?: () => void;
+  animationData?: AnimationData | null;
+  onAnimationComplete?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -36,7 +60,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messages = [],
   onSendMessage,
   onMessage,
-  isLoading
+  isLoading,
+  isTechReqAnimating = false,
+  directSpeechText = null,
+  onDirectSpeechComplete = () => {},
+  animationData = null,
+  onAnimationComplete = () => {}
 }: ChatInterfaceProps) => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -48,15 +77,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  // Local state
-  const [currentStageId, setCurrentStageId] = useState('intro');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const flowService = FlowService.getInstance();
+  const { currentStageId: globalStageId } = useConversationStore();
+  const currentStage = flowService.getStageById(globalStageId);
   
-  // Use the conversation store
   const {
     currentAnimation,
     isSpeaking: isAISpeaking,
@@ -68,49 +94,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     addMessage: addConversationMessage
   } = useConversationStore();
 
-  const currentStage = flowService.getStageById(currentStageId);
-  const currentQuestions = currentStage?.questions || [];
-
-  const handleNewMessage = async (text: string) => {
-    setInputValue('');
-    setIsTyping(true);
-
-    // If we're in a question-based stage, treat this as an answer
-    if (currentStage?.questions && currentStage.questions.length > 0) {
-      const currentQuestion = currentStage.questions[0];
-      setUserAnswer(currentQuestion.text, text);
-    } else {
-      // Process as an option selection if the current stage has options
-      if (currentStage?.options && currentStage.options.includes(text)) {
-        selectOption(text);
-      } else {
-        // Otherwise, just add it as a user message
-        addConversationMessage(text, false);
-        onSendMessage(text);
-      }
-    }
-
-    setIsTyping(false);
-    
-    // Trigger appropriate animations based on content
-    if (text.includes('?')) {
-      setAnimation(ANIMATION_MAPPINGS.THINKING);
-    } else if (text.includes('!') || text.toLowerCase().includes('great')) {
-      setAnimation(ANIMATION_MAPPINGS.HAPPY);
-    } else {
-      setAnimation(ANIMATION_MAPPINGS.SPEAKING);
-    }
-
-    // Simulate spoken response after a short delay
-    setTimeout(() => {
-      setAISpeaking(true);
-      setTimeout(() => {
-        setAISpeaking(false);
-      }, 3000); // Simulate voice duration
-    }, 1000);
-  };
-
-  // Voice interaction hook
   const { 
     speak, 
     isSpeaking: voiceIsSpeaking, 
@@ -121,33 +104,65 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     onStartListening,
     onStopListening,
     onStartSpeaking: () => {
+      console.log("onStartSpeaking callback triggered");
       onStartSpeaking();
       setAISpeaking(true);
     },
     onStopSpeaking: () => {
+      console.log("onStopSpeaking callback triggered");
       onStopSpeaking();
       setAISpeaking(false);
     },
     onResult: (text) => {
       setInputValue(text);
-      handleNewMessage(text);
+      onSendMessage(text);
     }
   });
 
-  // Handle voice responses
-  const handleVoiceResponse = async (text: string, afterVoice?: () => void) => {
+  const prevMessagesLengthRef = useRef(messages.length);
+  useEffect(() => {
+    console.log("ChatInterface: Messages effect triggered. Current length:", messages.length, "Prev length:", prevMessagesLengthRef.current);
+    const currentLength = messages.length;
+    if (currentLength > prevMessagesLengthRef.current) {
+      const newMessages = messages.slice(prevMessagesLengthRef.current);
+      console.log("ChatInterface: New messages detected:", newMessages);
+      
+      newMessages.forEach((newMessage, index) => {
+        if (newMessage && newMessage.isAI) {
+          if (newMessage.shouldSpeak) {
+            console.log(`ChatInterface: AI Message [${index}] should be spoken:`, newMessage.text);
+            speak(newMessage.text); 
+          } else {
+            console.log(`ChatInterface: AI Message [${index}] should NOT be spoken:`, newMessage.text);
+          }
+        } else if (newMessage) {
+          console.log(`ChatInterface: User Message [${index}]:`, newMessage.text);
+        }
+      });
+    } else if (currentLength < prevMessagesLengthRef.current) {
+      console.log("ChatInterface: Messages array decreased (likely cleared).");
+    }
+    
+    prevMessagesLengthRef.current = currentLength;
+  }, [messages, speak]);
+
+  useEffect(() => {
+    if (directSpeechText) {
+      console.log("ChatInterface: Direct speech requested:", directSpeechText);
+      speak(directSpeechText);
+      onDirectSpeechComplete(); 
+    }
+  }, [directSpeechText, speak, onDirectSpeechComplete]);
+
+  const handleVoiceResponse = async (text: string) => {
     setAISpeaking(true);
     try {
       await speak(text);
     } finally {
       setAISpeaking(false);
-      if (afterVoice) {
-        afterVoice();
-      }
     }
   };
 
-  // Animation trigger for user interactions
   const triggerAvatarAnimation = (action: 'typing' | 'sending' | 'receiving' | 'thinking') => {
     switch(action) {
       case 'typing':
@@ -168,7 +183,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
-  // Input handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
     if (e.target.value.length > 0 && !isTyping) {
@@ -179,19 +193,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const handleSend = async () => {
     if (!inputValue.trim()) return;
     triggerAvatarAnimation('sending');
-    await handleNewMessage(inputValue.trim());
+    onSendMessage(inputValue.trim());
+    setInputValue('');
   };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages, currentStage?.chat]);
+  }, [messages]);
 
-  // Handle file uploads
   const handleFileUpload = async (file: File) => {
     try {
       const validation = validateFile(file);
@@ -205,7 +218,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       const response = await uploadFile(file);
       if (response.success && response.fileUrl) {
-        onMessage(`File uploaded successfully: ${file.name}`);
+        onMessage(`File uploaded successfully: ${file.name}`); 
       } else {
         toast.error(response.error || 'Failed to upload file');
       }
@@ -222,12 +235,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const startRecording = () => {
     setIsRecording(true);
     triggerAvatarAnimation('receiving');
-    // Implement recording logic
   };
 
   const stopRecording = () => {
     setIsRecording(false);
-    // Implement stop recording logic
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -236,138 +247,116 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
-  // Initialize with intro stage
-  useEffect(() => {
-    const initializeIntroStage = async () => {
-      if (currentStage?.id === "intro" && !isProcessing) {
-        setIsProcessing(true);
-        const welcomeVoice = "👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.";
-        try {
-          await handleVoiceResponse(welcomeVoice);
-          addConversationMessage("✨ Wanna go through onboarding or skip to testing our legendary worldAPI?", false);
-          const options = ["Full Onboarding", "Fast-Track Testing"];
-          addConversationMessage(options.map(opt => `• ${opt}`).join('\n'), false);
-        } finally {
-          setIsProcessing(false);
-        }
-      }
-    };
-    initializeIntroStage();
-  }, [currentStage?.id]);
+  const handleOptionSelect = (option: string) => {
+    console.log("Option button clicked in ChatInterface:", option);
+    onSendMessage(option);
+  };
 
-  // Handle stage changes
-  useEffect(() => {
-    const handleStageChange = async () => {
-      if (!currentStage || isProcessing) return;
+  const [visibleFeedItems, setVisibleFeedItems] = useState<FeedItemState[]>([]);
+  const [isAnimatingFeed, setIsAnimatingFeed] = useState(false);
+  const [showFireworks, setShowFireworks] = useState(false);
+  const { width, height } = useWindowSize();
+  const fireworksDuration = 10000;
+  const itemStatusTimeouts = useRef<NodeJS.Timeout[]>([]);
 
-      setIsProcessing(true);
-      try {
-        switch (currentStage.id) {
-          case "partner-onboarding":
-            addConversationMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢", false);
-            break;
+  useEffect(() => {
+    let feedInterval: NodeJS.Timeout | null = null;
+    let fireworksTimer: NodeJS.Timeout | null = null;
+    const totalAnimationTime = 30000;
+    const itemCompleteDelay = 3000;
+
+    itemStatusTimeouts.current.forEach(clearTimeout);
+    itemStatusTimeouts.current = [];
+
+    if (animationData && animationData.connectionFeed && animationData.connectionFeed.length > 0) {
+      setIsAnimatingFeed(true);
+      setVisibleFeedItems([]);
+      setShowFireworks(false);
+      let itemIndex = 0;
+      const feedItems = animationData.connectionFeed;
+      const itemCount = feedItems.length;
+      const itemIntervalDelay = itemCount > 0 ? totalAnimationTime / itemCount : 750;
+
+      feedInterval = setInterval(() => {
+        if (itemIndex < feedItems.length) {
+          const newItem: FeedItemState = { 
+            id: itemIndex,
+            text: feedItems[itemIndex], 
+            status: 'loading' 
+          };
+          setVisibleFeedItems(prev => [...prev, newItem]);
           
-          case "collectMinimalInfo":
-            const fastTrackVoice = "Okay, speedster! You picked the fast lane, and I'm so here for it. Just three tiny things and we're rolling. Blink and you might miss it!";
-            await handleVoiceResponse(fastTrackVoice);
-            if (currentQuestions.length > 0) {
-              addConversationMessage(currentQuestions[currentQuestionIndex].text, false);
-            }
-            break;
+          const timeoutId = setTimeout(() => {
+            setVisibleFeedItems(prevItems => 
+              prevItems.map(item => 
+                item.id === newItem.id ? { ...item, status: 'completed' } : item
+              )
+            );
+            console.log(`Item ${newItem.id} (${newItem.text}) marked as completed.`);
+          }, itemCompleteDelay);
+          itemStatusTimeouts.current.push(timeoutId);
 
-          case "compliance-kyc":
-            const complianceVoice = "Ughhh... compliance. Not my favorite chapter in this love story — but hey, rules are rules and regulators never sleep. 😔 Don't worry, I'll make this as painless as possible. Here's the shopping list!";
-            await handleVoiceResponse(complianceVoice);
-            addConversationMessage("Let's get your compliance docs sorted. Below is our standard AML/KYC checklist. You can either upload the docs right here or email them to us at 👉 partnerships@digitnine.com", false);
-            if (currentStage.kycChecklist) {
-              addConversationMessage(currentStage.kycChecklist.map(item => `• ${item}`).join('\n'), false);
-              const afterListVoice = "Whew. That's quite the list, I know — but once it's done, it's DONE. Upload them or shoot them to partnerships@digitnine.com. I'll be sipping tea and checking boxes. ☕";
-              await handleVoiceResponse(afterListVoice);
-            }
-            break;
+          itemIndex++;
+        } else {
+          if (feedInterval) clearInterval(feedInterval);
+          
+          const finalDelay = itemCompleteDelay + 500;
+          setTimeout(() => {
+              console.log("ChatInterface: Feed animation finished. Triggering fireworks and callback.");
+              setShowFireworks(true); 
+              fireworksTimer = setTimeout(() => setShowFireworks(false), fireworksDuration); 
+              onAnimationComplete(); 
+              setIsAnimatingFeed(false);
+          }, finalDelay);
         }
-      } finally {
-        setIsProcessing(false);
-      }
-    };
-    handleStageChange();
-  }, [currentStage?.id]);
-
-  // Handle option selection
-  const handleOptionSelect = useCallback(async (option: string) => {
-    if (isProcessing) return;
-    
-    setIsProcessing(true);
-    try {
-      setSelectedOption(option);
-      addConversationMessage(option, true);
-
-      switch (option) {
-        case "Full Onboarding":
-          moveToStage("partner-onboarding");
-          const onboardingVoice = "Great! Let's get you set up as a partner. First, what's your organization's name?";
-          await handleVoiceResponse(onboardingVoice);
-          break;
-        case "Fast-Track Testing":
-          moveToStage("collectMinimalInfo");
-          const fastTrackVoice = "Okay, speedster! You picked the fast lane, and I'm so here for it. Just three tiny things and we're rolling. Blink and you might miss it!";
-          await handleVoiceResponse(fastTrackVoice);
-          break;
-      }
-
-      setCurrentQuestionIndex(0);
-      setUserAnswers({});
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [addConversationMessage, moveToStage, isProcessing]);
-
-  // Handle question responses
-  const handleQuestionResponse = useCallback(async (answer: string) => {
-    if (!currentStage?.questions || currentQuestionIndex >= currentStage.questions.length) return;
-
-    const currentQuestion = currentStage.questions[currentQuestionIndex];
-    setUserAnswers(prev => ({ ...prev, [currentQuestion.text]: answer }));
-    
-    // Add user's answer to conversation
-    addConversationMessage(answer, true);
-
-    // Handle CFO-specific response
-    if (currentQuestion.text === "Are you a CFO?" && answer.toLowerCase().includes("yes")) {
-      if (currentQuestion.voiceIfCFO) {
-        for (const voiceLine of currentQuestion.voiceIfCFO) {
-          await handleVoiceResponse(voiceLine);
-        }
-      }
-    } else if (currentQuestion.voiceAfter) {
-      await handleVoiceResponse(currentQuestion.voiceAfter);
-    }
-
-    // Move to next question or stage
-    if (currentQuestionIndex < currentStage.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else if (currentStage.next) {
-      moveToStage(currentStage.next);
-    }
-  }, [currentStage, currentQuestionIndex, addConversationMessage, moveToStage]);
-
-  // Handle input submission
-  const handleInputSubmit = useCallback(async () => {
-    if (!inputValue.trim()) return;
-
-    if (currentStage?.questions && currentQuestionIndex < currentStage.questions.length) {
-      await handleQuestionResponse(inputValue.trim());
+      }, itemIntervalDelay);
     } else {
-      handleNewMessage(inputValue.trim());
+      setIsAnimatingFeed(false);
+      setShowFireworks(false);
     }
 
-    setInputValue('');
-  }, [inputValue, currentStage, currentQuestionIndex, handleQuestionResponse, handleNewMessage]);
+    return () => {
+      if (feedInterval) clearInterval(feedInterval);
+      if (fireworksTimer) clearTimeout(fireworksTimer);
+      itemStatusTimeouts.current.forEach(clearTimeout);
+      itemStatusTimeouts.current = [];
+      setIsAnimatingFeed(false);
+      setShowFireworks(false);
+      setVisibleFeedItems([]);
+    };
+  }, [animationData, onAnimationComplete, fireworksDuration]);
 
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-cyber-dark">
-      {/* Header and Avatar */}
-      <div className="flex items-center justify-between h-20 px-2 border-b border-cyber-medium-teal">
+    <div className="relative flex flex-col h-screen max-h-screen overflow-hidden bg-cyber-dark">
+      {showFireworks && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={500}
+          tweenDuration={fireworksDuration - 1000}
+          style={{ position: 'absolute', top: 0, left: 0, zIndex: 100 }}
+        />
+      )}
+
+      <AnimatePresence>
+        {isTechReqAnimating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 z-50 pointer-events-none tech-req-animation-overlay"
+            style={{
+              background: 'linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(100, 0, 255, 0.1), rgba(0, 255, 100, 0.1))',
+              backgroundSize: '400% 400%',
+              animation: 'gradientPulse 5s ease infinite'
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between h-20 px-2 border-b border-cyber-medium-teal relative z-10 bg-cyber-dark">
         <div className="flex flex-col items-center">
           <h2 className="text-lg font-bold text-cyber-light-teal">Dolly</h2>
           <p className="text-xs text-cyber-deep-teal">Your AI Concierge</p>
@@ -393,9 +382,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </div>
 
-      {/* Main content area with messages */}
-      <div className="flex-1 overflow-hidden p-2 relative flex flex-col">
-        {/* Buttons in a compact layout */}
+      <div className="flex-1 overflow-hidden p-2 relative flex flex-col z-10 bg-cyber-dark">
         <div className="flex gap-1 mb-1 justify-center">
           <button
             onClick={() => setAISpeaking(!isAISpeaking)}
@@ -405,34 +392,76 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </button>
         </div>
 
-        {/* Chat messages container */}
-        <div className="flex-1 overflow-hidden">
+        {isAnimatingFeed ? (
+          <div className="tech-animation-container h-full overflow-y-auto custom-scrollbar rounded bg-cyber-darker border border-cyber-deep-teal/40 p-4 shadow-inner flex flex-col items-center justify-center">
+            <h3 className="text-lg font-bold text-cyber-light-teal mb-4 neon-text">Initializing Connection...</h3>
+            <div className="w-full max-w-md space-y-2">
+              <AnimatePresence>
+                {visibleFeedItems.map((item) => (
+                  <motion.div
+                    layout
+                    key={item.id} 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
+                    className="flex items-center justify-between text-sm text-cyber-deep-teal font-mono py-1.5 px-3 rounded bg-cyber-dark border border-cyber-deep-teal/30 shadow-sm"
+                  >
+                    <span>{item.text}</span>
+                    <AnimatePresence mode="wait">
+                      {item.status === 'loading' ? (
+                        <motion.div key="loading" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ duration: 0.2 }}>
+                          <Loader2 className="h-4 w-4 text-cyber-accent animate-spin" />
+                        </motion.div>
+                      ) : (
+                        <motion.div key="completed" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.2 }}>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        ) : (
           <div className="h-full overflow-y-auto custom-scrollbar rounded bg-cyber-dark border border-cyber-deep-teal/40 p-2 shadow-inner">
             <AnimatePresence>
               {messages.map((message, index) => (
-                <ChatMessage
-                  key={index}
-                  message={message.text}
-                  isAI={message.isAI}
-                  isTyping={index === messages.length - 1 && message.isAI && isLoading}
-                />
+                <motion.div
+                  key={index} 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChatMessage
+                    message={message.text}
+                    isAI={message.isAI}
+                    isTyping={index === messages.length - 1 && message.isAI && isLoading}
+                  />
+                </motion.div>
               ))}
               {isLoading && messages[messages.length - 1]?.isAI !== true && (
-                <ChatMessage
-                  message=""
-                  isAI={true}
-                  isTyping={true}
-                />
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChatMessage
+                    message=""
+                    isAI={true}
+                    isTyping={true}
+                  />
+                </motion.div>
               )}
             </AnimatePresence>
             <div ref={messagesEndRef} />
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Footer with input area */}
-      <div className="p-2 border-t border-cyber-medium-teal bg-cyber-darker">
-        {/* Current stage options */}
+      <div className="p-2 border-t border-cyber-medium-teal bg-cyber-darker relative z-10">
         {currentStage?.options && (
           <div className="flex flex-wrap gap-2 mb-2">
             {currentStage.options.map((option: string) => (
@@ -447,19 +476,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         )}
 
-        {/* KYC Checklist if applicable */}
         {currentStage?.kycChecklist && (
           <div className="mb-3 p-2 bg-cyber-darker/50 border border-cyber-deep-teal/30 rounded">
             <h3 className="font-semibold text-cyber-light-teal mb-1">AML/KYC Checklist:</h3>
             <ul className="text-sm list-disc pl-5 text-cyber-deep-teal">
-              {currentStage?.kycChecklist.map((item: string, index: number) => (
+              {currentStage.kycChecklist.map((item: string, index: number) => (
                 <li key={index} className="mb-0.5">{item}</li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Message input */}
         <div className="mt-2">
           {showFileUpload && (
             <FileUpload

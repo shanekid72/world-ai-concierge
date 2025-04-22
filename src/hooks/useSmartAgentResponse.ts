@@ -15,6 +15,29 @@ interface SmartAgentResponseProps {
   };
 }
 
+const RANDOM_RESPONSES = [
+  "🔌 Processing your request through the neural net...",
+  "🌐 Syncing with the mainframe...",
+  "💾 Accessing the data streams...",
+  "⚡ Powering up the response matrix...",
+  "🔍 Scanning the digital horizon...",
+  "🔄 Initializing response protocols...",
+  "📡 Connecting to the cyber grid...",
+  "💫 Engaging quantum processors...",
+  "🎮 Loading response algorithms...",
+  "🔮 Consulting the digital oracle...",
+  "🌌 Tapping into the data void...",
+  "🎯 Targeting optimal response...",
+  "🚀 Launching response sequence...",
+  "🎲 Rolling the digital dice...",
+  "🎵 Harmonizing with the data flow...",
+  "🎨 Painting with binary colors...",
+  "🎭 Performing digital theater...",
+  "🎪 Setting up the cyber circus...",
+  "🎮 Leveling up the response...",
+  "🎯 Bullseye! Processing your request..."
+];
+
 const CYBERPUNK_PROMPT = `You are Dolly, a cyberpunk-themed AI concierge. Your responses should:
 1. Be concise and direct
 2. Use cyberpunk slang and terminology
@@ -43,9 +66,12 @@ export const useSmartAgentResponse = () => {
         .replace('{userInput}', userInput)
         .replace('{context}', JSON.stringify(context || {}));
 
-      // TODO: Implement actual API call here
+      // Return a random response from the list
       const response = await new Promise<string>(resolve => 
-        setTimeout(() => resolve("Greetings, netrunner! I'm processing your request..."), 1000)
+        setTimeout(() => {
+          const randomIndex = Math.floor(Math.random() * RANDOM_RESPONSES.length);
+          resolve(RANDOM_RESPONSES[randomIndex]);
+        }, 1000)
       );
 
       return response;

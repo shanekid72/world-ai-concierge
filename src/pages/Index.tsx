@@ -1,11 +1,29 @@
-import React, { useState } from "react";
-import DollyBootup from "@/components/DollyBootup";
-import ChatInterface from "@/components/ChatInterface";
+import { useState } from "react";
+import { ChatInterface } from "@/components/ChatInterface";
 
-const Index = () => {
-  const [booted, setBooted] = useState(false);
+interface Message {
+  text: string;
+  isAI: boolean;
+}
 
-  return booted ? <ChatInterface /> : <DollyBootup onComplete={() => setBooted(true)} />;
-};
+export default function Index() {
+  const [messages, setMessages] = useState<Message[]>([]);
 
-export default Index;
+  return (
+    <div className="min-h-screen bg-cyber-dark">
+      <ChatInterface
+        onStartListening={() => {}}
+        onStopListening={() => {}}
+        onStartSpeaking={() => {}}
+        onStopSpeaking={() => {}}
+        onSendMessage={(message) => {
+          setMessages((prev) => [...prev, { text: message, isAI: false }]);
+        }}
+        onMessage={(message) => {
+          setMessages((prev) => [...prev, { text: message, isAI: true }]);
+        }}
+        messages={messages}
+      />
+    </div>
+  );
+}
