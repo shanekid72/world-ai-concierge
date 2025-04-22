@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { motion } from 'framer-motion';
 
@@ -65,50 +65,48 @@ export function Dolly3DAvatar({
       testCube.position.set(0, 0, 0);
       scene.add(testCube);
 
-      // Load GLTF model
-      console.log('Starting GLTF load...');
-      const loader = new GLTFLoader();
+      // Load FBX model
+      console.log('Starting FBX load...');
+      const loader = new FBXLoader();
       
       // Add timestamp to bypass cache
-      const modelPath = `${window.location.origin}/models/dolly-avatar.glb?v=${Date.now()}`;
+      const modelPath = `${window.location.origin}/assets/avatars/Talking On Phone.fbx?v=${Date.now()}`;
       console.log('Attempting to load from:', modelPath);
 
       loader.load(
         modelPath,
-        (gltf) => {
-          console.log('GLTF loaded successfully');
+        (fbx) => {
+          console.log('FBX loaded successfully');
           try {
-            const model = gltf.scene;
-            
             // Center and scale the model
-            const box = new THREE.Box3().setFromObject(model);
+            const box = new THREE.Box3().setFromObject(fbx);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
             
-            model.position.x = -center.x;
-            model.position.y = -center.y;
-            model.position.z = -center.z;
+            fbx.position.x = -center.x;
+            fbx.position.y = -center.y;
+            fbx.position.z = -center.z;
             
-            const scale = 1.5 / size.y;
-            model.scale.multiplyScalar(scale);
+            const scale = 0.05; // FBX models are often much larger
+            fbx.scale.set(scale, scale, scale);
 
             // Enable shadows
-            model.traverse((node) => {
+            fbx.traverse((node) => {
               if (node instanceof THREE.Mesh) {
                 node.castShadow = true;
                 node.receiveShadow = true;
               }
             });
 
-            scene.add(model);
+            scene.add(fbx);
             scene.remove(testCube); // Remove test cube once model loads
             setLoading(false);
             console.log('Model added to scene');
 
             // Handle animations if present
-            if (gltf.animations && gltf.animations.length > 0) {
-              const mixer = new THREE.AnimationMixer(model);
-              const idleAction = mixer.clipAction(gltf.animations[0]);
+            if (fbx.animations && fbx.animations.length > 0) {
+              const mixer = new THREE.AnimationMixer(fbx);
+              const idleAction = mixer.clipAction(fbx.animations[0]);
               idleAction.play();
 
               // Update animation in render loop
@@ -139,7 +137,7 @@ export function Dolly3DAvatar({
           setLoadingProgress(progress);
         },
         (error) => {
-          console.error('Error loading GLTF:', error);
+          console.error('Error loading FBX:', error);
           setError('Failed to load 3D model: ' + error.message);
         }
       );

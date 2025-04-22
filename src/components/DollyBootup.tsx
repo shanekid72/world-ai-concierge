@@ -46,7 +46,7 @@ const DollyBootup = ({ onComplete }: Props) => {
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
-          <Power className="w-6 h-6 text-cyber-pink" />
+          <Power className="w-6 h-6 text-cyber-accent" />
           <Wifi className="w-6 h-6 text-cyber-blue" />
           <Zap className="w-6 h-6 text-cyber-yellow" />
           <Mic className="w-6 h-6 text-cyber-green" />
@@ -73,7 +73,7 @@ const DollyBootup = ({ onComplete }: Props) => {
             >
               <span className={
                 index === currentSequence 
-                  ? "text-cyber-pink" 
+                  ? "text-cyber-accent" 
                   : index < currentSequence 
                     ? "text-cyber-blue" 
                     : "text-gray-600"

@@ -7,13 +7,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        'cyber-dark': '#0a0a0f',
-        'cyber-darker': '#050507',
-        'cyber-blue': '#00ffff',
-        'cyber-pink': '#ff00cc',
-        'cyber-purple': '#9900ff',
-        'cyber-yellow': '#ffff00',
-        'cyber-green': '#00ff00',
+        'cyber-dark': '#0D0A2C',      // Dark background
+        'cyber-darker': '#090720',     // Darker shade for contrast
+        'cyber-primary': {
+          from: '#581CA0',            // Primary gradient start
+          to: '#371C9C',              // Primary gradient end
+        },
+        'cyber-heading': '#F2F0F4',    // Heading text color
+        'cyber-body': '#DCD7E5',       // Body text color
+        'cyber-card': '#120E35',       // Slightly lighter than background for cards
+        'cyber-border': '#371C9C',     // Border color matching primary
+        'cyber-accent': '#581CA0',     // Accent color for highlights
+        'cyber-hover': '#6B21C8',      // Lighter purple for hover states
+        'cyber-muted': '#9CA3AF',      // Muted text color
+        'cyber-pink': '#FF00CC',       // Cyberpunk pink color for accents
+        'cyber-blue': '#00FFFF',       // Cyberpunk blue color for accents
+        'cyber-purple': '#8A2BE2',     // Cyberpunk purple color for gradients
+        'cyber-yellow': '#FFD700',     // Cyberpunk yellow color
+        'cyber-deep-teal': '#006466',  // Deep teal color
+        'cyber-medium-teal': '#065A60', // Medium teal color
+        'cyber-light-teal': '#7FFFD4',  // Light teal/cyan color
+        'cyber-avatar-glow': '#0A1437',  // Avatar glow color
+        'cyber-avatar-bg-from': '#065A60',  // Avatar gradient from color
+        'cyber-avatar-bg-to': '#006466',    // Avatar gradient to color
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -48,8 +64,17 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      backgroundImage: {
+        'primary-gradient': 'linear-gradient(135deg, var(--tw-gradient-from) 10%, var(--tw-gradient-to) 90%)',
+        'avatar-gradient': 'linear-gradient(to bottom, var(--tw-gradient-from), var(--tw-gradient-to))',
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
+      boxShadow: {
+        'avatar-glow': '0 0 25px 5px',
+        'neon': '0 0 10px var(--tw-shadow-color)',
+      },
       fontFamily: {
-        'cyber': ['Orbitron', 'sans-serif'],
+        'cyber': ['Share Tech Mono', 'monospace'],
         'code': ['Fira Code', 'monospace'],
         'sans': ['Inter', 'sans-serif'],
       },
@@ -60,10 +85,10 @@ export default {
       keyframes: {
         'pulse-neon': {
           '0%, 100%': { 
-            boxShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 15px #0ff, 0 0 20px #0ff',
+            boxShadow: '0 0 5px #581CA0, 0 0 10px #581CA0, 0 0 15px #581CA0, 0 0 20px #581CA0',
           },
           '50%': { 
-            boxShadow: '0 0 2px #fff, 0 0 5px #fff, 0 0 10px #0ff, 0 0 15px #0ff',
+            boxShadow: '0 0 2px #581CA0, 0 0 5px #581CA0, 0 0 10px #581CA0, 0 0 15px #581CA0',
           },
         },
         'float': {

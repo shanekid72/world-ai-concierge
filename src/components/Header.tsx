@@ -16,76 +16,27 @@ const Header: React.FC = () => {
   };
 
   return (
-    <motion.header 
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative py-4 px-8 flex items-center justify-between border-b border-cyber-blue/30 bg-cyber-darker/80 backdrop-blur-sm"
-    >
-      <div className="flex items-center space-x-4">
-        <motion.div 
-          className="relative"
-          onHoverStart={() => setIsLogoHovered(true)}
-          onHoverEnd={() => setIsLogoHovered(false)}
-          whileHover={{ scale: 1.05 }}
-        >
-          <img src="/logo.png" alt="worldAPI" className="h-10 w-auto" />
-          {isLogoHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 power-glow rounded-full"
-            />
-          )}
-        </motion.div>
+    <header className="h-16 bg-cyber-dark border-b border-cyber-deep-teal">
+      <div className="container mx-auto px-4 h-full flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <h1 className="text-2xl font-cyber text-cyber-deep-teal">
+            Dolly
+          </h1>
+          <span className="text-sm text-cyber-deep-teal">
+            Your AI Concierge
+          </span>
+        </div>
         
-        <div className="flex flex-col">
-          <motion.h1 
-            className="text-2xl font-cyber glitch-text"
-            data-text="worldAPI"
-          >
-            worldAPI
-          </motion.h1>
-          <motion.span 
-            className="text-xs text-cyber-pink border border-cyber-pink/50 px-2 py-0.5"
-            whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(255,0,204,0.5)' }}
-          >
-            by Digit9
-          </motion.span>
-        </div>
+        <nav className="flex items-center space-x-4">
+          <button className="px-4 py-2 bg-cyber-deep-teal hover:bg-cyber-secondary rounded-lg text-cyber-dark transition-colors">
+            Settings
+          </button>
+          <button className="px-4 py-2 bg-cyber-deep-teal hover:bg-cyber-secondary rounded-lg text-cyber-dark transition-colors">
+            Help
+          </button>
+        </nav>
       </div>
-
-      <div className="flex items-center space-x-6">
-        <motion.div 
-          className="flex items-center space-x-2"
-          onHoverStart={() => setIsNetStatusHovered(true)}
-          onHoverEnd={() => setIsNetStatusHovered(false)}
-        >
-          <div className={`h-2 w-2 rounded-full ${isNetStatusHovered ? 'power-glow' : ''} bg-green-500`} />
-          <span className="text-sm text-cyber-blue">NET_STATUS: ONLINE</span>
-          {isNetStatusHovered && (
-            <Zap className="w-4 h-4 text-cyber-pink" />
-          )}
-        </motion.div>
-
-        <motion.button 
-          onClick={handleContactSupport}
-          className="cyber-button"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Contact Support
-        </motion.button>
-
-        <div className="flex items-center space-x-3">
-          <motion.div 
-            className="h-10 w-10 rounded-full bg-cyber-blue/20 border-2 border-cyber-blue flex items-center justify-center power-glow"
-            whileHover={{ scale: 1.1 }}
-          >
-            GP
-          </motion.div>
-        </div>
-      </div>
-    </motion.header>
+    </header>
   );
 };
 

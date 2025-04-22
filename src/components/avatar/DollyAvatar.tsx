@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, Suspense } from "react";
+import React, { useEffect, useRef, Suspense, useState, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, OrbitControls } from "@react-three/drei";
-import { Group, Object3D, Mesh } from "three";
+import { useGLTF, OrbitControls, useFBX } from "@react-three/drei";
+import { Group, Object3D, Mesh, AnimationMixer, AnimationClip, Clock } from "three";
+import * as THREE from 'three';
 
 interface DollyAvatarProps {
   isSpeaking?: boolean;
@@ -41,65 +42,149 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
   }
 }
 
-function Model({ isSpeaking, expression = 'neutral', gesture = 'idle' }: ModelProps) {
+// Create a memoized Model component to prevent re-renders
+const Model = React.memo(({ isSpeaking, expression = 'neutral', gesture = 'idle' }: ModelProps) => {
   const group = useRef<Group>(null);
-  const modelPath = "/models/dolly-avatar.glb";
-  console.log("Loading model from path:", modelPath);
-  const { scene } = useGLTF(modelPath);
-
+  const modelPath = "/assets/avatars/Talking On Phone.fbx";
+  
+  // Log only on first render
+  const isFirstRender = useRef(true);
+  if (isFirstRender.current) {
+    console.log("Loading model from path:", modelPath);
+    isFirstRender.current = false;
+  }
+  
+  // Memoize the FBX model to prevent reloading
+  const fbx = useMemo(() => useFBX(modelPath), [modelPath]);
+  
+  // Animation setup
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const clockRef = useRef(new THREE.Clock());
+  const [animationIndex, setAnimationIndex] = useState(0);
+  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Effect for initial setup - run only once
   useEffect(() => {
-    if (scene) {
-      scene.traverse((child: Object3D) => {
-        if ('isMesh' in child && child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
-    }
-  }, [scene]);
-
-  useFrame((state) => {
-    if (group.current) {
-      // Idle animation
-      const t = state.clock.getElapsedTime();
-      group.current.rotation.y = Math.sin(t / 4) * 0.2;
-      if (isSpeaking) {
-        group.current.position.y = Math.sin(t * 2) * 0.05;
+    if (!fbx) return;
+    
+    // Set up mesh properties
+    fbx.traverse((child: Object3D) => {
+      if ('isMesh' in child && child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
       }
+    });
+    
+    if (fbx.animations && fbx.animations.length > 0) {
+      console.log("Found animations:", fbx.animations.length);
+      
+      // Create the mixer
+      const mixer = new THREE.AnimationMixer(fbx);
+      mixerRef.current = mixer;
+      
+      // Play the first animation
+      const action = mixer.clipAction(fbx.animations[0]);
+      action.play();
+      
+      // Set up a timer to switch animations occasionally
+      animationTimerRef.current = setInterval(() => {
+        if (fbx.animations.length > 1) {
+          const nextIndex = (animationIndex + 1) % fbx.animations.length;
+          setAnimationIndex(nextIndex);
+          
+          mixer.stopAllAction();
+          const newAction = mixer.clipAction(fbx.animations[nextIndex]);
+          newAction.fadeIn(0.5);
+          newAction.play();
+        }
+      }, 8000); // Change animation every 8 seconds
+    }
+    
+    // Cleanup function
+    return () => {
+      if (animationTimerRef.current) {
+        clearInterval(animationTimerRef.current);
+      }
+      if (mixerRef.current) {
+        mixerRef.current.stopAllAction();
+      }
+    };
+  }, [fbx]); // Only depend on fbx
+  
+  // Effect for responding to user interactions - only run when props change
+  useEffect(() => {
+    if (!mixerRef.current || !fbx || !fbx.animations || fbx.animations.length === 0) return;
+    
+    // Choose an animation based on the current state
+    let animToPlay = 0;
+    
+    if (isSpeaking) {
+      // Use the first animation for speaking
+      animToPlay = 0;
+    } else if (gesture === 'thinking') {
+      // Use animation 1 for thinking if available
+      animToPlay = fbx.animations.length > 1 ? 1 : 0;
+    }
+    
+    if (animToPlay !== animationIndex) {
+      setAnimationIndex(animToPlay);
+      
+      mixerRef.current.stopAllAction();
+      const action = mixerRef.current.clipAction(fbx.animations[animToPlay]);
+      action.reset();
+      action.fadeIn(0.5);
+      action.play();
+    }
+  }, [isSpeaking, expression, gesture, fbx]); // Important props that should trigger animation changes
+  
+  // Animation frame update
+  useFrame(() => {
+    if (mixerRef.current) {
+      const delta = clockRef.current.getDelta();
+      mixerRef.current.update(delta);
     }
   });
-
+  
   return (
     <group ref={group}>
-      <primitive object={scene} scale={2} position={[0, -2, 0]} />
+      <primitive 
+        object={fbx} 
+        scale={0.01} 
+        position={[0, -1.5, 0]} 
+        rotation={[0, Math.PI, 0]}
+      />
     </group>
   );
-}
+});
+
+// Add display name for debugging
+Model.displayName = "DollyModel";
 
 export function DollyAvatar({ isSpeaking, expression, position, gesture }: DollyAvatarProps) {
-  useEffect(() => {
-    fetch("/models/dolly-avatar.glb")
-      .then(res => res.text())
-      .then(console.log)
-      .catch(console.error);
-  }, []);
+  // Prevent re-rendering of the Canvas component
+  const canvasProps = useMemo(() => ({
+    shadows: true,
+    camera: { position: [0, 0, 5] as [number, number, number], fov: 45 },
+    style: {
+      background: 'transparent',
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%'
+    },
+    gl: {
+      alpha: true,
+      premultipliedAlpha: false,
+      antialias: true
+    }
+  }), []);
 
   return (
-    <div className="w-64 h-64 relative">
-      <Canvas
-        shadows
-        camera={{ position: [0, 0, 5], fov: 45 }}
-        style={{
-          background: 'transparent',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%'
-        }}
-      >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} castShadow />
+    <div className="w-full h-full relative bg-gradient-radial from-cyber-avatar-bg-from to-cyber-avatar-bg-to opacity-80 shadow-avatar-glow shadow-cyber-avatar-glow rounded-full overflow-hidden">
+      <Canvas {...canvasProps}>
+        <ambientLight intensity={1.5} />
+        <pointLight position={[10, 10, 10]} intensity={2} castShadow />
         <Suspense fallback={null}>
           <ErrorBoundary fallback={null}>
             <Model 

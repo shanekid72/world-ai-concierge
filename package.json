@@ -11,8 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-avatar": "^1.1.6",
     "@radix-ui/react-slot": "^1.2.0",
-    "@react-three/drei": "^10.0.6",
+    "@react-three/drei": "^9.88.7",
     "@react-three/fiber": "^8.15.19",
     "@use-gesture/react": "^10.3.0",
     "axios": "^1.8.4",
@@ -28,8 +29,9 @@
     "react-toastify": "^10.0.4",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.162.0",
-    "three-stdlib": "^2.35.15"
+    "three": "^0.157.0",
+    "three-stdlib": "^2.35.15",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/node": "^20.11.28",

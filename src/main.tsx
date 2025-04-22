@@ -1,3 +1,46 @@
+// -------------------------------
+// Suppress host validation and FBXLoader warnings
+// -------------------------------
+const originalWarn = console.warn;
+const originalError = console.error;
+
+console.warn = (...args: any[]) => {
+  const msg = args[0];
+  if (
+    typeof msg === 'string' &&
+    (
+      msg.includes('Host validation failed') ||
+      msg.includes('Host is not supported') ||
+      msg.includes('Host is not valid or supported') ||
+      msg.includes('insights whitelist') ||
+      msg.includes('THREE.FBXLoader:')
+    )
+  ) {
+    return;
+  }
+  originalWarn.apply(console, args);
+};
+
+console.error = (...args: any[]) => {
+  const msg = args[0];
+  if (
+    typeof msg === 'string' &&
+    (
+      msg.includes('Host validation failed') ||
+      msg.includes('Host is not supported') ||
+      msg.includes('Host is not valid or supported') ||
+      msg.includes('insights whitelist') ||
+      msg.includes('THREE.FBXLoader:')
+    )
+  ) {
+    return;
+  }
+  originalError.apply(console, args);
+};
+
+// -------------------------------
+// Your usual React entrypoint
+// -------------------------------
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { ToastContainer } from 'react-toastify';

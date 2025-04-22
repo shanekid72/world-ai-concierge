@@ -29,6 +29,16 @@
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
 
+    --cyber-dark: #0D0A2C;
+    --cyber-darker: #090720;
+    --cyber-accent: #581CA0;
+    --cyber-heading: #F2F0F4;
+    --cyber-body: #DCD7E5;
+    --cyber-card: #120E35;
+    --cyber-border: #371C9C;
+    --cyber-primary-from: #581CA0;
+    --cyber-primary-to: #371C9C;
+
     --sidebar-background: 240 30% 10%;
     --sidebar-foreground: 180 100% 80%;
     --sidebar-primary: 320 100% 60%;
@@ -37,10 +47,6 @@
     --sidebar-accent-foreground: 180 100% 80%;
     --sidebar-border: 240 20% 30%;
     --sidebar-ring: 270 100% 60%;
-
-    --cyber-dark: #1a1b2e;
-    --cyber-blue: #00f0ff;
-    --cyber-pink: #ff00ff;
   }
 
   .dark {
@@ -68,7 +74,7 @@
 
 @layer base {
   body {
-    @apply bg-cyber-dark text-white font-cyber;
+    @apply bg-cyber-dark text-cyber-body font-cyber;
     margin: 0;
     padding: 0;
     background-color: var(--cyber-dark);
@@ -78,15 +84,15 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: 
-      linear-gradient(to right, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 12, 41, 0.95), rgba(15, 12, 41, 0.95));
+      linear-gradient(to right, rgba(88, 28, 160, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(88, 28, 160, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(13, 10, 44, 0.95), rgba(13, 10, 44, 0.95));
     background-size: 50px 50px, 50px 50px, 100% 100%;
     background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-cyber text-cyber-pink;
+    @apply font-cyber text-cyber-heading;
   }
 
   code {
@@ -97,44 +103,44 @@
 
 @layer components {
   .cyber-button {
-    @apply relative px-8 py-2 bg-transparent border-2 border-cyber-pink text-cyber-pink font-cyber 
-    uppercase tracking-wider hover:bg-cyber-pink hover:text-black transition-all duration-300
+    @apply relative px-8 py-2 bg-transparent border-2 border-cyber-accent text-cyber-accent font-cyber
+    uppercase tracking-wider hover:bg-cyber-accent hover:text-black transition-all duration-300
     hover:shadow-[0_0_20px_rgba(255,0,204,0.7)] focus:outline-none;
   }
 
   .cyber-input {
-    @apply bg-cyber-darker border-2 border-cyber-blue text-white px-4 py-2 rounded-none
-    focus:border-cyber-pink focus:outline-none focus:shadow-[0_0_15px_rgba(0,255,255,0.5)]
-    font-mono placeholder-gray-500;
+    @apply bg-cyber-card border-2 border-cyber-border text-cyber-body px-4 py-2 rounded-none
+    focus:border-cyber-accent focus:outline-none focus:shadow-[0_0_15px_rgba(88,28,160,0.5)]
+    font-mono placeholder-cyber-muted;
   }
 
   .cyber-card {
-    @apply bg-cyber-darker/80 border-2 border-cyber-blue p-6 rounded-none
-    hover:border-cyber-pink transition-all duration-300
-    hover:shadow-[0_0_20px_rgba(0,255,255,0.3)];
+    @apply bg-cyber-card border-2 border-cyber-border p-6 rounded-none
+    hover:border-cyber-accent transition-all duration-300
+    hover:shadow-[0_0_20px_rgba(88,28,160,0.3)];
   }
 
   .cyber-text-glow {
-    @apply animate-glow;
+    @apply animate-glow text-cyber-heading;
   }
 
   .cyber-border-glow {
-    @apply border-2 border-cyber-pink shadow-[0_0_10px_rgba(255,0,204,0.7)];
+    @apply border-2 border-cyber-accent shadow-[0_0_10px_rgba(88,28,160,0.7)];
   }
 
   .cyber-grid {
-    @apply bg-cyber-dark min-h-screen text-white;
+    @apply bg-cyber-dark min-h-screen text-cyber-body;
     background-size: 50px 50px;
     background-image: 
-      linear-gradient(to right, rgba(0, 240, 255, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+      linear-gradient(to right, rgba(88, 28, 160, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(88, 28, 160, 0.1) 1px, transparent 1px);
   }
 
   .cyber-grid-bg {
     @apply bg-cyber-dark relative;
     background-image: 
-      linear-gradient(to right, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+      linear-gradient(to right, rgba(88, 28, 160, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(88, 28, 160, 0.1) 1px, transparent 1px);
     background-size: 50px 50px;
   }
 
@@ -145,45 +151,45 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(15, 12, 41, 0.9), rgba(15, 12, 41, 0.7));
+    background: linear-gradient(to bottom, rgba(13, 10, 44, 0.9), rgba(13, 10, 44, 0.7));
     pointer-events: none;
   }
 
   .cyber-panel {
-    @apply border border-cyber-blue/50 bg-cyber-dark/50 backdrop-blur-sm;
+    @apply border border-cyber-border/50 bg-cyber-dark/50 backdrop-blur-sm;
   }
 
   .neon-border {
-    @apply border border-fuchsia-500 shadow-[0_0_10px_rgba(255,0,255,0.7)];
+    @apply border border-cyber-accent shadow-[0_0_10px_rgba(88,28,160,0.7)];
   }
   
   .neon-text {
-    @apply text-fuchsia-400 drop-shadow-[0_0_8px_rgba(255,0,255,0.8)];
+    @apply text-cyber-heading drop-shadow-[0_0_8px_rgba(88,28,160,0.8)];
   }
   
   .tech-pattern {
     background-image: 
-      radial-gradient(circle at 30% 50%, rgba(0, 255, 255, 0.04) 0%, transparent 15%),
-      radial-gradient(circle at 70% 30%, rgba(255, 0, 255, 0.03) 0%, transparent 20%),
+      radial-gradient(circle at 30% 50%, rgba(88, 28, 160, 0.04) 0%, transparent 15%),
+      radial-gradient(circle at 70% 30%, rgba(55, 28, 156, 0.03) 0%, transparent 20%),
       linear-gradient(90deg, rgba(20, 20, 30, 0.3) 1px, transparent 1px),
       linear-gradient(0deg, rgba(20, 20, 30, 0.3) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
   }
 
   .cyberpunk-bg {
-    @apply bg-gradient-to-br from-cyan-900/20 via-fuchsia-900/20 to-cyan-900/20;
+    @apply bg-gradient-to-br from-cyber-primary-from/20 via-cyber-primary-to/20 to-cyber-primary-from/20;
   }
 
   .cyberpunk-dark {
-    @apply bg-gray-900/90;
+    @apply bg-cyber-dark/90;
   }
 
   .cyberpunk-darker {
-    @apply bg-gray-950/90;
+    @apply bg-cyber-darker/90;
   }
 
-  .cyberpunk-pink {
-    @apply text-fuchsia-500;
+  .cyberpunk-accent {
+    @apply text-cyber-accent;
   }
 
   .cyberpunk-blue {
@@ -226,7 +232,7 @@
 
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.cyber-blue') theme('colors.cyber-darker');
+    scrollbar-color: theme('colors.cyber-accent') theme('colors.cyber-darker');
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -238,11 +244,14 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-cyber-blue rounded-full;
+    @apply bg-cyber-accent rounded-full;
   }
 
   .shadow-neon {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #0ff, 0 0 20px #0ff;
+    box-shadow: 0 0 5px theme('colors.cyber-heading'), 
+                0 0 10px theme('colors.cyber-heading'), 
+                0 0 15px theme('colors.cyber-accent'), 
+                0 0 20px theme('colors.cyber-accent');
   }
 
   .typing-indicator {
@@ -250,7 +259,7 @@
   }
 
   .typing-indicator span {
-    @apply w-2 h-2 bg-cyber-blue rounded-full;
+    @apply w-2 h-2 bg-cyber-accent rounded-full;
     animation: typing 1s infinite ease-in-out;
   }
 
@@ -270,15 +279,15 @@
 @keyframes typing {
   0% {
     transform: translateY(0px);
-    background-color: rgba(0, 255, 255, 1);
+    background-color: theme('colors.cyber-accent');
   }
   28% {
     transform: translateY(-5px);
-    background-color: rgba(0, 255, 255, 0.4);
+    background-color: theme('colors.cyber-accent/40');
   }
   44% {
     transform: translateY(0px);
-    background-color: rgba(0, 255, 255, 0.2);
+    background-color: theme('colors.cyber-accent/20');
   }
 }
 
@@ -292,12 +301,12 @@
 }
 
 .chat-container::-webkit-scrollbar-thumb {
-  background: theme('colors.cyber-pink');
+  background: theme('colors.cyber-accent');
   border-radius: 3px;
 }
 
 .chat-container::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.cyber-blue');
+  background: theme('colors.cyber-accent');
 }
 
 /* Glitch effect */
@@ -444,17 +453,17 @@
 @keyframes power-pulse {
   0%, 100% {
     box-shadow: 
-      0 0 5px theme('colors.cyber-blue'),
-      0 0 10px theme('colors.cyber-blue'),
-      0 0 15px theme('colors.cyber-blue'),
-      0 0 20px theme('colors.cyber-blue');
+      0 0 5px theme('colors.cyber-accent'),
+      0 0 10px theme('colors.cyber-accent'),
+      0 0 15px theme('colors.cyber-accent'),
+      0 0 20px theme('colors.cyber-accent');
   }
   50% {
     box-shadow: 
-      0 0 10px theme('colors.cyber-pink'),
-      0 0 20px theme('colors.cyber-pink'),
-      0 0 30px theme('colors.cyber-pink'),
-      0 0 40px theme('colors.cyber-pink');
+      0 0 10px theme('colors.cyber-accent'),
+      0 0 20px theme('colors.cyber-accent'),
+      0 0 30px theme('colors.cyber-accent'),
+      0 0 40px theme('colors.cyber-accent');
   }
 }
 
@@ -492,13 +501,13 @@
 
 .glitch-text::before {
   left: 2px;
-  text-shadow: -2px 0 theme('colors.cyber-pink');
+  text-shadow: -2px 0 theme('colors.cyber-accent');
   animation: glitch-anim 5s infinite linear alternate-reverse;
 }
 
 .glitch-text::after {
   left: -2px;
-  text-shadow: -2px 0 theme('colors.cyber-blue');
+  text-shadow: -2px 0 theme('colors.cyber-accent');
   animation: glitch-anim2 1s infinite linear alternate-reverse;
 }
 
@@ -512,20 +521,12 @@
   background-color: var(--cyber-dark);
 }
 
-.text-cyber-blue {
-  color: var(--cyber-blue);
+.text-cyber-accent {
+  color: var(--cyber-accent);
 }
 
-.bg-cyber-blue {
-  background-color: var(--cyber-blue);
-}
-
-.text-cyber-pink {
-  color: var(--cyber-pink);
-}
-
-.bg-cyber-pink {
-  background-color: var(--cyber-pink);
+.bg-cyber-accent {
+  background-color: var(--cyber-accent);
 }
 
 /* Loading screen specific styles */

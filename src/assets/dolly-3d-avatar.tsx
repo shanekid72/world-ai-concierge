@@ -164,7 +164,7 @@ export function Dolly3DAvatar({
       {(isListening || isSpeaking) && (
         <motion.div
           className={`absolute inset-0 rounded-full border-2 ${
-            isListening ? 'border-cyber-green' : 'border-cyber-pink'
+            isListening ? 'border-cyber-blue' : 'border-cyber-accent'
           }`}
           animate={{
             scale: [1, 1.1, 1],
