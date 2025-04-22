@@ -12,7 +12,7 @@ export const processUserMessage = async (
 ): Promise<{ newState: ConversationState, aiResponse: string, isTyping: boolean }> => {
   // Try specialized processors first
   
-  // Currency processor
+  // Processors are not properly coordinated with the chat flow stages
   const currencyResponse = await processCurrencyMessage(message, state);
   if (currencyResponse) return currencyResponse;
   
