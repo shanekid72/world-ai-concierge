@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "api": {
+    "name": "WorldAPI",
+    "baseUrl": "https://api.worldapi.com/v1",
+    "endpoints": {
+      "onboarding": "/onboarding",
+      "compliance": "/compliance",
+      "technical": "/technical",
+      "integration": "/integration"
+    }
+  },
+  "tools": {
+    "enabled": true,
+    "features": [
+      "endpointIntegration",
+      "codeGeneration",
+      "documentation",
+      "testing"
+    ]
+  },
+  "settings": {
+    "autoSync": true,
+    "notifications": true,
+    "theme": "cyberpunk"
+  }
+} 

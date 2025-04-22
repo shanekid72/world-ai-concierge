@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { speakText } from '../services/voiceService';
+import axios from 'axios';
 
 interface UseVoiceInteractionProps {
   onStartListening?: () => void;
@@ -20,6 +21,7 @@ export const useVoiceInteraction = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [recognition, setRecognition] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -86,21 +88,77 @@ export const useVoiceInteraction = ({
 
   // Speak text using ElevenLabs API
   const speak = useCallback(async (text: string) => {
-    if (isSpeaking) return;
+    if (!text) return;
+
     try {
       setIsSpeaking(true);
-      if (onStartSpeaking) onStartSpeaking();
+      setError(null);
       
-      await speakText(text);
+      // Check if we have an API key
+      if (!import.meta.env.VITE_ELEVENLABS_API_KEY) {
+        const errorMsg = 'ElevenLabs API key not found. Voice synthesis disabled.';
+        console.warn(errorMsg);
+        setError(errorMsg);
+        return;
+      }
+
+      console.log('Attempting to speak:', text);
       
-      setIsSpeaking(false);
-      if (onStopSpeaking) onStopSpeaking();
+      const response = await axios.post(
+        'https://api.elevenlabs.io/v1/text-to-speech/nova',
+        {
+          text,
+          model_id: 'eleven_monolingual_v1',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5
+          }
+        },
+        {
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY
+          },
+          responseType: 'blob'
+        }
+      );
+
+      console.log('Received audio response');
+      const audio = new Audio(URL.createObjectURL(response.data));
+      
+      audio.onended = () => {
+        console.log('Audio playback ended');
+        setIsSpeaking(false);
+      };
+      
+      audio.onerror = (e) => {
+        console.error('Audio playback error:', e);
+        setError('Error playing audio');
+        setIsSpeaking(false);
+      };
+
+      await audio.play();
+      console.log('Started audio playback');
     } catch (error) {
-      console.error('Error in speak function:', error);
+      console.error('Error generating speech:', error);
+      if (axios.isAxiosError(error)) {
+        setError(`API Error: ${error.response?.status} - ${error.response?.data?.detail || error.message}`);
+      } else {
+        setError('Error generating speech');
+      }
       setIsSpeaking(false);
-      if (onStopSpeaking) onStopSpeaking();
     }
-  }, [isSpeaking, onStartSpeaking, onStopSpeaking]);
+  }, []);
+
+  const stopSpeaking = useCallback(() => {
+    setIsSpeaking(false);
+    setError(null);
+  }, []);
+
+  const testVoice = useCallback(async () => {
+    await speak("Hello! This is a test of the voice synthesis system. If you can hear this, the voice synthesis is working correctly!");
+  }, [speak]);
 
   return {
     isListening,
@@ -109,5 +167,8 @@ export const useVoiceInteraction = ({
     startListening,
     stopListening,
     speak,
+    stopSpeaking,
+    error,
+    testVoice
   };
 }; 

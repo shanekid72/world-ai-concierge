@@ -1,0 +1,116 @@
+{
+  "stages": [
+    {
+      "id": "intro",
+      "voice": "\ud83d\udc4b Hi, I'm Dolly \u2014 your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.",
+      "chat": "\u2728 Wanna go through onboarding or skip to testing our legendary worldAPI?",
+      "options": [
+        "Full Onboarding",
+        "Fast-Track Testing"
+      ]
+    },
+    {
+      "id": "path-selection",
+      "onOptionSelect": {
+        "Full Onboarding": "partner-onboarding",
+        "Fast-Track Testing": "collectMinimalInfo"
+      }
+    },
+    {
+      "id": "partner-onboarding",
+      "chat": "I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? \ud83c\udfe2",
+      "subFlow": "partnerOnboardingScript"
+    },
+    {
+      "id": "collectMinimalInfo",
+      "voice": "Okay, speedster! You picked the fast lane, and I\u2019m so here for it. Just three tiny things and we\u2019re rolling. Blink and you might miss it!",
+      "questions": [
+        {
+          "text": "What\u2019s your name?",
+          "voiceAfter": "Nice to meet you, superstar. You and I? We\u2019re gonna do big things."
+        },
+        {
+          "text": "What\u2019s your company\u2019s name?",
+          "voiceAfter": "Oooh, that sounds official. I love a brand with presence!"
+        },
+        {
+          "text": "What\u2019s the best email or phone number to reach you?",
+          "voiceAfter": "Perfect. Now I know where to send the confetti once we\u2019re live."
+        },
+        {
+          "text": "Are you a CFO?",
+          "voiceIfCFO": [
+            "Oh my god... I was literally born for this moment.",
+            "I\u2019m the AI every fintech\u2019s CFO dreams of \u2014 charming, smart, and allergic to repetitive dev tasks \ud83d\udc85.",
+            "You will fall for me\u2026 like every other CFO does \ud83d\udc98"
+          ]
+        }
+      ],
+      "next": "technical-requirements"
+    },
+    {
+      "id": "compliance-kyc",
+      "voice": "Ughhh... compliance. Not my favorite chapter in this love story \u2014 but hey, rules are rules and regulators never sleep. \ud83d\ude14 Don\u2019t worry, I\u2019ll make this as painless as possible. Here\u2019s the shopping list!",
+      "chat": "Let\u2019s get your compliance docs sorted. Below is our standard AML/KYC checklist. You can either upload the docs right here or email them to us at \ud83d\udc49 partnerships@digitnine.com",
+      "kycChecklist": [
+        "AML Questionnaire",
+        "Certificate of Incorporation / Registration",
+        "Memorandum / Articles of Association",
+        "Central Bank License or Regulator\u2019s Authorization Letter",
+        "Organization Chart",
+        "Shareholder List",
+        "ID copies of UBOs",
+        "ID copies of Directors",
+        "ID copies of Authorized Signatories",
+        "External Audit or Assurance Report",
+        "AML Policy & Procedures",
+        "USA PATRIOT Act Certificate (if applicable)",
+        "Audited Financial Statements - 3 years",
+        "ID of Compliance Officer / MLRO"
+      ],
+      "voiceAfterList": "Whew. That\u2019s quite the list, I know \u2014 but once it\u2019s done, it\u2019s DONE. Upload them or shoot them to partnerships@digitnine.com. I\u2019ll be sipping tea and checking boxes. \u2615"
+    },
+    {
+      "id": "technical-requirements",
+      "animation": {
+        "duration": "45s",
+        "visuals": [
+          "moving gradients",
+          "glitch blur",
+          "typewriter text",
+          "neon sparks"
+        ],
+        "connectionFeed": [
+          "\ud83d\udd0c Connecting to MTOs... \u2705",
+          "Western Union \u2705",
+          "TerraPay \u2705",
+          "Ria \u2705",
+          "Transfast \u2705",
+          "\ud83c\udf10 Syncing with Banks... \u2705",
+          "\ud83d\udcf2 Linking 247 digital wallets... \u2705"
+        ],
+        "voiceMidAnimation": "Bro, I think you're the Spiderman of APIs \ud83d\udd77\ufe0f \u2014 there's too much going on in your web!"
+      },
+      "postAnimation": {
+        "voice": "Boom! You're through the boring part and officially in the big leagues. You\u2019re now ready to explore WorldAPI \u2014 and yes, that means it\u2019s time to connect your development IDE and bring those endpoints to life.",
+        "chat": "\ud83d\udcc1 Download your WorldAPI config file: \n\u27a1\ufe0f [Download mcp.json]",
+        "voiceDownload": "Save that file \u2014 it\u2019s basically the passport to my API playground."
+      },
+      "cursorSetup": {
+        "steps": [
+          "Go to your project root",
+          "Create a folder named .cursor",
+          "Paste the downloaded mcp.json inside",
+          "Open IDE \u2192 Settings \u2192 MCP tab",
+          "WorldAPI tools will now be available"
+        ],
+        "voice": "Dot-cursor folder. MCP tab. And boom \u2014 tools unlocked like cheat codes. \ud83c\udfae"
+      },
+      "integrationPrompts": [
+        "Integrate WorldAPI endpoints into \"my project name\" using the WorldAPI tool. Maintain the project structure and format.",
+        "Wire the newly integrated WorldAPI to my front-end project \"my project name\" inside a new page and add it to the menu."
+      ],
+      "voiceAfterPrompts": "Whisper these to your IDE and let it do its thing. Like summoning spells \u2014 but for code. \ud83e\uddd9\u200d\u2642\ufe0f"
+    }
+  ]
+}
