@@ -237,110 +237,131 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   // Initialize with intro stage
   useEffect(() => {
-    if (currentStage?.id === "intro") {
-      const welcomeVoice = "👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.";
-      handleVoiceResponse(welcomeVoice, () => {
-        addConversationMessage("✨ Wanna go through onboarding or skip to testing our legendary worldAPI?", false);
-        const options = ["Full Onboarding", "Fast-Track Testing"];
-        addConversationMessage(options.map(opt => `• ${opt}`).join('\n'), false);
-      });
-    }
-  }, []);
+    const initializeIntroStage = async () => {
+      if (currentStage?.id === "intro" && !isProcessing) {
+        setIsProcessing(true);
+        const welcomeVoice = "👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.";
+        try {
+          await handleVoiceResponse(welcomeVoice);
+          addConversationMessage("✨ Wanna go through onboarding or skip to testing our legendary worldAPI?", false);
+          const options = ["Full Onboarding", "Fast-Track Testing"];
+          addConversationMessage(options.map(opt => `• ${opt}`).join('\n'), false);
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+    };
+    initializeIntroStage();
+  }, [currentStage?.id]);
 
   // Handle stage changes
   useEffect(() => {
-    if (!currentStage) return;
+    const handleStageChange = async () => {
+      if (!currentStage || isProcessing) return;
 
-    switch (currentStage.id) {
-      case "partner-onboarding":
-        addConversationMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢", false);
-        break;
-      
-      case "collectMinimalInfo":
-        const fastTrackVoice = "Okay, speedster! You picked the fast lane, and I'm so here for it. Just three tiny things and we're rolling. Blink and you might miss it!";
-        handleVoiceResponse(fastTrackVoice, () => {
-          if (currentQuestions.length > 0) {
-            addConversationMessage(currentQuestions[currentQuestionIndex].text, false);
-          }
-        });
-        break;
+      setIsProcessing(true);
+      try {
+        switch (currentStage.id) {
+          case "partner-onboarding":
+            addConversationMessage("I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢", false);
+            break;
+          
+          case "collectMinimalInfo":
+            const fastTrackVoice = "Okay, speedster! You picked the fast lane, and I'm so here for it. Just three tiny things and we're rolling. Blink and you might miss it!";
+            await handleVoiceResponse(fastTrackVoice);
+            if (currentQuestions.length > 0) {
+              addConversationMessage(currentQuestions[currentQuestionIndex].text, false);
+            }
+            break;
 
-      case "compliance-kyc":
-        const complianceVoice = "Ughhh... compliance. Not my favorite chapter in this love story — but hey, rules are rules and regulators never sleep. 😔 Don't worry, I'll make this as painless as possible. Here's the shopping list!";
-        handleVoiceResponse(complianceVoice, () => {
-          addConversationMessage("Let's get your compliance docs sorted. Below is our standard AML/KYC checklist. You can either upload the docs right here or email them to us at 👉 partnerships@digitnine.com", false);
-          if (currentStage.kycChecklist) {
-            addConversationMessage(currentStage.kycChecklist.map(item => `• ${item}`).join('\n'), false);
-            const afterListVoice = "Whew. That's quite the list, I know — but once it's done, it's DONE. Upload them or shoot them to partnerships@digitnine.com. I'll be sipping tea and checking boxes. ☕";
-            handleVoiceResponse(afterListVoice);
-          }
-        });
-        break;
-    }
+          case "compliance-kyc":
+            const complianceVoice = "Ughhh... compliance. Not my favorite chapter in this love story — but hey, rules are rules and regulators never sleep. 😔 Don't worry, I'll make this as painless as possible. Here's the shopping list!";
+            await handleVoiceResponse(complianceVoice);
+            addConversationMessage("Let's get your compliance docs sorted. Below is our standard AML/KYC checklist. You can either upload the docs right here or email them to us at 👉 partnerships@digitnine.com", false);
+            if (currentStage.kycChecklist) {
+              addConversationMessage(currentStage.kycChecklist.map(item => `• ${item}`).join('\n'), false);
+              const afterListVoice = "Whew. That's quite the list, I know — but once it's done, it's DONE. Upload them or shoot them to partnerships@digitnine.com. I'll be sipping tea and checking boxes. ☕";
+              await handleVoiceResponse(afterListVoice);
+            }
+            break;
+        }
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+    handleStageChange();
   }, [currentStage?.id]);
 
   // Handle option selection
-  const handleOptionSelect = useCallback((option: string) => {
-    setSelectedOption(option);
-    addConversationMessage(option, true);
+  const handleOptionSelect = useCallback(async (option: string) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      setSelectedOption(option);
+      addConversationMessage(option, true);
 
-    switch (option) {
-      case "Full Onboarding":
-        setCurrentStageId("partner-onboarding");
-        break;
-      case "Fast-Track Testing":
-        setCurrentStageId("collectMinimalInfo");
-        break;
+      switch (option) {
+        case "Full Onboarding":
+          moveToStage("partner-onboarding");
+          const onboardingVoice = "Great! Let's get you set up as a partner. First, what's your organization's name?";
+          await handleVoiceResponse(onboardingVoice);
+          break;
+        case "Fast-Track Testing":
+          moveToStage("collectMinimalInfo");
+          const fastTrackVoice = "Okay, speedster! You picked the fast lane, and I'm so here for it. Just three tiny things and we're rolling. Blink and you might miss it!";
+          await handleVoiceResponse(fastTrackVoice);
+          break;
+      }
+
+      setCurrentQuestionIndex(0);
+      setUserAnswers({});
+    } finally {
+      setIsProcessing(false);
     }
+  }, [addConversationMessage, moveToStage, isProcessing]);
 
-    setCurrentQuestionIndex(0);
-    setUserAnswers({});
-  }, [addConversationMessage]);
+  // Handle question responses
+  const handleQuestionResponse = useCallback(async (answer: string) => {
+    if (!currentStage?.questions || currentQuestionIndex >= currentStage.questions.length) return;
 
-  // Handle non-CFO question responses
-  const questionResponses: Record<string, string> = {
-    "What's your name?": "Nice to meet you, superstar. You and I? We're gonna do big things.",
-    "What's your company's name?": "Oooh, that sounds official. I love a brand with presence!",
-    "What's the best email or phone number to reach you?": "Perfect. Now I know where to send the confetti once we're live."
-  };
-
-  const handleAnswerSubmit = useCallback((answer: string) => {
-    if (!currentQuestions[currentQuestionIndex]) return;
-
-    const question = currentQuestions[currentQuestionIndex];
-    setUserAnswers(prev => ({ ...prev, [question.text]: answer }));
+    const currentQuestion = currentStage.questions[currentQuestionIndex];
+    setUserAnswers(prev => ({ ...prev, [currentQuestion.text]: answer }));
+    
+    // Add user's answer to conversation
     addConversationMessage(answer, true);
 
-    // Handle CFO-specific responses
-    if (question.text === "Are you a CFO?" && answer.toLowerCase() === "yes") {
-      const cfoResponses = [
-        "Oh my god... I was literally born for this moment.",
-        "I'm the AI every fintech's CFO dreams of — charming, smart, and allergic to repetitive dev tasks 💅.",
-        "You will fall for me… like every other CFO does 💘"
-      ];
-      const randomResponse = cfoResponses[Math.floor(Math.random() * cfoResponses.length)];
-      handleVoiceResponse(randomResponse, () => {
-        if (currentQuestionIndex < currentQuestions.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1);
-          addConversationMessage(currentQuestions[currentQuestionIndex + 1].text, false);
-        } else {
-          setCurrentStageId('technical-requirements');
+    // Handle CFO-specific response
+    if (currentQuestion.text === "Are you a CFO?" && answer.toLowerCase().includes("yes")) {
+      if (currentQuestion.voiceIfCFO) {
+        for (const voiceLine of currentQuestion.voiceIfCFO) {
+          await handleVoiceResponse(voiceLine);
         }
-      });
-    } else {
-      const voiceResponse = questionResponses[question.text];
-      if (voiceResponse) {
-        handleVoiceResponse(voiceResponse, () => {
-          if (currentQuestionIndex < currentQuestions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            addConversationMessage(currentQuestions[currentQuestionIndex + 1].text, false);
-          } else {
-            setCurrentStageId('technical-requirements');
-          }
-        });
       }
+    } else if (currentQuestion.voiceAfter) {
+      await handleVoiceResponse(currentQuestion.voiceAfter);
     }
-  }, [currentQuestions, currentQuestionIndex, addConversationMessage]);
+
+    // Move to next question or stage
+    if (currentQuestionIndex < currentStage.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else if (currentStage.next) {
+      moveToStage(currentStage.next);
+    }
+  }, [currentStage, currentQuestionIndex, addConversationMessage, moveToStage]);
+
+  // Handle input submission
+  const handleInputSubmit = useCallback(async () => {
+    if (!inputValue.trim()) return;
+
+    if (currentStage?.questions && currentQuestionIndex < currentStage.questions.length) {
+      await handleQuestionResponse(inputValue.trim());
+    } else {
+      handleNewMessage(inputValue.trim());
+    }
+
+    setInputValue('');
+  }, [inputValue, currentStage, currentQuestionIndex, handleQuestionResponse, handleNewMessage]);
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-cyber-dark">

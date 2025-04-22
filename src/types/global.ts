@@ -14,6 +14,7 @@ export interface ConversationQuestion {
   text: string;
   voiceAfter?: string;
   voiceIfCFO?: string[];
+  expectedAnswers?: string[];
 }
 
 export interface ConversationStage {
