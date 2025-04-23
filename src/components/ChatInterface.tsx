@@ -4,7 +4,6 @@ import { Mic, Send, StopCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import { useVoiceInteraction } from '../hooks/useVoiceInteraction';
 import { toast, ToastContainer } from 'react-toastify';
-import DollyAvatar from './DollyAvatar';
 import { FileUpload } from './FileUpload';
 import { uploadFile, validateFile, getFilePreview } from '../utils/fileHandler';
 import { Canvas } from '@react-three/fiber';
@@ -13,6 +12,7 @@ import useConversationStore, { ANIMATION_MAPPINGS } from '../store/conversationS
 import { FlowService, FlowStage } from '../services/flowService';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import IntegrationPromptsDisplay from './IntegrationPromptsDisplay';
 
 // Match the enhanced message type from App.tsx
 interface DisplayMessage {
@@ -50,6 +50,7 @@ interface ChatInterfaceProps {
   onDirectSpeechComplete?: () => void;
   animationData?: AnimationData | null;
   onAnimationComplete?: () => void;
+  currentIntegrationPrompts?: string[] | null;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -65,7 +66,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   directSpeechText = null,
   onDirectSpeechComplete = () => {},
   animationData = null,
-  onAnimationComplete = () => {}
+  onAnimationComplete = () => {},
+  currentIntegrationPrompts = null
 }: ChatInterfaceProps) => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -146,12 +148,31 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     prevMessagesLengthRef.current = currentLength;
   }, [messages, speak]);
 
+  const { width, height } = useWindowSize();
+  const fireworksDuration = 10000;
+  const itemStatusTimeouts = useRef<NodeJS.Timeout[]>([]);
+  const [isSpeakingDirectly, setIsSpeakingDirectly] = useState(false);
+
   useEffect(() => {
-    if (directSpeechText) {
-      console.log("ChatInterface: Direct speech requested:", directSpeechText);
+    let speechTimeout: NodeJS.Timeout | null = null;
+
+    if (directSpeechText && !isSpeakingDirectly) {
+      console.log("ChatInterface: Direct speech requested, setting flag:", directSpeechText);
+      setIsSpeakingDirectly(true);
       speak(directSpeechText);
-      onDirectSpeechComplete(); 
+      
+      speechTimeout = setTimeout(() => {
+        console.log("ChatInterface: Simulating end of direct speech, calling callback and clearing flag.");
+        onDirectSpeechComplete();
+        setIsSpeakingDirectly(false);
+      }, 4000);
     }
+
+    return () => {
+      if (speechTimeout) {
+        clearTimeout(speechTimeout);
+      }
+    };
   }, [directSpeechText, speak, onDirectSpeechComplete]);
 
   const handleVoiceResponse = async (text: string) => {
@@ -249,15 +270,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const handleOptionSelect = (option: string) => {
     console.log("Option button clicked in ChatInterface:", option);
+    if (option === "Fast-Track Testing") {
+      setAnimation(ANIMATION_MAPPINGS.HAPPY);
+      setTimeout(() => setAnimation(ANIMATION_MAPPINGS.IDLE), 2500); 
+    } else if (option === "Full Onboarding") {
+      setAnimation(ANIMATION_MAPPINGS.THINKING);
+      setTimeout(() => setAnimation(ANIMATION_MAPPINGS.IDLE), 2500); 
+    }
     onSendMessage(option);
   };
 
   const [visibleFeedItems, setVisibleFeedItems] = useState<FeedItemState[]>([]);
   const [isAnimatingFeed, setIsAnimatingFeed] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
-  const { width, height } = useWindowSize();
-  const fireworksDuration = 10000;
-  const itemStatusTimeouts = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
     let feedInterval: NodeJS.Timeout | null = null;
@@ -362,23 +387,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <p className="text-xs text-cyber-deep-teal">Your AI Concierge</p>
         </div>
         <div className="relative w-24 h-24 overflow-hidden rounded-full bg-gradient-radial from-cyber-avatar-bg-from to-cyber-avatar-bg-to shadow-avatar-glow">
-          <Canvas
-            camera={{ position: [0, 0, 5] as [number, number, number], fov: 45 }}
-            style={{ background: 'transparent' }}
-            gl={{ alpha: true, antialias: true }}
-          >
-            <ambientLight intensity={1.5} />
-            <pointLight position={[10, 10, 10]} intensity={2} />
-            <group scale={0.01} position={[0, -1.5, 0]} rotation={[0, Math.PI, 0]}>
-              <DollyAvatar clipName={currentAnimation} />
-            </group>
-            <OrbitControls 
-              enableZoom={false}
-              enablePan={false}
-              minPolarAngle={Math.PI / 2}
-              maxPolarAngle={Math.PI / 2}
-            />
-          </Canvas>
+          <div className="w-full h-full flex items-center justify-center text-xs text-cyber-accent">
+            {isAISpeaking ? 'SPEAKING' : 'IDLE'}
+          </div>
         </div>
       </div>
 
@@ -424,39 +435,44 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </div>
           </div>
         ) : (
-          <div className="h-full overflow-y-auto custom-scrollbar rounded bg-cyber-dark border border-cyber-deep-teal/40 p-2 shadow-inner">
-            <AnimatePresence>
-              {messages.map((message, index) => (
-                <motion.div
-                  key={index} 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChatMessage
-                    message={message.text}
-                    isAI={message.isAI}
-                    isTyping={index === messages.length - 1 && message.isAI && isLoading}
-                  />
-                </motion.div>
-              ))}
-              {isLoading && messages[messages.length - 1]?.isAI !== true && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChatMessage
-                    message=""
-                    isAI={true}
-                    isTyping={true}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <div ref={messagesEndRef} />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto custom-scrollbar rounded bg-cyber-dark border border-cyber-deep-teal/40 p-2 shadow-inner mb-2">
+              <AnimatePresence>
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={index} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChatMessage
+                      message={message.text}
+                      isAI={message.isAI}
+                      isTyping={index === messages.length - 1 && message.isAI && isLoading}
+                    />
+                  </motion.div>
+                ))}
+                {isLoading && messages[messages.length - 1]?.isAI !== true && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChatMessage
+                      message=""
+                      isAI={true}
+                      isTyping={true}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div ref={messagesEndRef} />
+            </div>
+            {currentIntegrationPrompts && (
+               <IntegrationPromptsDisplay prompts={currentIntegrationPrompts} />
+            )}
           </div>
         )}
       </div>

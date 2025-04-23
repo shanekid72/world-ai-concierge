@@ -7,6 +7,7 @@ import SidebarNavigation from './components/SidebarNavigation'
 import { LoadingScreen } from './components/LoadingScreen'
 import { FlowService, FlowStage } from './services/flowService'
 import { useSmartAgentResponse } from './hooks/useSmartAgentResponse'
+import useConversationStore, { ANIMATION_MAPPINGS } from './store/conversationStore'
 
 // Define a more specific message type
 interface DisplayMessage {
@@ -31,6 +32,9 @@ function App() {
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   // State for voice-only messages
   const [directSpeechText, setDirectSpeechText] = useState<string | null>(null);
+  // State for integration prompts
+  const [currentIntegrationPrompts, setCurrentIntegrationPrompts] = useState<string[] | null>(null);
+  const { setAnimation } = useConversationStore(); // Get setAnimation from store
 
   useEffect(() => {
     // Remove the initial loader
@@ -51,10 +55,12 @@ function App() {
   const handleTechReqAnimationComplete = useCallback(() => {
     console.log("Tech requirements animation complete. Adding post-animation content.");
     const techStage = flowService.getStageById('technical-requirements');
-    if (techStage?.postAnimation) {
-      const postAnimData = techStage.postAnimation;
-      let postAnimDelay = 500; // Start slightly after animation completes
+    if (!techStage) return; // Guard clause
 
+    let postAnimDelay = 500; 
+
+    if (techStage.postAnimation) {
+      const postAnimData = techStage.postAnimation;
       if (postAnimData.voice) {
         setMessages(prev => [...prev, { text: postAnimData.voice!, isAI: true, shouldSpeak: true }]);
         postAnimDelay += 1500; 
@@ -71,7 +77,8 @@ function App() {
         }, postAnimDelay);
         postAnimDelay += 1500; 
       }
-       // Handle Cursor Setup and Integration Prompts after post-animation
+    }
+       // Handle Cursor Setup
        if (techStage.cursorSetup) {
           const setupData = techStage.cursorSetup;
           setTimeout(() => {
@@ -87,24 +94,27 @@ function App() {
           }, postAnimDelay);
           postAnimDelay += 2000;
        }
+       // Handle Integration Prompts - Set state instead of adding to messages
        if (techStage.integrationPrompts) {
           setTimeout(() => {
-             const promptsText = "Try these prompts:\n" + techStage.integrationPrompts!.map(prompt => `• ${prompt}`).join('\n');
-             setMessages(prev => [...prev, { text: promptsText, isAI: true, shouldSpeak: false }]);
+             console.log("Setting integration prompts state.");
+             setCurrentIntegrationPrompts(techStage.integrationPrompts || null);
+             // Add the accompanying voice after setting the prompts state
              if (techStage.voiceAfterPrompts) {
                 setTimeout(() => {
                    setMessages(prev => [...prev, { text: techStage.voiceAfterPrompts!, isAI: true, shouldSpeak: true }]);
-                }, 500);
+                }, 500); // Voice slightly after prompts appear
              }
           }, postAnimDelay);
        }
-    }
-  }, [flowService]);
+    
+  }, [flowService]); 
 
-  // Initialize messages when stage changes or on initial load
+  // Initialize messages/prompts when stage changes or on initial load
   useEffect(() => {
     console.log(`Stage changed to: ${currentStageId}, isLoading: ${isLoading}`); 
     setIsTechReqAnimating(false);
+    setCurrentIntegrationPrompts(null); // Clear prompts on any stage change
     let animationTimer: NodeJS.Timeout | null = null;
 
     if (currentStage && !isLoading) {
@@ -114,23 +124,18 @@ function App() {
       // === Special handling for technical-requirements stage ===
       if (currentStage.id === 'technical-requirements' && currentStage.animation) {
         console.log("Initializing technical-requirements stage - Animation handled by ChatInterface");
-        // DO NOT add connectionFeed or postAnimation messages here.
-        // ChatInterface will handle the animation display and call handleTechReqAnimationComplete.
-        
-        // Still schedule the mid-animation voice from here
+        // App.tsx only handles the mid-animation voice
         const animationData = currentStage.animation;
         if (animationData.voiceMidAnimation) {
           const feedLength = animationData.connectionFeed?.length || 0;
-          const midPointTime = (feedLength / 2) * 750; // Estimate based on 750ms per item
+          const midPointTime = (feedLength / 2) * 750; 
           setTimeout(() => {
             console.log("Adding mid-animation voice.");
             setMessages(prev => [...prev, { text: animationData.voiceMidAnimation!, isAI: true, shouldSpeak: true }]);
           }, midPointTime);
         }
-        // Set the visual effect timer (optional, could be tied to animation prop in ChatInterface instead)
         setIsTechReqAnimating(true);
         animationTimer = setTimeout(() => setIsTechReqAnimating(false), 5000); 
-
       } 
       // === Fallback to default stage handling ===
       else {
@@ -177,15 +182,18 @@ function App() {
     };
   }, [currentStageId, isLoading]);
 
-  const handleSendMessage = async (message: string) => {
+  // Wrap handleSendMessage in useCallback
+  const handleSendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return;
     
     // Add user message immediately - not spoken
     setMessages(prev => [...prev, { text: message, isAI: false, shouldSpeak: false }]);
     console.log("User message added:", message); // Debug log
     
+    // Re-fetch current stage data inside the callback using function form of setState or currentStageId
+    const currentStageData = flowService.getStageById(currentStageId); 
+    
     // Handle stage transitions based on user input (button clicks or text match)
-    const currentStageData = flowService.getStageById(currentStageId); // Get current stage data
     const nextStageId = currentStageData?.onOptionSelect?.[message];
     
     if (nextStageId) {
@@ -198,72 +206,65 @@ function App() {
     // Handle questions if present in current stage
     if (currentStageData?.questions && currentStageData.questions.length > 0) {
       const currentQuestion = currentStageData.questions[currentQuestionIndex];
-      console.log("Handling question:", currentQuestionIndex, currentQuestion.text); // Debug log
+      console.log("Handling question:", currentQuestionIndex, currentQuestion.text);
 
-      // Add voice after message if available - mark for speaking
+      // --- Determine Next Step --- 
+      const isLastQuestion = !(currentQuestionIndex < currentStageData.questions!.length - 1);
+      let nextStepAction: (() => void) | null = null;
+      let progressionDelay = 1500; // Default delay before showing next question/stage
+
+      if (!isLastQuestion) {
+        // Not the last question -> prepare to move to the next question
+        const nextQuestionIndex = currentQuestionIndex + 1;
+        console.log("Next step determined: Next question index", nextQuestionIndex);
+        nextStepAction = () => {
+          const latestStageData = flowService.getStageById(currentStageId); // Re-fetch latest stage data
+          const nextQuestion = latestStageData?.questions?.[nextQuestionIndex];
+          if (nextQuestion) {
+            setCurrentQuestionIndex(nextQuestionIndex);
+            setMessages(prev => [...prev, { text: nextQuestion.text, isAI: true, shouldSpeak: true }]);
+            console.log("Progression: Displaying next question", nextQuestionIndex);
+          }
+        };
+      } else if (currentStageData.next) {
+        // Last question and has a next stage -> prepare to move to the next stage
+        const nextStageId = currentStageData.next;
+        console.log("Next step determined: Next stage", nextStageId);
+        progressionDelay = 1500; // Keep a delay before stage transition
+        nextStepAction = () => {
+          console.log("Progression: Moving to next stage", nextStageId);
+          setCurrentStageId(nextStageId);
+          setCurrentQuestionIndex(0);
+        };
+      }
+
+      // --- Schedule Actions --- 
+
+      // 1. Schedule Voice After display/speech (Quickly)
       if (currentQuestion.voiceAfter) {
         setTimeout(() => {
           setMessages(prev => [...prev, { text: currentQuestion.voiceAfter!, isAI: true, shouldSpeak: true }]);
-          console.log("Added voiceAfter (marked for speaking)."); // Debug log
-          
-          // Move to next question/stage AFTER showing voiceAfter
-          if (currentQuestionIndex < currentStageData.questions!.length - 1) {
-            const nextQuestionIndex = currentQuestionIndex + 1;
-            const nextQuestion = currentStageData.questions![nextQuestionIndex];
-            setTimeout(() => {
-              setCurrentQuestionIndex(nextQuestionIndex);
-              if (nextQuestion) {
-                // Add next question - mark for speaking
-                setMessages(prev => [...prev, { text: nextQuestion.text, isAI: true, shouldSpeak: true }]);
-                console.log("Added next question (marked for speaking):", nextQuestionIndex, nextQuestion.text); // Debug log
-              }
-            }, 1500); // Delay before showing next question
-          } else if (currentStageData.next) {
-            const nextStageIdFromQuestions = currentStageData.next;
-            setTimeout(() => {
-              console.log("Finished questions, moving to next stage:", nextStageIdFromQuestions); // Debug log
-              setCurrentStageId(nextStageIdFromQuestions);
-              setCurrentQuestionIndex(0);
-            }, 1500); // Delay before moving to next stage
-          }
-        }, 1000); // Delay before showing voiceAfter
-      } else {
-        // If no voiceAfter, move to next question/stage immediately (with a small delay)
-        if (currentQuestionIndex < currentStageData.questions!.length - 1) {
-          const nextQuestionIndex = currentQuestionIndex + 1;
-          const nextQuestion = currentStageData.questions![nextQuestionIndex];
-          setTimeout(() => {
-            setCurrentQuestionIndex(nextQuestionIndex);
-            if (nextQuestion) {
-              // Add next question - mark for speaking
-              setMessages(prev => [...prev, { text: nextQuestion.text, isAI: true, shouldSpeak: true }]);
-              console.log("Added next question (no voiceAfter, marked for speaking):", nextQuestionIndex, nextQuestion.text); // Debug log
-            }
-          }, 1000); // Delay before showing next question
-        } else if (currentStageData.next) {
-          const nextStageIdFromQuestions = currentStageData.next;
-          setTimeout(() => {
-            console.log("Finished questions (no voiceAfter), moving to next stage:", nextStageIdFromQuestions); // Debug log
-            setCurrentStageId(nextStageIdFromQuestions);
-            setCurrentQuestionIndex(0);
-          }, 1000); // Delay before moving to next stage
-        }
+          console.log("Scheduled: voiceAfter display/speech.");
+        }, 500); 
       }
 
-      // Special handling for CFO question - AFTER voiceAfter/next question logic is scheduled
-      if (currentQuestion.voiceIfCFO && message.toLowerCase().includes('yes')) {
-         // Set direct speech text instead of adding to messages array
+      // 2. Schedule Special CFO direct speech (If applicable, slightly later)
+      if (currentQuestion.text === "Are you a CFO?" && message.toLowerCase().includes('yes') && currentQuestion.voiceIfCFO) {
          const randomCFOMessage = currentQuestion.voiceIfCFO![
            Math.floor(Math.random() * currentQuestion.voiceIfCFO!.length)
          ];
-         // Schedule setting this state, ensuring it happens after potential state updates from voiceAfter
          setTimeout(() => {
-            console.log("Setting direct speech for CFO message:", randomCFOMessage);
+            console.log("Scheduled: directSpeech for CFO.");
             setDirectSpeechText(randomCFOMessage);
-         }, 1500); // Delay should roughly align with when voiceAfter finishes or shortly after
+         }, 1000); // Schedule after potential voiceAfter starts
       }
 
-      return; // Stop further processing
+      // 3. Schedule the determined Next Step (Flow Progression)
+      if (nextStepAction) {
+        setTimeout(nextStepAction, progressionDelay); 
+      }
+
+      return; // Stop further processing in this handler
     }
 
     // Use smart response as fallback - assume it should be spoken
@@ -278,7 +279,6 @@ function App() {
       if (smartResponse) {
         setMessages(prev => [...prev, { text: smartResponse, isAI: true, shouldSpeak: true }]);
       } else {
-        // Error message - mark for speaking
         setMessages(prev => [...prev, { 
           text: "I'm having trouble processing that request. Could you try rephrasing it?", 
           isAI: true, shouldSpeak: true 
@@ -286,13 +286,13 @@ function App() {
       }
     } catch (error) {
       console.error('Error getting smart response:', error);
-      // Error message - mark for speaking
       setMessages(prev => [...prev, { 
         text: "I'm experiencing a technical glitch. Please try again in a moment.", 
         isAI: true, shouldSpeak: true 
       }]);
     }
-  };
+  // Add dependencies for useCallback
+  }, [currentStageId, currentQuestionIndex, flowService, getSmartResponse]); 
 
   const handleMessage = (message: string) => {
     // Generic message handler, assume should be spoken if from AI? Or needs context.
@@ -307,6 +307,19 @@ function App() {
     console.log("Clearing direct speech text.");
     setDirectSpeechText(null);
   }, []); // Empty dependency array means this function reference is stable
+
+  // --- Callbacks passed to ChatInterface to control animation --- 
+  const handleStartSpeaking = useCallback(() => {
+    console.log("App: handleStartSpeaking");
+    setIsSpeaking(true);
+    setAnimation(ANIMATION_MAPPINGS.SPEAKING);
+  }, [setAnimation]);
+
+  const handleStopSpeaking = useCallback(() => {
+    console.log("App: handleStopSpeaking");
+    setIsSpeaking(false);
+    setAnimation(ANIMATION_MAPPINGS.IDLE);
+  }, [setAnimation]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -333,10 +346,7 @@ function App() {
               <div className="relative mb-8">
                 <div className="absolute left-1/2 -translate-x-1/2 -top-4 z-20">
                   <DollyAvatar 
-                    isSpeaking={isSpeaking}
-                    expression={isListening ? 'happy' : 'neutral'}
-                    gesture={isSpeaking ? 'explaining' : 'idle'}
-                    position={{ x: 50, y: 0 }}
+                     position={{ x: 50, y: 0 }}
                   />
                 </div>
               </div>
@@ -348,19 +358,18 @@ function App() {
                   <ChatInterface 
                     onStartListening={() => setIsListening(true)}
                     onStopListening={() => setIsListening(false)}
-                    onStartSpeaking={() => setIsSpeaking(true)}
-                    onStopSpeaking={() => setIsSpeaking(false)}
+                    onStartSpeaking={handleStartSpeaking}
+                    onStopSpeaking={handleStopSpeaking}
                     messages={messages}
                     onSendMessage={handleSendMessage}
                     onMessage={handleMessage}
                     isLoading={isLoading}
-                    // Pass the animation state down
                     isTechReqAnimating={isTechReqAnimating}
-                    // Pass down direct speech state and callback
                     directSpeechText={directSpeechText}
                     onDirectSpeechComplete={handleDirectSpeechComplete}
                     animationData={currentStageId === 'technical-requirements' ? currentStage?.animation : null}
                     onAnimationComplete={handleTechReqAnimationComplete}
+                    currentIntegrationPrompts={currentIntegrationPrompts}
                   />
                 )}
               </div>

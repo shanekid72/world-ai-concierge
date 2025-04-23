@@ -139,8 +139,8 @@ const useConversationStore = create<ConversationState>((
 
   setUserAnswer: (question: string, answer: string) =>
     set((state: ConversationState) => ({
-      userAnswers: { ...state.userAnswers, [question]: answer }
-    })),
+    userAnswers: { ...state.userAnswers, [question]: answer }
+  })),
 
   setAnimation: (animation: AnimationType) =>
     set({ currentAnimation: animation }),

@@ -61,7 +61,7 @@
         {
           "text": "Are you a CFO?",
           "voiceAfter": "Understood.",
-          "voiceIfCFO": [
+          "voiceIfCFO2": [
             "Excellent! As a CFO, you'll appreciate our detailed financial reporting features.",
             "Perfect! I'll make sure to highlight our financial integration capabilities for you."
           ],
