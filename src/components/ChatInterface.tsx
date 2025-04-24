@@ -13,6 +13,7 @@ import { FlowService, FlowStage } from '../services/flowService';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import IntegrationPromptsDisplay from './IntegrationPromptsDisplay';
+import CyberpunkInitialization from './CyberpunkInitialization'; // Import our new component
 
 // Match the enhanced message type from App.tsx
 interface DisplayMessage {
@@ -404,34 +405,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
 
         {isAnimatingFeed ? (
-          <div className="tech-animation-container h-full overflow-y-auto custom-scrollbar rounded bg-cyber-darker border border-cyber-deep-teal/40 p-4 shadow-inner flex flex-col items-center justify-center">
-            <h3 className="text-lg font-bold text-cyber-light-teal mb-4 neon-text">Initializing Connection...</h3>
-            <div className="w-full max-w-md space-y-2">
-              <AnimatePresence>
-                {visibleFeedItems.map((item) => (
-                  <motion.div
-                    layout
-                    key={item.id} 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
-                    className="flex items-center justify-between text-sm text-cyber-deep-teal font-mono py-1.5 px-3 rounded bg-cyber-dark border border-cyber-deep-teal/30 shadow-sm"
-                  >
-                    <span>{item.text}</span>
-                    <AnimatePresence mode="wait">
-                      {item.status === 'loading' ? (
-                        <motion.div key="loading" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ duration: 0.2 }}>
-                          <Loader2 className="h-4 w-4 text-cyber-accent animate-spin" />
-                        </motion.div>
-                      ) : (
-                        <motion.div key="completed" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.2 }}>
-                          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+          <div className="flex flex-col h-full">
+            <CyberpunkInitialization 
+              feedItems={visibleFeedItems} 
+              isConnecting={true}
+            />
+            <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-4 z-30">
+              <button className="gradient-border" onClick={() => {
+                setIsAnimatingFeed(false);
+                // Add other onboarding initialization logic here
+              }}>
+                <span>Full Onboarding</span>
+              </button>
+              <button className="gradient-border" onClick={() => {
+                setIsAnimatingFeed(false);
+                // Add fast-track initialization logic here
+              }}>
+                <span>Fast-Track Testing</span>
+              </button>
             </div>
           </div>
         ) : (
@@ -484,9 +475,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <button
                 key={option}
                 onClick={() => handleOptionSelect(option)}
-                className="px-3 py-1 text-sm bg-cyber-deep-teal/80 hover:bg-cyber-deep-teal text-cyber-dark rounded transition-colors"
+                className="gradient-border"
               >
-                {option}
+                <span>{option}</span>
               </button>
             ))}
           </div>
@@ -562,10 +553,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div className="p-4 border-t border-cyber-border">
           <button
             onClick={testVoice}
-            className="cyber-button mb-4"
+            className="gradient-border"
             disabled={voiceIsSpeaking}
           >
-            {voiceIsSpeaking ? "Speaking..." : "Test Voice"}
+            <span>{voiceIsSpeaking ? "Speaking..." : "Test Voice"}</span>
           </button>
         </div>
       </div>

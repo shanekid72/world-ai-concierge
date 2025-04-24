@@ -103,7 +103,7 @@
           "neon sparks"
         ],
         "connectionFeed": [
-          "�� Connecting to MTOs...",
+          "Connecting to MTOs...",
           "Western Union",
           "TerraPay",
           "Ria",
@@ -111,7 +111,7 @@
           "🌐 Syncing with Banks...",
           "📲 Linking digital wallets..."
         ],
-        "voiceMidAnimation": "Bro, I think you're the Spiderman of APIs 🕷️ — there's too much going on in your web!"
+        "voiceMidAnimation": "I think you're the Spiderman of APIs 🕷️ — there's too much going on in your web!"
       },
       "postAnimation": {
         "voice": "Boom! You're through the boring part and officially in the big leagues. You're now ready to explore WorldAPI — and yes, that means it's time to connect your development IDE and bring those endpoints to life.",

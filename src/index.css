@@ -529,6 +529,98 @@
   background-color: var(--cyber-accent);
 }
 
+/* Cyberpunk 3D animation effects */
+@keyframes gradientPulse {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes dataStreamGlow {
+  0% { box-shadow: 0 0 5px 0px rgba(0, 255, 255, 0.5); }
+  50% { box-shadow: 0 0 20px 2px rgba(0, 255, 255, 0.8); }
+  100% { box-shadow: 0 0 5px 0px rgba(0, 255, 255, 0.5); }
+}
+
+@keyframes scanlineAnimation {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes blinkingText {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes rocketLaunchEffect {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6)); }
+  50% { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.9)); }
+}
+
+.neon-text {
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.7), 0 0 20px rgba(0, 255, 255, 0.5), 0 0 30px rgba(0, 255, 255, 0.3);
+  animation: blinkingText 3s infinite ease-in-out;
+}
+
+.cyber-grid {
+  background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
+              repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.15) 2px, rgba(0, 255, 255, 0.15) 4px),
+              repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 255, 0.15) 2px, rgba(0, 255, 255, 0.15) 4px);
+  background-size: 100% 100%, 50px 50px, 50px 50px;
+  animation: scanlineAnimation 10s linear infinite;
+}
+
+.tech-animation-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-animation-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(0,255,255,0), rgba(0,255,255,1), rgba(0,255,255,0));
+  animation: gradientPulse 5s infinite;
+  z-index: 1;
+}
+
+.tech-animation-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.2) 2px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.data-stream {
+  animation: dataStreamGlow 2s infinite ease-in-out;
+}
+
+.rocket-glow {
+  animation: rocketLaunchEffect 3s infinite ease-in-out;
+}
+
+.cyber-hologram {
+  backdrop-filter: blur(4px);
+  background: rgba(0, 40, 60, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
 /* Loading screen specific styles */
 .cyber-glow {
   box-shadow: 
@@ -598,5 +690,125 @@ html, body {
   50% {
     transform: scale(1.3);
     opacity: 0.7;
+  }
+}
+
+/* Onboarding button styles */
+.cyber-button {
+  display: inline-block;
+  padding: 0;
+  position: relative;
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  margin: 0 10px;
+  min-width: 180px;
+}
+
+.cyber-button:before,
+.cyber-button:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #00f0ff, #ff00c8, #00f0ff);
+  background-size: 200%;
+  animation: border-rotate 3s linear infinite;
+  z-index: 0;
+  border-radius: 6px;
+}
+
+.cyber-button:after {
+  filter: blur(10px);
+  opacity: 0.6;
+}
+
+.cyber-button span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding: 1rem 1.5rem;
+  background: #000;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+.cyber-button:hover span {
+  background: #111;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.cyber-button:active span {
+  transform: translateY(-1px);
+}
+
+@keyframes border-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* Colorful border animation buttons */
+button.gradient-border {
+  position: relative;
+  padding: 3px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  margin: 0 8px;
+}
+
+button.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, #4fcf70, #fad648, #a767e5, #12bcfe, #44ce7b);
+  background-size: 300% 100%;
+  animation-name: gradient-border-slide;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  z-index: -1;
+}
+
+button.gradient-border:hover::before {
+  animation-play-state: running;
+}
+
+button.gradient-border span {
+  display: block;
+  padding: 0.8rem 1.2rem;
+  background: #000;
+  border-radius: 3px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+button.gradient-border:hover span {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes gradient-border-slide {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
   }
 }

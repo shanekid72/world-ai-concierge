@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, Suspense, useState, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, OrbitControls } from "@react-three/drei";
-import { Group, Object3D, Mesh, AnimationMixer, AnimationClip, Clock } from "three";
+import React, { useEffect, useRef, Suspense, useState, useMemo, useCallback } from "react";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { Group, AnimationMixer, Clock, AnimationClip } from "three";
 import * as THREE from 'three';
+// @ts-ignore - Ignore TS error for FBXLoader import
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import useConversationStore, { ANIMATION_MAPPINGS } from '../../store/conversationStore';
 
 interface DollyAvatarProps {
@@ -40,32 +42,60 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps> {
 
 const Model = React.memo(({ clipName }: ModelProps) => {
   const group = useRef<Group>(null);
-  const modelPath = "/assets/avatars/dolly_avatar.glb";
   
-  console.log("--- Model Component: Attempting to load ---", modelPath);
+  // Available FBX avatar models
+  const avatarModels = useMemo(() => [
+    "/assets/avatars/Freehang Climb.fbx",
+    "/assets/avatars/Body Block.fbx",
+    "/assets/avatars/Golf Pre-Putt.fbx",
+    "/assets/avatars/Hip Hop Dancing.fbx",
+    "/assets/avatars/Jog In Circle.fbx",
+    "/assets/avatars/Punching.fbx",
+    "/assets/avatars/Talking On Phone.fbx",
+    "/assets/avatars/Zombie Stand Up.fbx",
+    "/assets/avatars/dolly-avatar.fbx"
+  ], []);
+  
+  // State to keep track of current avatar model and index
+  const [currentModelIndex, setCurrentModelIndex] = useState(0);
+  const currentModelPath = avatarModels[currentModelIndex];
+  
+  console.log("--- Model Component: Current model index:", currentModelIndex, "Path:", currentModelPath);
 
-  const { scene, animations } = useGLTF(modelPath);
+  // Use useLoader hook from react-three-fiber to load the FBX model
+  const fbx = useLoader(FBXLoader, currentModelPath);
   
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const clockRef = useRef(new THREE.Clock());
   const currentActionRef = useRef<THREE.AnimationAction | null>(null);
   
+  // Function to change avatar to the next model in sequence
+  const changeAvatarModel = useCallback(() => {
+    // Move to the next model in the sequence
+    const nextIndex = (currentModelIndex + 1) % avatarModels.length;
+    console.log("Changing avatar model to index:", nextIndex);
+    setCurrentModelIndex(nextIndex);
+  }, [avatarModels.length, currentModelIndex]);
+  
   useEffect(() => {
-    if (!scene || !animations || animations.length === 0) return;
+    if (!fbx) return;
     
-    scene.traverse((child: Object3D) => {
+    fbx.traverse((child: any) => {
       if ('isMesh' in child && child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
       }
     });
     
-    console.log("Found animations:", animations.map(a => a.name));
+    // Get animations from the FBX file
+    const animations = fbx.animations;
+    console.log("Found animations:", animations.map((a: AnimationClip) => a.name));
     
-    const mixer = new THREE.AnimationMixer(scene);
+    const mixer = new THREE.AnimationMixer(fbx);
     mixerRef.current = mixer;
     
-    const idleClip = animations.find(clip => clip.name.toLowerCase().includes('idle')) || animations[0];
+    // Try to find an idle animation, or use the first animation if none is found
+    const idleClip = animations.find((clip: AnimationClip) => clip.name.toLowerCase().includes('idle')) || animations[0];
     if (idleClip) {
       const action = mixer.clipAction(idleClip);
       action.play();
@@ -76,18 +106,19 @@ const Model = React.memo(({ clipName }: ModelProps) => {
     return () => {
       mixerRef.current?.stopAllAction();
     };
-  }, [scene, animations]);
+  }, [fbx]);
   
   useEffect(() => {
-    if (!mixerRef.current || !animations || animations.length === 0 || !clipName) return;
+    if (!mixerRef.current || !fbx.animations || fbx.animations.length === 0 || !clipName) return;
 
     console.log(`Attempting to play animation for clipName: ${clipName}`);
     
-    const targetClip = animations.find(clip => 
+    const animations = fbx.animations;
+    const targetClip = animations.find((clip: AnimationClip) => 
         clip.name.toLowerCase().includes(clipName.toLowerCase())
     );
 
-    const clipToPlay = targetClip || animations.find(clip => clip.name.toLowerCase().includes('idle')) || animations[0]; 
+    const clipToPlay = targetClip || animations.find((clip: AnimationClip) => clip.name.toLowerCase().includes('idle')) || animations[0]; 
     
     if (clipToPlay && currentActionRef.current?.getClip() !== clipToPlay) {
        console.log("Switching animation to:", clipToPlay.name);
@@ -105,7 +136,16 @@ const Model = React.memo(({ clipName }: ModelProps) => {
        console.warn(`Animation clip not found for: ${clipName}`);
     }
 
-  }, [clipName, animations]);
+  }, [clipName, fbx]);
+  
+  // Periodically change the avatar model using fixed time intervals
+  useEffect(() => {
+    // Fixed time interval of 20 seconds per avatar model
+    const FIXED_INTERVAL = 20000; // 20 seconds
+    const intervalId = setInterval(changeAvatarModel, FIXED_INTERVAL);
+    
+    return () => clearInterval(intervalId);
+  }, [changeAvatarModel]);
   
   useFrame((_, delta) => {
     mixerRef.current?.update(delta);
@@ -114,10 +154,10 @@ const Model = React.memo(({ clipName }: ModelProps) => {
   return (
     <group ref={group}>
       <primitive 
-        object={scene}
-        scale={2.5}
+        object={fbx}
+        scale={0.02} // FBX models often need scaling adjustment
         position={[0, -2.5, 0]}
-        rotation={[0, Math.PI * 0.75, 0]}
+        rotation={[0, 0, 0]} // Changed to face front
       />
     </group>
   );
@@ -129,45 +169,102 @@ export function DollyAvatar() {
   const [currentAnimation, setCurrentAnimation] = useState('Idle');
   const [avatarPosition, setAvatarPosition] = useState({ top: '50%', left: '50%' });
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const targetPositionRef = useRef({ x: 0, y: 0 });
+  const currentPositionRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const speedRef = useRef({ x: 0, y: 0 });
+  const animationFrameRef = useRef<number | NodeJS.Timeout | null>(null);
 
   const availableAnimations = useMemo(() => [
     'Idle', 'Talking', 'Thinking', 'Waving', 'Punching', 'ThumbsUp'
   ], []);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Select a random animation
-      const randomIndex = Math.floor(Math.random() * availableAnimations.length);
-      setCurrentAnimation(availableAnimations[randomIndex]);
-
-      // Calculate random position within the viewport
-      if (containerRef.current) {
-        const parentRect = containerRef.current.parentElement?.getBoundingClientRect();
-        if (parentRect) {
-          const maxX = parentRect.width - containerRef.current.offsetWidth;
-          const maxY = parentRect.height - containerRef.current.offsetHeight;
-          const randomX = Math.max(0, Math.floor(Math.random() * maxX));
-          const randomY = Math.max(0, Math.floor(Math.random() * maxY));
-          setAvatarPosition({ top: `${randomY}px`, left: `${randomX}px` });
-        } else {
-          const randomTop = Math.random() * 80 + 10;
-          const randomLeft = Math.random() * 80 + 10;
-          setAvatarPosition({ top: `${randomTop}%`, left: `${randomLeft}%` });
-        }
+  const generateNewTarget = useCallback(() => {
+    if (containerRef.current) {
+      const avatarWidth = containerRef.current.offsetWidth;
+      const avatarHeight = containerRef.current.offsetHeight;
+      
+      const maxX = window.innerWidth - avatarWidth;
+      const maxY = window.innerHeight - avatarHeight;
+      
+      const randomX = Math.max(avatarWidth/2, Math.min(maxX - avatarWidth/2, Math.random() * maxX));
+      const randomY = Math.max(avatarHeight/2, Math.min(maxY - avatarHeight/2, Math.random() * maxY));
+      
+      targetPositionRef.current = { x: randomX, y: randomY };
+      
+      if (Math.random() > 0.7) {
+        const randomIndex = Math.floor(Math.random() * availableAnimations.length);
+        setCurrentAnimation(availableAnimations[randomIndex]);
       }
-    }, 5000);
-
-    return () => clearInterval(intervalId);
+    }
   }, [availableAnimations]);
+
+  const animateFloat = useCallback(() => {
+    const dx = targetPositionRef.current.x - currentPositionRef.current.x;
+    const dy = targetPositionRef.current.y - currentPositionRef.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance < 5) {
+      generateNewTarget();
+    }
+    
+    const jitterX = (Math.random() - 0.5) * 0.05;
+    const jitterY = (Math.random() - 0.5) * 0.05;
+    
+    speedRef.current.x = speedRef.current.x * 0.99 + (dx / 800) + jitterX;
+    speedRef.current.y = speedRef.current.y * 0.99 + (dy / 800) + jitterY;
+    
+    const maxSpeed = 0.5;
+    if (Math.abs(speedRef.current.x) > maxSpeed) {
+      speedRef.current.x = Math.sign(speedRef.current.x) * maxSpeed;
+    }
+    if (Math.abs(speedRef.current.y) > maxSpeed) {
+      speedRef.current.y = Math.sign(speedRef.current.y) * maxSpeed;
+    }
+    
+    currentPositionRef.current.x += speedRef.current.x;
+    currentPositionRef.current.y += speedRef.current.y;
+    
+    setAvatarPosition({ 
+      top: `${currentPositionRef.current.y}px`, 
+      left: `${currentPositionRef.current.x}px` 
+    });
+    
+    animationFrameRef.current = setTimeout(() => {
+      requestAnimationFrame(animateFloat);
+    }, 16); 
+  }, [generateNewTarget]);
+
+  useEffect(() => {
+    generateNewTarget();
+    
+    animationFrameRef.current = requestAnimationFrame(animateFloat);
+    
+    const intervalId = setInterval(generateNewTarget, 20000);
+    
+    const handleResize = () => {
+      generateNewTarget();
+    };
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        clearTimeout(animationFrameRef.current);
+      }
+      clearInterval(intervalId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [generateNewTarget, animateFloat]);
 
   return (
     <div
       ref={containerRef}
-      className="w-48 h-48 absolute bg-gradient-radial from-cyber-avatar-bg-from to-cyber-avatar-bg-to opacity-90 shadow-avatar-glow shadow-cyber-avatar-glow rounded-full overflow-hidden transition-all duration-1000 ease-in-out"
+      className="w-48 h-48 fixed z-50"
       style={{
         top: avatarPosition.top,
         left: avatarPosition.left,
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
+        pointerEvents: 'none' 
       }}
     >
       <ErrorBoundary fallback={<div>Failed to load 3D model.</div>}>
