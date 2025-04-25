@@ -271,10 +271,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const handleOptionSelect = (option: string) => {
     console.log("Option button clicked in ChatInterface:", option);
-    if (option === "Fast-Track Testing") {
+    if (option === "Boss Mode") {
       setAnimation(ANIMATION_MAPPINGS.HAPPY);
       setTimeout(() => setAnimation(ANIMATION_MAPPINGS.IDLE), 2500); 
-    } else if (option === "Full Onboarding") {
+    } else if (option === "Legacy Mode") {
       setAnimation(ANIMATION_MAPPINGS.THINKING);
       setTimeout(() => setAnimation(ANIMATION_MAPPINGS.IDLE), 2500); 
     }
@@ -376,6 +376,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             style={{
               background: 'linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(100, 0, 255, 0.1), rgba(0, 255, 100, 0.1))',
               backgroundSize: '400% 400%',
+              backgroundPosition: 'center center',
               animation: 'gradientPulse 5s ease infinite'
             }}
           />
@@ -405,28 +406,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
 
         {isAnimatingFeed ? (
-          <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto custom-scrollbar rounded bg-cyber-dark border border-cyber-deep-teal/40 shadow-inner relative">
             <CyberpunkInitialization 
               feedItems={visibleFeedItems} 
               isConnecting={true}
             />
-            <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-4 z-30">
-              <button className="gradient-border" onClick={() => {
-                setIsAnimatingFeed(false);
-                // Add other onboarding initialization logic here
-              }}>
-                <span>Full Onboarding</span>
-              </button>
-              <button className="gradient-border" onClick={() => {
-                setIsAnimatingFeed(false);
-                // Add fast-track initialization logic here
-              }}>
-                <span>Fast-Track Testing</span>
-              </button>
-            </div>
+            
           </div>
         ) : (
-          <div className="h-full flex flex-col">
+          <div className="flex-1 flex flex-col">
             <div className="flex-1 overflow-y-auto custom-scrollbar rounded bg-cyber-dark border border-cyber-deep-teal/40 p-2 shadow-inner mb-2">
               <AnimatePresence>
                 {messages.map((message, index) => (
@@ -475,9 +463,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <button
                 key={option}
                 onClick={() => handleOptionSelect(option)}
-                className="gradient-border"
+                className={option === "Legacy Mode" || option === "Boss Mode" ? "bg-transparent border-0" : "gradient-border"}
               >
-                <span>{option}</span>
+                {option === "Legacy Mode" || option === "Boss Mode" ? (
+                  <CyberpunkButtonWrapper>
+                    <div className="grid" />
+                    <div className="glow" />
+                    <div className="darkBorderBg" />
+                    <div className="white" />
+                    <div className="border" />
+                    <span>{option}</span>
+                  </CyberpunkButtonWrapper>
+                ) : (
+                  <span>{option}</span>
+                )}
               </button>
             ))}
           </div>
@@ -500,6 +499,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onFileUpload={handleFileUpload}
             />
           )}
+
           <div className="flex gap-1 mb-1">
             <button
               onClick={() => setShowFileUpload(!showFileUpload)}
@@ -508,46 +508,59 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {showFileUpload ? 'Cancel' : 'Upload File'}
             </button>
           </div>
-          <div className="flex items-center w-full">
-            <input
-              type="text"
-              className="flex-1 p-2 rounded-l bg-cyber-dark border border-r-0 border-cyber-deep-teal/40 text-cyber-deep-teal focus:outline-none focus:ring-1 focus:ring-cyber-deep-teal"
-              placeholder="Type your message..."
-              value={inputValue}
-              onChange={handleInputChange}
-              onFocus={() => triggerAvatarAnimation('thinking')}
-              onKeyPress={handleKeyPress}
-            />
-            {isRecording ? (
-              <button
-                onClick={stopRecording}
-                className="p-2 bg-cyber-dark border-y border-cyber-deep-teal/40 hover:bg-cyber-deep-teal/20 transition-colors"
-              >
-                <StopCircle size={16} className="text-cyber-deep-teal" />
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  startRecording();
-                  triggerAvatarAnimation('receiving');
-                }}
-                className="p-2 bg-cyber-dark border-y border-cyber-deep-teal/40 hover:bg-cyber-deep-teal/20 transition-colors"
-              >
-                <Mic size={16} className="text-cyber-deep-teal" />
-              </button>
-            )}
-            <button
-              onClick={handleSend}
-              disabled={!inputValue.trim()}
-              className={`p-2 rounded-r text-cyber-dark transition-colors ${
-                inputValue.trim() 
-                  ? 'bg-cyber-deep-teal/80 hover:bg-cyber-deep-teal' 
-                  : 'bg-cyber-deep-teal/40 cursor-not-allowed'
-              }`}
-            >
-              <Send size={16} />
-            </button>
-          </div>
+          <StyledInputWrapper>
+            <div className="grid" />
+            <div id="poda">
+              <div className="glow" />
+              <div className="darkBorderBg" />
+              <div className="darkBorderBg" />
+              <div className="darkBorderBg" />
+              <div className="white" />
+              <div className="border" />
+              <div id="main">
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Type your message..."
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onFocus={() => triggerAvatarAnimation('thinking')}
+                  onKeyPress={handleKeyPress}
+                  data-component-name="ChatInterface"
+                />
+                <div id="input-mask" />
+                <div id="pink-mask" />
+                <div className="filterBorder" />
+                
+                <div id="search-icon">
+                  {isRecording ? (
+                    <StyledButtonWrapper onClick={stopRecording}>
+                      <StopCircle size={18} color="#fe53bb" />
+                    </StyledButtonWrapper>
+                  ) : (
+                    <StyledButtonWrapper 
+                      onClick={() => {
+                        startRecording();
+                        triggerAvatarAnimation('receiving');
+                      }}
+                    >
+                      <Mic size={18} color="#fe53bb" />
+                    </StyledButtonWrapper>
+                  )}
+                </div>
+                
+                <div id="filter-icon">
+                  <StyledButtonWrapper
+                    onClick={handleSend}
+                    disabled={!inputValue.trim()}
+                    className={!inputValue.trim() ? 'disabled' : ''}
+                  >
+                    <Send size={16} color={inputValue.trim() ? '#09fbd3' : '#767676'} />
+                  </StyledButtonWrapper>
+                </div>
+              </div>
+            </div>
+          </StyledInputWrapper>
         </div>
 
         <div className="p-4 border-t border-cyber-border">
@@ -563,3 +576,553 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     </div>
   );
 };
+
+import styled from 'styled-components';
+
+const StyledInputWrapper = styled.div`
+  .grid {
+    height: 200px;
+    width: 400px;
+    background-image: linear-gradient(to right, #0f0f10 1px, transparent 1px),
+      linear-gradient(to bottom, #0f0f10 1px, transparent 1px);
+    background-size: 1rem 1rem;
+    background-position: center center;
+    position: absolute;
+    z-index: -1;
+    filter: blur(1px);
+  }
+  .white,
+  .border,
+  .darkBorderBg,
+  .glow {
+    max-height: 70px;
+    max-width: 100%;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+    z-index: -1;
+    border-radius: 12px;
+    filter: blur(3px);
+  }
+  .input {
+    background-color: #010201;
+    border: none;
+    width: 100%;
+    height: 56px;
+    border-radius: 10px;
+    color: white;
+    padding-inline: 59px;
+    font-size: 18px;
+  }
+  #poda {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+  }
+  .input::placeholder {
+    color: #c0b9c0;
+  }
+
+  .input:focus {
+    outline: none;
+  }
+
+  #main:focus-within > #input-mask {
+    display: none;
+  }
+
+  #input-mask {
+    pointer-events: none;
+    width: 100px;
+    height: 20px;
+    position: absolute;
+    background: linear-gradient(90deg, transparent, black);
+    top: 18px;
+    left: 70px;
+  }
+  #pink-mask {
+    pointer-events: none;
+    width: 30px;
+    height: 20px;
+    position: absolute;
+    background: #cf30aa;
+    top: 10px;
+    left: 5px;
+    filter: blur(20px);
+    opacity: 0.8;
+    transition: all 2s;
+  }
+  #main:hover > #pink-mask {
+    opacity: 0;
+  }
+
+  .white {
+    max-height: 63px;
+    max-width: 100%;
+    border-radius: 10px;
+    filter: blur(2px);
+  }
+
+  .white::before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(83deg);
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    filter: brightness(1.4);
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0) 0%,
+      #a099d8,
+      rgba(0, 0, 0, 0) 8%,
+      rgba(0, 0, 0, 0) 50%,
+      #dfa2da,
+      rgba(0, 0, 0, 0) 58%
+    );
+    transition: all 2s;
+  }
+  .border {
+    max-height: 59px;
+    max-width: 100%;
+    border-radius: 11px;
+    filter: blur(0.5px);
+  }
+  .border::before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(70deg);
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    filter: brightness(1.3);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: conic-gradient(
+      #1c191c,
+      #402fb5 5%,
+      #1c191c 14%,
+      #1c191c 50%,
+      #cf30aa 60%,
+      #1c191c 64%
+    );
+    transition: all 2s;
+  }
+  .darkBorderBg {
+    max-height: 65px;
+    max-width: 100%;
+  }
+  .darkBorderBg::before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(82deg);
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0),
+      #18116a,
+      rgba(0, 0, 0, 0) 10%,
+      rgba(0, 0, 0, 0) 50%,
+      #6e1b60,
+      rgba(0, 0, 0, 0) 60%
+    );
+    transition: all 2s;
+  }
+  #poda:hover > .darkBorderBg::before {
+    transform: translate(-50%, -50%) rotate(262deg);
+  }
+  #poda:hover > .glow::before {
+    transform: translate(-50%, -50%) rotate(240deg);
+  }
+  #poda:hover > .white::before {
+    transform: translate(-50%, -50%) rotate(263deg);
+  }
+  #poda:hover > .border::before {
+    transform: translate(-50%, -50%) rotate(250deg);
+  }
+
+  #poda:hover > .darkBorderBg::before {
+    transform: translate(-50%, -50%) rotate(-98deg);
+  }
+  #poda:hover > .glow::before {
+    transform: translate(-50%, -50%) rotate(-120deg);
+  }
+  #poda:hover > .white::before {
+    transform: translate(-50%, -50%) rotate(-97deg);
+  }
+  #poda:hover > .border::before {
+    transform: translate(-50%, -50%) rotate(-110deg);
+  }
+
+  #poda:focus-within > .darkBorderBg::before {
+    transform: translate(-50%, -50%) rotate(442deg);
+    transition: all 4s;
+  }
+  #poda:focus-within > .glow::before {
+    transform: translate(-50%, -50%) rotate(420deg);
+    transition: all 4s;
+  }
+  #poda:focus-within > .white::before {
+    transform: translate(-50%, -50%) rotate(443deg);
+    transition: all 4s;
+  }
+  #poda:focus-within > .border::before {
+    transform: translate(-50%, -50%) rotate(430deg);
+    transition: all 4s;
+  }
+
+  .glow {
+    overflow: hidden;
+    filter: blur(30px);
+    opacity: 0.4;
+    max-height: 130px;
+    max-width: 100%;
+  }
+  .glow:before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(60deg);
+    position: absolute;
+    width: 999px;
+    height: 999px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: conic-gradient(
+      #000,
+      #402fb5 5%,
+      #000 38%,
+      #000 50%,
+      #cf30aa 60%,
+      #000 87%
+    );
+    transition: all 2s;
+  }
+
+  #filter-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    max-height: 40px;
+    max-width: 38px;
+    height: 100%;
+    width: 100%;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #161329, black, #1d1b4b);
+    border: 1px solid transparent;
+  }
+  .filterBorder {
+    height: 42px;
+    width: 40px;
+    position: absolute;
+    overflow: hidden;
+    top: 7px;
+    right: 7px;
+    border-radius: 10px;
+  }
+
+  .filterBorder::before {
+    content: "";
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    filter: brightness(1.35);
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0),
+      #3d3a4f,
+      rgba(0, 0, 0, 0) 50%,
+      rgba(0, 0, 0, 0) 50%,
+      #3d3a4f,
+      rgba(0, 0, 0, 0) 100%
+    );
+    animation: rotate 4s linear infinite;
+  }
+  #main {
+    position: relative;
+    width: 100%;
+  }
+  #search-icon {
+    position: absolute;
+    left: 20px;
+    top: 15px;
+  }
+
+  @keyframes rotate {
+    100% {
+      transform: translate(-50%, -50%) rotate(450deg);
+    }
+  }
+`;
+
+const CyberpunkButtonWrapper = styled.button`
+  position: relative;
+  height: 62px;
+  width: 170px;
+  padding: 16px;
+  margin: 5px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    position: relative;
+    z-index: 10;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .grid {
+    height: 100px;
+    width: 100px;
+    background-image: linear-gradient(to right, #0f0f10 1px, transparent 1px),
+      linear-gradient(to bottom, #0f0f10 1px, transparent 1px);
+    background-size: 1rem 1rem;
+    background-position: center center;
+    position: absolute;
+    z-index: -1;
+    filter: blur(1px);
+  }
+
+  .white,
+  .border,
+  .darkBorderBg,
+  .glow {
+    max-height: 60px;
+    max-width: 170px;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+    z-index: -1;
+    border-radius: 8px;
+    filter: blur(3px);
+  }
+
+  .white {
+    max-height: 54px;
+    max-width: 164px;
+    border-radius: 7px;
+    filter: blur(2px);
+  }
+
+  .white::before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(83deg);
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    filter: brightness(1.4);
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0) 0%,
+      #a099d8,
+      rgba(0, 0, 0, 0) 8%,
+      rgba(0, 0, 0, 0) 50%,
+      #dfa2da,
+      rgba(0, 0, 0, 0) 58%
+    );
+    transition: all 0.8s;
+  }
+
+  .border {
+    max-height: 52px;
+    max-width: 166px;
+    border-radius: 7px;
+    filter: blur(0.5px);
+  }
+
+  .border::before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(70deg);
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    filter: brightness(1.3);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: conic-gradient(
+      #1c191c,
+      #402fb5 5%,
+      #1c191c 14%,
+      #1c191c 50%,
+      #cf30aa 60%,
+      #1c191c 64%
+    );
+    transition: all 0.8s;
+  }
+
+  .darkBorderBg {
+    max-height: 58px;
+    max-width: 168px;
+  }
+
+  .darkBorderBg::before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(82deg);
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: conic-gradient(
+      rgba(0, 0, 0, 0),
+      #18116a,
+      rgba(0, 0, 0, 0) 10%,
+      rgba(0, 0, 0, 0) 50%,
+      #6e1b60,
+      rgba(0, 0, 0, 0) 60%
+    );
+    transition: all 0.8s;
+  }
+
+  .glow {
+    overflow: hidden;
+    filter: blur(30px);
+    opacity: 0.4;
+    max-height: 70px;
+    max-width: 180px;
+  }
+
+  .glow:before {
+    content: "";
+    z-index: -2;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(60deg);
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-image: conic-gradient(
+      #000,
+      #402fb5 5%,
+      #000 38%,
+      #000 50%,
+      #cf30aa 60%,
+      #000 87%
+    );
+    transition: all 0.8s;
+  }
+
+  &:hover .darkBorderBg::before {
+    transform: translate(-50%, -50%) rotate(-98deg);
+  }
+  &:hover .glow::before {
+    transform: translate(-50%, -50%) rotate(-120deg);
+  }
+  &:hover .white::before {
+    transform: translate(-50%, -50%) rotate(-97deg);
+  }
+  &:hover .border::before {
+    transform: translate(-50%, -50%) rotate(-110deg);
+  }
+
+  &:focus .darkBorderBg::before {
+    transform: translate(-50%, -50%) rotate(442deg);
+    transition: all 2s;
+  }
+  &:focus .glow::before {
+    transform: translate(-50%, -50%) rotate(420deg);
+    transition: all 2s;
+  }
+  &:focus .white::before {
+    transform: translate(-50%, -50%) rotate(443deg);
+    transition: all 2s;
+  }
+  &:focus .border::before {
+    transform: translate(-50%, -50%) rotate(430deg);
+    transition: all 2s;
+  }
+
+  @keyframes rotate {
+    100% {
+      transform: translate(-50%, -50%) rotate(450deg);
+    }
+  }
+`;
+
+const StyledButtonWrapper = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    background: rgba(100, 100, 255, 0.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    
+    &:hover {
+      background: transparent;
+    }
+    
+    &:active {
+      transform: none;
+    }
+  }
+`;

@@ -3,17 +3,21 @@
     {
       "id": "intro",
       "voice": "\ud83d\udc4b Hi, I'm Dolly \u2014 your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.",
-      "chat": "\u2728 Wanna go through onboarding or skip to testing our legendary worldAPI?",
+      "chat": "\u2728 Wanna go through onboarding (Legacy Mode) or skip to testing our legendary worldAPI (Boss Mode)?",
       "options": [
-        "Full Onboarding",
-        "Fast-Track Testing"
-      ]
+        "Legacy Mode",
+        "Boss Mode"
+      ],
+      "onOptionSelect": {
+        "Legacy Mode": "partner-onboarding",
+        "Boss Mode": "collectMinimalInfo"
+      }
     },
     {
       "id": "path-selection",
       "onOptionSelect": {
-        "Full Onboarding": "partner-onboarding",
-        "Fast-Track Testing": "collectMinimalInfo"
+        "Legacy Mode": "partner-onboarding",
+        "Boss Mode": "collectMinimalInfo"
       }
     },
     {

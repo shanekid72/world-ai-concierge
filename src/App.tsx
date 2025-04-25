@@ -345,9 +345,7 @@ function App() {
             <div className="h-full max-w-4xl mx-auto">
               <div className="relative mb-8">
                 <div className="absolute left-1/2 -translate-x-1/2 -top-4 z-20">
-                  <DollyAvatar 
-                     position={{ x: 50, y: 0 }}
-                  />
+                  <DollyAvatar />
                 </div>
               </div>
               
@@ -367,7 +365,7 @@ function App() {
                     isTechReqAnimating={isTechReqAnimating}
                     directSpeechText={directSpeechText}
                     onDirectSpeechComplete={handleDirectSpeechComplete}
-                    animationData={currentStageId === 'technical-requirements' ? currentStage?.animation : null}
+                    animationData={currentStage?.animation}
                     onAnimationComplete={handleTechReqAnimationComplete}
                     currentIntegrationPrompts={currentIntegrationPrompts}
                   />

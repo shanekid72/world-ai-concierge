@@ -17,6 +17,22 @@ interface CyberpunkInitializationProps {
   isConnecting: boolean;
 }
 
+// Error boundary to catch 3D rendering errors
+class ErrorBoundary extends React.Component<{children: React.ReactNode, fallback: React.ReactNode}> {
+  state = { hasError: false };
+  
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
 // Holographic displays with scrolling data
 const HolographicDisplay: React.FC<{position: [number, number, number]}> = ({ position }) => {
   const displayRef = useRef<THREE.Mesh>(null);
@@ -97,7 +113,7 @@ const Scene: React.FC = () => {
   });
   
   return (
-    <>
+    <ErrorBoundary fallback={<div className="text-center text-cyan-400 p-4">Loading 3D scene...</div>}>
       <ambientLight intensity={0.2} />
       <directionalLight position={[5, 5, 5]} intensity={0.5} />
       <fog attach="fog" args={['#000020', 5, 30]} />
@@ -106,7 +122,7 @@ const Scene: React.FC = () => {
       <CyberGrid />
       <HolographicDisplay position={[2, 0.5, -1]} />
       <HolographicDisplay position={[-2, 0, -1]} />
-    </>
+    </ErrorBoundary>
   );
 };
 
@@ -128,7 +144,7 @@ const FeedItemsDisplay: React.FC<{feedItems: FeedItemState[]}> = ({ feedItems })
 
 const CyberpunkInitialization: React.FC<CyberpunkInitializationProps> = ({ feedItems, isConnecting }) => {
   return (
-    <div className="tech-animation-container h-full overflow-hidden custom-scrollbar rounded bg-cyber-darker border border-cyber-deep-teal/40 shadow-inner flex flex-col items-center justify-center relative">
+    <div className="tech-animation-container h-full overflow-hidden custom-scrollbar flex flex-col items-center justify-center relative">
       {/* Matrix-style background */}
       <div className="absolute inset-0 z-0 matrix-bg-container">
         <MatrixBackground />
@@ -136,9 +152,11 @@ const CyberpunkInitialization: React.FC<CyberpunkInitializationProps> = ({ feedI
       
       {/* 3D background scene */}
       <div className="absolute inset-0 z-10 opacity-75">
-        <Canvas shadows>
-          <Scene />
-        </Canvas>
+        <ErrorBoundary fallback={<div className="text-center text-cyan-400 p-4">Loading 3D scene...</div>}>
+          <Canvas shadows>
+            <Scene />
+          </Canvas>
+        </ErrorBoundary>
       </div>
       
       {/* Overlay content */}

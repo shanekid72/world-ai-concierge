@@ -37,11 +37,11 @@ export const chatFlow: ChatFlowStage[] = [
   {
     id: "intro",
     voice: "👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.",
-    chat: "✨ Wanna go through onboarding or skip to testing our legendary worldAPI?",
-    options: ["Full Onboarding", "Fast-Track Testing"],
+    chat: "✨ Wanna go through onboarding (Legacy Mode) or skip to testing our legendary worldAPI (Boss Mode)?",
+    options: ["Legacy Mode", "Boss Mode"],
     onOptionSelect: {
-      "Full Onboarding": "partner-onboarding",
-      "Fast-Track Testing": "collectMinimalInfo"
+      "Legacy Mode": "partner-onboarding",
+      "Boss Mode": "collectMinimalInfo"
     }
   },
   {

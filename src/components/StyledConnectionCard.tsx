@@ -58,12 +58,14 @@ const StyledCard = styled.div`
   padding: 8px 0;
   
   .card-content {
-    width: 100%;
+    width: 448px;
+    height: 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
     z-index: 1;
+    overflow: hidden;
   }
 
   .connection-text {
