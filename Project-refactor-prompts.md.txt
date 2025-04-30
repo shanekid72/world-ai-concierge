@@ -1,0 +1,79 @@
+# 🧹 Windsurf Task: Full Project Refactor & Optimization (Preserve UI/Features)
+
+**Task Goal:** Refactor the codebase for improved structure, compatibility, and cleanliness without changing the UI or existing features. Execute the following steps in order.
+
+---
+
+## 🔁 Step-by-Step Tasks
+
+### 🔧 Step 1: Project Audit
+- List all top-level folders, files, and components.
+- Identify large, duplicated, unused, or legacy code.
+- Create a `refactor-checklist.md` summarizing audit findings.
+
+---
+
+### 🧱 Step 2: Restructure Folder Hierarchy
+- Modularize folders by domain or feature.
+- Rename ambiguous folders (`common`, `helpers`) to clear names.
+- Separate `/app/layout.js` from page logic.
+- Move repeated components into `/components/ui`.
+
+---
+
+### ➡️ Step 3: Component Cleanup
+- Convert all class/legacy components to arrow functional components.
+- Use prop destructuring.
+- Migrate inline styles to Tailwind classes or CSS Modules.
+- Break large components (>150 lines) into smaller ones.
+
+---
+
+### 💡 Step 4: Remove Dead Code
+- Delete unused files, `console.log`, and commented-out blocks.
+- Refactor and centralize duplicate utility functions in `/lib/utils.js`.
+
+---
+
+### 🧠 Step 5: Optimize State Logic
+- Eliminate prop drilling via `React.createContext`.
+- Simplify complex local state with `useReducer` or custom hooks.
+- Remove unused or redundant states.
+
+---
+
+### 📦 Step 6: Dependency Optimization
+- Remove unused `npm` packages.
+- Upgrade outdated libraries.
+- Convert heavy imports to named imports (e.g. `lodash/get` not `lodash`).
+- Run `npm dedupe`.
+
+---
+
+### 🧼 Step 7: Linting & Formatting
+- Install and configure ESLint and Prettier.
+- Apply lint rules: `react-hooks`, `a11y`, `no-unused-vars`.
+- Format all `.js` files using Prettier.
+
+---
+
+### 🧪 Step 8: Test Assurance
+- Ensure test coverage >90% remains.
+- Add snapshot tests to catch unintentional UI changes.
+- Ensure all tests pass post-refactor.
+
+---
+
+### 🚀 Step 9: QA & Deploy
+- Run full QA (local & staging).
+- Compare feature behavior pre/post refactor.
+- Commit changes with message: `chore(refactor): restructure and clean codebase without feature changes`.
+
+---
+
+## 📚 Docs Reference
+- [Next.js App Router Docs](https://nextjs.org/docs/app)
+- [React Docs](https://react.dev/learn)
+- [ESLint Config Guide](https://eslint.org/docs/latest/user-guide/configuring/)
+- [Prettier Guide](https://prettier.io/docs/en/index.html)
+- [Tailwind Best Practices](https://tailwindcss.com/docs/reusing-styles)

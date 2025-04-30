@@ -1,0 +1,96 @@
+# World AI Concierge - Production Build Notes
+
+## Files & Directories Included
+
+### Core Configuration Files
+- package.json (modified for production use only)
+- tsconfig.json
+- tsconfig.node.json
+- tsconfig.app.json
+- vite.config.ts
+- tailwind.config.js
+- postcss.config.mjs
+- index.html
+- components.json
+- netlify.toml
+- .env.production
+
+### Source Code
+- /src (complete source code minus test files)
+  - App.tsx and App.css (main application files)
+  - index.css (global styles)
+  - main.tsx (application entry point)
+  - vite-env.d.ts (type declarations)
+  - /components (UI components)
+  - /hooks (React hooks)
+  - /utils (utility functions)
+  - /types (TypeScript interfaces and types)
+  - /services (API services)
+  - /store (state management)
+  - /assets (images, icons, etc.)
+  - /lib (third-party library wrappers)
+  - /pages (page components)
+  - /data (data models)
+
+### Static Assets
+- /public (all static assets)
+  - Images
+  - 3D models
+  - Fonts
+  - Other media files
+
+## Files & Directories Excluded
+
+### Development & Test Files
+- All test files (*.test.ts, *.test.tsx, *.spec.ts, *.spec.tsx)
+- All __tests__ directories
+- setupTests.ts
+- Test mocks and fixtures
+- vitest.config.ts
+
+### Development Configuration
+- .eslintrc and eslint.config.js
+- .prettierrc
+- .vscode/ directory
+- dev.ps1 and other development scripts
+- Development-specific environment variables
+- .windsurfrules (project configuration)
+
+### Developer Tools
+- node_modules/ (should be reinstalled with production flag)
+- .git/ directory and git configuration
+- IDE and editor configuration files
+- Debug configurations
+
+### Documentation Not Required for Runtime
+- Windsurf-Project-Refactor-Task.md
+- Windsurf-Production-Export-Task.md
+- test-results/ directory
+
+## Package.json Modifications
+- Removed development scripts (dev, test, lint)
+- Added "start" script for production serving
+- Moved essential build dependencies from devDependencies to dependencies
+- Removed testing libraries and lint configuration
+
+## Manual Steps Required After Deployment
+
+1. **Environment Variables Configuration**
+   - Set up the actual production API keys in .env.production
+   - VITE_OPENAI_API_KEY must be configured with a valid production key
+
+2. **Installation and Build**
+   - Run `npm install` to install dependencies
+   - Run `npm run build` to create the optimized production build
+
+3. **Serving the Application**
+   - Run `npm run start` to serve the application
+   - Or deploy the build output to a static hosting service like Netlify
+
+4. **Domain Configuration**
+   - If deploying to a custom domain, configure DNS settings accordingly
+
+5. **SSL Configuration**
+   - Ensure your hosting provider has SSL enabled for HTTPS access
+
+The production build is now complete, clean, and ready for deployment with all development and test files excluded.

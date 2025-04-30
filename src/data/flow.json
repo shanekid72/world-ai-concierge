@@ -1,0 +1,146 @@
+{
+  "stages": [
+    {
+      "id": "intro",
+      "voice": "👋 Hi, I'm Dolly — your AI assistant from Digit9. Welcome to worldAPI, the API you can talk to.",
+      "chat": "✨ Wanna go through onboarding (Legacy Mode) or skip to testing our legendary worldAPI (Boss Mode)?",
+      "options": [
+        "Legacy Mode",
+        "Boss Mode"
+      ],
+      "onOptionSelect": {
+        "Legacy Mode": "partner-onboarding",
+        "Boss Mode": "collectMinimalInfo"
+      }
+    },
+    {
+      "id": "path-selection",
+      "onOptionSelect": {
+        "Legacy Mode": "partner-onboarding",
+        "Boss Mode": "collectMinimalInfo"
+      }
+    },
+    {
+      "id": "partner-onboarding",
+      "chat": "I'll guide you through the compliance and business requirements. First, could you tell me the name of your organization? 🏢",
+      "subFlow": "partnerOnboardingScript",
+      "voice": "Great! Let's get you set up as a partner. First, what's your organization's name?",
+      "questions": [
+        {
+          "text": "What is your organization's name?",
+          "voiceAfter": "Thank you! Now, let's verify your identity.",
+          "expectedAnswers": ["company", "organization", "business", "firm", "enterprise"]
+        }
+      ],
+      "kycChecklist": [
+        "Government-issued ID",
+        "Proof of address",
+        "Business registration documents",
+        "Tax identification number"
+      ]
+    },
+    {
+      "id": "collectMinimalInfo",
+      "voice": "Okay, speedster! You picked the fast lane, and I'm so here for it. Just three tiny things and we're rolling. Blink and you might miss it!",
+      "chat": "Let's get you started with some basic information.",
+      "questions": [
+        {
+          "text": "What is your name?",
+          "voiceAfter": "Nice to meet you, superstar. You and I? We are gonna do big things.",
+          "expectedAnswers": ["first name"]
+        },{
+          "text": "What is the name of your organization?",
+          "voiceAfter": "TOooh, that sounds official. I love a brand with presence!",
+          "expectedAnswers": ["organization", "business", "firm", "enterprise"]
+        }
+        ,{
+          "text": "What\u2019s the best email or phone number to reach you?",
+          "voiceAfter": "Perfect. Now I know where to send the confetti once we\u2019re live.",
+          "expectedAnswers": ["email", "phone", "contact", "number"]
+        },
+        {
+          "text": "Are you a CFO?",
+          "voiceAfter": "Understood.",
+          "voiceIfCFO2": [
+            "Excellent! As a CFO, you'll appreciate our detailed financial reporting features.",
+            "Perfect! I'll make sure to highlight our financial integration capabilities for you."
+          ],
+          "expectedAnswers": ["yes", "no", "not", "n't"]
+        }
+      ],
+      "next": "technical-requirements"
+    },
+    {
+      "id": "compliance-kyc",
+      "voice": "Ughhh... compliance. Not my favorite chapter in this love story — but hey, rules are rules and regulators never sleep. 😔 Don't worry, I'll make this as painless as possible. Here's the shopping list!",
+      "chat": "Let's get your compliance docs sorted. Below is our standard AML/KYC checklist. You can either upload the docs right here or email them to us at 👉 partnerships@digitnine.com",
+      "kycChecklist": [
+        "AML Questionnaire",
+        "Certificate of Incorporation / Registration",
+        "Memorandum / Articles of Association",
+        "Central Bank License or Regulator's Authorization Letter",
+        "Organization Chart",
+        "Shareholder List",
+        "ID copies of UBOs",
+        "ID copies of Directors",
+        "ID copies of Authorized Signatories",
+        "External Audit or Assurance Report",
+        "AML Policy & Procedures",
+        "USA PATRIOT Act Certificate (if applicable)",
+        "Audited Financial Statements - 3 years",
+        "ID of Compliance Officer / MLRO"
+      ],
+      "voiceAfterList": "Whew. That's quite the list, I know — but once it's done, it's DONE. Upload them or shoot them to partnerships@digitnine.com. I'll be sipping tea and checking boxes. ☕"
+    },
+    {
+      "id": "technical-requirements",
+      "animation": {
+        "duration": "45s",
+        "visuals": [
+          "moving gradients",
+          "glitch blur",
+          "typewriter text",
+          "neon sparks"
+        ],
+        "connectionFeed": [
+          "Connecting to MTOs...",
+          "Western Union",
+          "TerraPay",
+          "Ria",
+          "Transfast",
+          "🌐 Syncing with Banks...",
+          "📲 Linking digital wallets..."
+        ],
+        "voiceMidAnimation": "I think you're the Spiderman of APIs 🕷️ — there's too much going on in your web!"
+      },
+      "postAnimation": {
+        "voice": "Boom! You're through the boring part and officially in the big leagues. You're now ready to explore WorldAPI — and yes, that means it's time to connect your development IDE and bring those endpoints to life.",
+        "chat": "📁 Download your WorldAPI config file: \n➡️ [Download mcp.json]",
+        "voiceDownload": "Save that file — it's basically the passport to my API playground."
+      },
+      "cursorSetup": {
+        "steps": [
+          "Go to your project root",
+          "Create a folder named .cursor",
+          "Paste the downloaded mcp.json inside",
+          "Open IDE → Settings → MCP tab",
+          "WorldAPI tools will now be available"
+        ],
+        "voice": "Dot-cursor folder. MCP tab. And boom — tools unlocked like cheat codes. 🎮"
+      },
+      "integrationPrompts": [
+        "Integrate WorldAPI endpoints into \"my project name\" using the WorldAPI tool. Maintain the project structure and format.",
+        "Wire the newly integrated WorldAPI to my front-end project \"my project name\" inside a new page and add it to the menu."
+      ],
+      "voiceAfterPrompts": "Whisper these to your IDE and let it do its thing. Like summoning spells — but for code. 🧙‍♂️",
+      "voice": "Now, let's go over the technical requirements for integration.",
+      "chat": "Now, let's go over the technical requirements for integration.",
+      "requirements": [
+        "API key authentication",
+        "HTTPS endpoints",
+        "Webhook support",
+        "Rate limiting compliance"
+      ]
+    }
+  ]
+} 
